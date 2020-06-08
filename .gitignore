@@ -1,5 +1,4 @@
 *.pkl
 *__pycache__*
-original_script.py
 *.idea*
 *.bat
