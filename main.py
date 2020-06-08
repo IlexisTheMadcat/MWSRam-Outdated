@@ -37,6 +37,7 @@ INIT_EXTENSIONS = [
     "misc",
     "moderation",
     "owner",
+    "repl",
     "vanity",
 ]
 
