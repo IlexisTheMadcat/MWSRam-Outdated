@@ -2,6 +2,8 @@
 
 # Lib
 from os import popen
+from os.path import exists
+from pickle import dump
 
 # Site
 # from discord.abc import Messageable
@@ -23,7 +25,6 @@ from discord.ext.commands.errors import (
 
 # Local
 from utils.classes import Bot  # , GlobalTextChannelConverter
-
 
 class Admin(Cog):
     """Administrative Commands"""
