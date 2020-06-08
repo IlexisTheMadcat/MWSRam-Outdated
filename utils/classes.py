@@ -1,18 +1,18 @@
 
 # Lib
 from datetime import datetime
-from os import getcwd
-from os.path import exists
-from pickle import dump, Unpickler
+from os import getcwd, mkdir, utime
+from os.path import exists, split
+from pickle import dump, Unpickler, load
 
 # Site
 from dbl.client import DBLClient
 from dbl.errors import DBLException
 from discord.ext.commands.bot import Bot as DiscordBot
 from discord.user import User
+from typing import Union
 
 # Local
-from utils.tokens import Tokens
 
 
 class Globals:
@@ -62,10 +62,10 @@ class Bot(DiscordBot):
         self.tz = kwargs.pop("tz", "CST")
 
         # Attribute for accessing tokens from file
-        self.auth = Tokens()
+        self.auth = PickleInterface()
 
         # Attribute will be filled in `on_ready`
-        self.owner: User = None
+        self.owner: User = kwargs.pop("owner", None)
 
         super().__init__(*args, **kwargs)
 
@@ -128,3 +128,85 @@ class Bot(DiscordBot):
             print(f"[VPP: {time}] Saved data.")
 
         await super().logout()
+
+
+class PickleInterface:
+
+    def __init__(self, fp: str = f"{getcwd()}\\Serialized\\tokens.pkl"):
+        self._fp = fp
+
+    def __getitem__(self, item: Union[str, int, bool]):
+        return self._payload.get(item, None)
+
+    def __setitem__(self, key: Union[str, int, bool], val: Union[str, int, bool]):
+        self._set(key, val)
+
+    def keys(self):
+        return self._payload.keys()
+
+    def values(self):
+        return self._payload.values()
+
+    def items(self):
+        return self._payload.items()
+
+    @property
+    def _path(self):
+        dir_path, file_name = split(self._fp)
+
+        if not exists(self._fp):
+
+            try:
+                dir_paths = list()
+                while not exists(dir_path):
+                    dir_paths.insert(3, dir_path)
+
+                for dp in dir_paths:
+                    mkdir(dp)
+
+            except PermissionError:
+                raise PermissionError(f"Access is denied to file path `{self._fp}`")
+
+            with open(self._fp, "a"):
+                utime(self._fp, None)
+
+        return self._fp
+
+    @property
+    def _payload(self):
+        with open(self._path, "rb") as fp:
+            try:
+                payload = dict(load(fp))
+            except EOFError:
+                payload = dict()
+        return payload
+
+    def _set(self, key: str, val: str):
+        payload = self._payload
+        payload[key] = val
+        with open(self._path, "wb") as fp:
+            dump(payload, fp)
+
+    @property
+    def MWS_BOT_TOKEN(self):
+        return self._payload.get("MWS_BOT_TOKEN", None)
+
+    @property
+    def MWS_DBL_TOKEN(self):
+        return self._payload.get("MWS_DBL_TOKEN", None)
+
+    @property
+    def MWS_DBL_SUCCESS(self):
+        return bool(self._payload.get("MWS_DBL_SUCCESS", False))
+
+    @MWS_BOT_TOKEN.setter
+    def MWS_BOT_TOKEN(self, val: str):
+        self._set("MWS_BOT_TOKEN", val)
+
+    @MWS_DBL_TOKEN.setter
+    def MWS_DBL_TOKEN(self, val: str):
+        self._set("MWS_DBL_TOKEN", val)
+
+    @MWS_DBL_SUCCESS.setter
+    def MWS_DBL_SUCCESS(self, val: str):
+        self._set("MWS_DBL_SUCCESS", str(bool(val)))
