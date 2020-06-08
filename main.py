@@ -35,6 +35,7 @@ INIT_EXTENSIONS = [
     "closet",
     "events",
     "misc",
+    "moderation",
     "owner",
     "vanity",
 ]
