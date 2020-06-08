@@ -5,7 +5,7 @@ from os import popen
 from os.path import exists
 from pickle import dump
 from typing import Union
-
+from copy import deepcopy
 # Site
 # from discord.abc import Messageable
 # from discord.channel import TextChannel
@@ -416,19 +416,20 @@ class OwnerCommands(Cog):
 
     # ------------------------------------------------------------------------------------------------------------------
     @command(name="config", aliases=["bot"])
-    async def settings(self, ctx, option, new_value: Union[bool, str] = None):
+    async def settings(self, ctx, option, new_value = None):
         """Manage Bot settings"""
         em = Embed(title="Administration: Config")
 
         if option == "auto_pull":
-            if new_value == True or False:
+            if new_value == "True" or "False":
                 try:
+                    original = deepcopy(self.bot.auto_pull)
                     self.bot.auto_pull = bool(new_value)
                 except ValueError:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
                 else:
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.auto_pull}`"
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
                     em.color = 0x00FF00
 
             elif not new_value:
@@ -436,14 +437,15 @@ class OwnerCommands(Cog):
                 em.color = 0x0000FF
         
         if option == "debug_mode":
-            if new_value == True or False:
+            if new_value == "True" or "False":
                 try:
+                    original = deepcopy(self.bot.debug_mode)
                     self.bot.debug_mode = bool(new_value)
                 except ValueError:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
                 else:
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.debug_mode}`"
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
                     em.color = 0x00FF00
 
             elif not new_value:
@@ -451,7 +453,7 @@ class OwnerCommands(Cog):
                 em.color = 0x0000FF
         
         if option == "tz":
-            if new_value == "EST" or "CST" or "UTC":
+            if new_value in ["EST", "CST", "UTC"]:
                 self.bot.tz = new_value
 
                 em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.tz}`"

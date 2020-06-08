@@ -44,6 +44,7 @@ except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to 
 else:
     print(f'Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
     debug_mode = False
+    auto_pull = True # Auto pulls github updates
     tz = "UTC" # Triggers python to get real UTC time for Rams's status.
 
 
