@@ -444,4 +444,4 @@ class OwnerCommands(Cog):
 def setup(bot: Bot):
     """Admin"""
     bot.add_cog(Admin(bot))
-    bot.add_bog(OwnerCommands(bot))
+    bot.add_cog(OwnerCommands(bot))
