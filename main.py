@@ -1,7 +1,7 @@
 
 # Lib
 from pickle import dump
-
+# yabadaba doooooo
 # Site
 from discord import __version__
 from discord.activity import Activity
