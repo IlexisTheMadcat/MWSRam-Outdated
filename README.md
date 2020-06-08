@@ -1,4 +1,4 @@
-[![Discord Bots](https://top.gg/api/widget/687427956364279873.svg)](https://top.gg/bot/687427956364279873)
+[![Discord Bots](https://top.gg/api/widget/687427956364279873.svg)](https://top.gg/bot/687427956364279873) \
 [![Run on Repl.it](https://repl.it/badge/github/SUPERMECHM500/MWSRam)](https://repl.it/github/SUPERMECHM500/MWSRam)
 
 # Vanity Profile Pics || Ram
