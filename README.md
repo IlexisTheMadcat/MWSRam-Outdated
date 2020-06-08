@@ -141,8 +141,8 @@ Renames closet entry `name` to `rename`.\
 **--** This won't work if `rename` is already in your closet.
 
 #### SEE_CLOSET; Aliases: "cl"
-`:>see_closet [user]`
---------------------------------------------------
+`:>see_closet [user]`\
+**--------------------------------------------------**\
 See all the items in your closet along with a `name` and its associated `url`.
 **--** Closets can only hold up to 10 avatars.
 **--** If `user` is provided, it will return that user's closet.
