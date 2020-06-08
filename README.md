@@ -38,7 +38,7 @@ With a vanity equiped, send a message anywhere in a specific server to transform
 ```
 
 A vanity is your avatar specific to a server.
-[![Vanity Message Difference](https://media.discordapp.net/attachments/655456170391109663/719609653687877726/unknown.png)](about:blank)
+[![Vanity Message Difference](https://media.discordapp.net/attachments/655456170391109663/719668552365244536/unknown.png)](about:blank)
 
 ### Commands
 ```
