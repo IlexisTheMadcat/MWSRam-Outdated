@@ -24,12 +24,12 @@ except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to 
 
     while True:
         tz = input("Time Zone:\n---| ")
-        if tz in ["EST", "CST"]:
+        if tz in ["EST", "CST", "UTC"]: # If not UTC, python will use the host computer's time.
             break
 else:
-    print("Running with default settings.")
+    print(f'Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
     debug_mode = False
-    tz = "und"
+    tz = "und" # Triggers python to get real UTC time for Rams's status.
 
 
 print("Loading...")
