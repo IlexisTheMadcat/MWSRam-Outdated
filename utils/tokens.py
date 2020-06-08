@@ -3,6 +3,7 @@
 from os import getcwd
 from os.path import exists
 from pickle import dump, load
+from typing import Union
 
 # Site
 
@@ -10,6 +11,12 @@ from pickle import dump, load
 
 
 class Tokens:
+
+    def __getitem__(self, item: Union[str, int, bool]):
+        return self._tokens.get(item, None)
+
+    def __setitem__(self, key: Union[str, int, bool], val: Union[str, int, bool]):
+        self._set(key, val)
 
     @property
     def _path(self):
