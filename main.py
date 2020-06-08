@@ -14,6 +14,7 @@ from discord.utils import oauth_url
 from utils.classes import Bot
 
 try:
+    print("Press CTRL+C for user config settings. Ignore for defauls.")
     for i in range(10):
         sleep(1)
 except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to configure. If no response, default options are used.
