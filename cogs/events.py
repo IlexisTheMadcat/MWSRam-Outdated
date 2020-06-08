@@ -337,7 +337,7 @@ class Events(Cog):
                     )
                     print("[Error outside of command]", error)
         else:
-            print_tb(error)
+            raise error
 
 
 
