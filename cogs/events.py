@@ -298,7 +298,7 @@ class Events(Cog):
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error: Exception):
-        if self.bot.debug_mode:
+        if not self.bot.debug_mode:
             msg = ctx.message
             if isinstance(error, BotMissingPermissions):
                 await msg.author.send(
