@@ -196,9 +196,10 @@ You have the option to blacklist channels from transforming your messages.
 **--** `item` can be a channel ID `[channal-add, channal-remove]`, or a prefix string `[prefix-add, prefix-remove]`.
 **----** `item` is required when using the modes `prefix-add` or `prefix-remove`.
 **----** To get a channel ID, turn Developer Mode on in Discord, then right-click on the target channel and click "Copy ID".
+**----** Or instead, you can mention the channel.
 
-Sending a message in a channel that is in your blacklist will not transform it.
-Sending a message starting with a prefix in your blacklist will not transform it.
+*Sending a message in a channel that is in your blacklist will not transform it.*
+*Sending a message starting with a prefix in your blacklist will not transform it.*
 """)
                 
             elif subsection.lower() == "see_blacklists":
@@ -232,19 +233,23 @@ Remove `name` from your closet.
 
             elif subsection.lower() == "rename_closet_entry":
                 await ctx.send(f"""
-**RENAME_CLOSET_ENTRY**; Aliases: "cl-rn"
+**RENAME_CLOSET_ENTRY**; Aliases: "cl_rn"
 `{self.bot.command_prefix}rename_closet_entry <name> <rename>`
+--------------------------------------------------
 Renames closet entry `name` to `rename`.
-**--** You cannot rename to a name that is already in your closet.
+**--** This won't work if `name` doesn't exist in your closet.
+**--** This won't work if `rename` is already in your closet.
 """)
                 
             elif subsection.lower() == "see_closet":
                 await ctx.send(f"""
 **SEE_CLOSET**; Aliases: "cl"
-`{self.bot.command_prefix}see_closet`
+`{self.bot.command_prefix}see_closet [user]`
 --------------------------------------------------
 See all the items in your closet along with a `name` and its associated `url`.
 **--** Closets can only hold up to 10 avatars.
+**--** If `user` is provided, it will return that user's closet.
+**----** Note that this will not work if `user` hasn't voted yet.
 """)
 
             elif subsection.lower() == "see_closet":
@@ -298,17 +303,19 @@ See all items that are blacklisted for the server the command is invoked in. The
 `{self.bot.command_prefix}list`
 --------------------------------------------------
 Returns a list of all users in the server with vanities equiped.
+**--** This list may contain members that have left. To remove them, use the `{self.bot.command_prefix}manage_user` below.
 """)
 
             elif subsection.lower() == "manage_user":
                 await ctx.send(f"""
-**MANAGE_USER**
+**MANAGE_USER**; Aliases: "manage", "user"
 `{self.bot.command_prefix}manage_user <mode> <user>`
 --------------------------------------------------
 Manage a user's ability to use the bot. This applies only in this server.
-**--** `mode` must be one of 2 things:
+**--** `mode` must be one of 3 things:
 **----** `block` - The mentioned user will be unable to send vanity messages.
 **----** `unblock` - The mentioned user will be allowed to send vanity messages.
+**----** `get_info` - Returns the vanity status of `user`.
 **------** Whether or not a user is blocked is an attribute of a user's vanity status.
 
 **--** `user` is also required. Mention the user, or quote the full ID.
@@ -318,7 +325,7 @@ Manage a user's ability to use the bot. This applies only in this server.
                 
             elif subsection.lower() == "help":
                 await ctx.send(f"""
-**HELP**
+**HELP**; Aliases: "h"
 `{self.bot.command_prefix}help [section] [command if <section> is "commands"]`
 --------------------------------------------------
 Shows a directory including the different sections of the help message.
@@ -329,7 +336,7 @@ Shows a directory including the different sections of the help message.
 `{self.bot.command_prefix}invite`
 --------------------------------------------------
 Gives you an invite link to invite this bot to any server.
-**--** You require the "Manage Server" permission in the target server to do this.
+**--** You require the "Manage Server" permission in the target server to do this. This is a discord limitation.
 """)
                 
             else:

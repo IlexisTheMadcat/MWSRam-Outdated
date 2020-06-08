@@ -1,7 +1,7 @@
 
 # Lib
 from pickle import dump
-
+from time import sleep
 # Site
 from discord import __version__
 from discord.activity import Activity
@@ -13,15 +13,21 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 
+try:
+    for i in range(10):
+        sleep(1)
+except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to configure. If no response, default options are used.
+    debug_mode = input("Enter debug mode? (D=accept)\n---| ")
+    if debug_mode == "D":
+        debug_mode = True
 
-debug_mode = input("Enter debug mode? (D=accept)\n---| ")
-if debug_mode == "D":
-    debug_mode = True
-
-while True:
-    tz = input("Time Zone:\n---| ")
-    if tz in ["EST", "CST"]:
-        break
+    while True:
+        tz = input("Time Zone:\n---| ")
+        if tz in ["EST", "CST"]:
+            break
+else:
+    debug_mode = False
+    tz = "und"
 
 
 print("Loading...")
@@ -34,9 +40,8 @@ INIT_EXTENSIONS = [
     "blacklist",
     "closet",
     "events",
-    "misc",
+    "help",
     "moderation",
-    "owner",
     "repl",
     "vanity",
 ]

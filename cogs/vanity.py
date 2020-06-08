@@ -16,7 +16,7 @@ class VanityCommands(Cog):
         self.bot = bot
         self.dblpy = self.bot.connect_dbl()
 
-    @command(aliases=["_set"])
+    @command(aliases=["set"])
     @bot_has_permissions(manage_webhooks=True)
     async def set_vanity(self, ctx: Context, url: str = None):
         if not ctx.guild:
@@ -150,18 +150,17 @@ class VanityCommands(Cog):
                 print(f'[] Sent standard avatar url for \"{user}\" to user \"{ctx.author}\".')
                 return
             
-            if not standard and \
-                    ctx.guild.id in self.bot.univ.VanityAvatars and \
-                    user.id in self.bot.univ.VanityAvatars[ctx.guild.id]:
+            if not standard:
+                if ctx.guild.id in self.bot.univ.VanityAvatars and \
+                    user.id in self.bot.univ.VanityAvatars[ctx.guild.id] and \
+                    self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]:
 
-                if self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]:
-
-                    await ctx.channel.send(
-                        f"Their current vanity avatar is located here:\n"
-                        f"{self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]}"
-                    )
-                    print(f'[] Sent vanity avatar url for \"{user}\" to user \"{ctx.author}\".')
-                    return
+                        await ctx.channel.send(
+                            f"Their current vanity avatar is located here:\n"
+                            f"{self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]}"
+                        )
+                        print(f'[] Sent vanity avatar url for \"{user}\" to user \"{ctx.author}\".')
+                        return
 
                 else:
                     await show_standard()

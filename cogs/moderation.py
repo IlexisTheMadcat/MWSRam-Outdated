@@ -278,6 +278,15 @@ class ModerationCommands(Cog):
                     self.bot.univ.VanityAvatars[ctx.guild.id][user.id][2] = False
                     await ctx.send("User unblocked for this server.")
                     return
+            
+            elif mode == "get_info":
+                await ctx.send(
+                    f"**Vanity status for user {str(user)}:**\n"
+                    f"Vanity url: {self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]}\n"
+                    f"Previous url: {self.bot.univ.VanityAvatars[ctx.guild.id][user.id][1]}\n"
+                    f"Is blocked:  {self.bot.univ.VanityAvatars[ctx.guild.id][user.id][2]}"
+                )
+                return
         else:
             await ctx.send("That user has no information linked with this server.")
             return
