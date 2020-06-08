@@ -361,12 +361,7 @@ class Admin(Cog):
 
         await ctx.send(embed=em, delete_after=5)
         await self.bot.logout()
-
-class OwnerCommands(Cog):
-    def __init__(self, bot: Bot):
-        self.bot = bot
-
-    # ------------------------------------------------------------------------------------------------------------------
+    
     @command(aliases=["rs_av"])
     @is_owner()
     async def resetallavatars(self, ctx: Context):
@@ -415,6 +410,7 @@ class OwnerCommands(Cog):
         print("[] Deleted all closets on owner's request.")
 
     # ------------------------------------------------------------------------------------------------------------------
+    @is_owner
     @command(name="config", aliases=["bot"])
     async def settings(self, ctx, option, new_value = None):
         """Manage Bot settings"""
@@ -449,7 +445,7 @@ class OwnerCommands(Cog):
                     em.color = 0x00FF00
 
             elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
+                em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
                 em.color = 0x0000FF
         
         if option == "tz":
@@ -500,4 +496,3 @@ class OwnerCommands(Cog):
 def setup(bot: Bot):
     """Admin"""
     bot.add_cog(Admin(bot))
-    bot.add_cog(OwnerCommands(bot))
