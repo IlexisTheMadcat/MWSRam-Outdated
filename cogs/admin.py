@@ -21,7 +21,7 @@ from discord.ext.commands.errors import (
 # from discord.utils import oauth_url
 
 # Local
-from utils.classes import Bot
+from utils.classes import Bot, GlobalTextChannelConverter
 
 
 class Admin(Cog):
