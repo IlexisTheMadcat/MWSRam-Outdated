@@ -1,4 +1,10 @@
 
+# Lib
+
+# Site
+
+# Local
+
 
 def _get_from_guilds(bot, getter, argument):
     """Copied from discord.ext.commands.converter to prevent

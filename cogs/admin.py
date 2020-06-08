@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
 # Lib
+from os import popen
 
 # Site
-from discord.abc import Messageable
-from discord.channel import TextChannel
+# from discord.abc import Messageable
+# from discord.channel import TextChannel
 from discord.embeds import Embed
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
-from discord.ext.commands.core import group, is_owner
+from discord.ext.commands.core import command, group, is_owner
 from discord.ext.commands.errors import (
-    BadArgument,
+    # BadArgument,
     ExtensionAlreadyLoaded,
     ExtensionFailed,
     ExtensionNotFound,
@@ -21,7 +22,7 @@ from discord.ext.commands.errors import (
 # from discord.utils import oauth_url
 
 # Local
-from utils.classes import Bot, GlobalTextChannelConverter
+from utils.classes import Bot  # , GlobalTextChannelConverter
 
 
 class Admin(Cog):
@@ -29,6 +30,7 @@ class Admin(Cog):
 
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.say_dest = None
 
     @staticmethod
     def color(ctx: Context):
@@ -276,56 +278,73 @@ class Admin(Cog):
     #     )
     #     await ctx.send(embed=em)
 
+    # @is_owner()
+    # @group(name="say", invoke_without_command=True)
+    # async def say(self, ctx: Context, *, msg: str = ""):
+    #     """Makes the bot send a message
+    #
+    #     If self.say_dest is set, it will send the message there
+    #     If it is not, it will send to ctx.channel"""
+    #
+    #     dest: Messageable = self.say_dest if self.say_dest else ctx.channel
+    #     await dest.send(msg)
+    #
+    # @is_owner()
+    # @say.command(name="in")
+    # async def say_in(self, ctx: Context, dest: str = None):
+    #     """Sets the destination for messages from `[p]say`"""
+    #
+    #     if dest:
+    #         try:
+    #             self.say_dest: TextChannel = await GlobalTextChannelConverter().convert(ctx, dest)
+    #         except BadArgument as error:
+    #             em = Embed(
+    #                 title="Invalid Channel Identifier",
+    #                 description=f"**__{type(error).__name__}__**: {str(error)}",
+    #                 color=0xFF0000
+    #             )
+    #             await ctx.send(embed=em, delete_after=5)
+    #         else:
+    #             em = Embed(
+    #                 title="Administration: Set `say` Destination",
+    #                 description=f"__Say destination set__\n"
+    #                             f"Guild: {self.say_dest.guild.name}\n"
+    #                             f"Channel: {self.say_dest.mention}\n"
+    #                             f"ID: {self.say_dest.id}",
+    #                 color=0x00FF00
+    #             )
+    #             await ctx.send(embed=em, delete_after=5)
+    #     else:
+    #         self.say_dest = None
+    #         em = Embed(
+    #             title="Administration: Set `say` Destination",
+    #             description=f"Say destination has been unset",
+    #             color=0x00FF00
+    #         )
+    #         await ctx.send(embed=em, delete_after=5)
 
+    """ #########################
+         Updating and Restarting
+        ######################### """
 
-    """ ######################
-         General Use Commands
-        ###################### """
+    @staticmethod
+    def gitpull() -> str:
+        """Uses os.popen to `git pull`"""
+        resp = popen("git pull").read()
+        resp = f"```diff\n{resp}\n```"
+        return resp
 
     @is_owner()
-    @group(name="say", invoke_without_command=True)
-    async def say(self, ctx: Context, *, msg: str = ""):
-        """Makes the bot send a message
+    @command(name="pull")
+    async def pull(self, ctx: Context):
+        """Updates bot repo from master"""
 
-        If self.say_dest is set, it will send the message there
-        If it is not, it will send to ctx.channel"""
-
-        dest: Messageable = self.say_dest if self.say_dest else ctx.channel
-        await dest.send(msg)
-
-    @is_owner()
-    @say.command(name="in")
-    async def say_in(self, ctx: Context, dest: str = None):
-        """Sets the destination for messages from `[p]say`"""
-
-        if dest:
-            try:
-                self.say_dest: TextChannel = await GlobalTextChannelConverter().convert(ctx, dest)
-            except BadArgument as error:
-                em = Embed(
-                    title="Invalid Channel Identifier",
-                    description=f"**__{type(error).__name__}__**: {str(error)}",
-                    color=0xFF0000
-                )
-                await ctx.send(embed=em, delete_after=5)
-            else:
-                em = Embed(
-                    title="Administration: Set `say` Destination",
-                    description=f"__Say destination set__\n"
-                                f"Guild: {self.say_dest.guild.name}\n"
-                                f"Channel: {self.say_dest.mention}\n"
-                                f"ID: {self.say_dest.id}",
-                    color=0x00FF00
-                )
-                await ctx.send(embed=em, delete_after=5)
-        else:
-            self.say_dest = None
-            em = Embed(
-                title="Administration: Set `say` Destination",
-                description=f"Say destination has been unset",
-                color=0x00FF00
-            )
-            await ctx.send(embed=em, delete_after=5)
+        em = Embed(
+            title="Administration: Git Pull",
+            description=self.gitpull(),
+            color=0x00FF00
+        )
+        await ctx.send(embed=em, delete_after=5)
 
     @is_owner()
     @group(name='restart', aliases=["kill", "f"], invoke_without_command=True)
