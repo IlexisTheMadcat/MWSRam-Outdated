@@ -4,6 +4,7 @@
 from os import popen
 from os.path import exists
 from pickle import dump
+from typing import Union
 
 # Site
 # from discord.abc import Messageable
@@ -413,6 +414,59 @@ class OwnerCommands(Cog):
         await ctx.author.send("Reset all closets.")
         print("[] Deleted all closets on owner's request.")
 
+    # ------------------------------------------------------------------------------------------------------------------
+    @command(name="config", aliases=["bot"])
+    async def settings(self, ctx, option, new_value: Union[bool, str] = None):
+        """Manage Bot settings"""
+        em = Embed(title="Administration: Config")
+
+        if option == "auto_pull":
+            if new_value == True or False:
+                try:
+                    self.bot.auto_pull = bool(new_value)
+                except ValueError:
+                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
+                    em.color = 0xFF0000
+                else:
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.auto_pull}`"
+                    em.color = 0x00FF00
+
+            elif not new_value:
+                em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
+                em.color = 0x0000FF
+        
+        if option == "debug_mode":
+            if new_value == True or False:
+                try:
+                    self.bot.debug_mode = bool(new_value)
+                except ValueError:
+                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
+                    em.color = 0xFF0000
+                else:
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.debug_mode}`"
+                    em.color = 0x00FF00
+
+            elif not new_value:
+                em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
+                em.color = 0x0000FF
+        
+        if option == "tz":
+            if new_value == "EST" or "CST" or "UTC":
+                self.bot.tz = new_value
+
+                em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.tz}`"
+                em.color = 0x00FF00
+        
+            elif new_value:
+                em.description = f"An improper value was passed.\n`Valid responses for {option}: [EST], [CST], [UTC]`"
+                em.color = 0xFF0000
+
+            elif not new_value:
+                em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
+                em.color = 0x0000FF
+        
+        await ctx.send(embed=em, delete_after=5)
+            
     # ------------------------------------------------------------------------------------------------------------------
     @command(name="logout")
     @is_owner()

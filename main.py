@@ -18,14 +18,29 @@ try:
     for i in range(10):
         sleep(1)
 except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to configure. If no response, default options are used.
-    debug_mode = input("\nEnter debug mode? (D=accept)\n---| ")
-    if debug_mode == "D":
-        debug_mode = True
+    while True:
+        debug_mode = input("\nEnter debug mode? (y/n)\n---| ")
+        if debug_mode.lower() == "y":
+            debug_mode = True
+            break        
+        elif debug_mode.lower() == "n":
+            debug_mode = False
+            break
+
+    while True:
+        auto_update = input("Auto-pull from github master repository? (y/n)\n---| ")
+        if auto_update.lower() == "y":
+            auto_update = True
+            break
+        elif auto_update.lower() == "n":
+            auto_update = False
+            break
 
     while True:
         tz = input("Time Zone:\n---| ")
         if tz in ["EST", "CST", "UTC"]: # If not UTC, python will use the host computer's time.
             break
+    
 else:
     print(f'Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
     debug_mode = False
@@ -54,6 +69,7 @@ bot = Bot(
     description="Change your profile picture for a specific server.",
     owner_id=331551368789622784,
     debug_mode=debug_mode,
+    auto_update=auto_update,
     tz=tz
 )
 

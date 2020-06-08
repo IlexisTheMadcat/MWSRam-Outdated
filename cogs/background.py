@@ -4,6 +4,7 @@ from asyncio import sleep
 from datetime import datetime
 from os.path import exists
 from pickle import dump
+from subprocess import Popen
 
 # Site
 from discord.activity import Activity
@@ -34,6 +35,7 @@ class BackgroundTasks(Cog):
             if len(minute) == 1:
                 minute = "0" + minute
             time = f"{hour}:{minute}"
+
         else:
             utchour = str(datetime.utcnow().hour)
             utcminute = str(datetime.utcnow().minute)
@@ -102,6 +104,12 @@ class BackgroundTasks(Cog):
 
             self.bot.univ.Inactive = self.bot.univ.Inactive + 1
             print(f"[VPP: {time}] Saved data.")
+    
+    @loop(seconds=30)
+    async def auto_pull_github(self):
+        if self.bot.auto_pull:
+            Popen('git pull', shell=True)
+            print("Pulled any changes from Github.")
 
     @status_change.before_loop
     async def wait(self):
