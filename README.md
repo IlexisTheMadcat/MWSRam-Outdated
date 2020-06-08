@@ -4,7 +4,7 @@
 ## Want a new look just for the occasion? Let me suit you up.
 
 ### Introduction
-With this bot, roleplay doesn't have to be played with a gamerpicture intended for work or other communities.\
+With this bot, roleplay doesn't have to be played with a profile picture intended for work or other communities.\
 You can change your avatar with one line of a command and your future messages will transform into your new avatar.
 
 **Starter Commands**
