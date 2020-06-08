@@ -1,0 +1,18 @@
+*Newest feature(s):
+-- The changelog will now be sent to your SYSTEM CHANNEL every time the bot reloads if new changes are added.
+---- Changing SYSTEM CHANNEL to None will disable these notifications.
+
+Relatively new features:
+-- You'll get notifications less frequently now for messages that took some time to send.
+---- Note that sending media with a vanity will cause a guarenteed delay than sending text.
+-- Added a new internal safety feature that prevents the bot from reseting data should the data file be lost.
+---- Data WILL be reset if the file is lost and the bot is closed. This should be an unlikely event.
+---- The bot's status will change when saving is disabled. The developer will have to create a new file should it be lost.
+-- You'll now get proper DMs when the bot is unable to delete your messages.
+-- Previous avatars will now load the last avatar you had on, EXCLUDING the one you're currently using.
+---- If you have a vanity on, and you use the :>_set command with no parameters, it will load the previous avatar.
+
+In case you missed it:
+New Features:
+-- Moderation commands (see ':>help commands' under Moderation)
+---- These commands allow moderators with specific permissions to limit how users can use this bot.
