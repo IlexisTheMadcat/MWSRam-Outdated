@@ -24,7 +24,7 @@ class REPL(Cog):
         self.bot = bot
 
         self.ret = None
-        self._env_store = {}
+        self._env_store = dict()
         self.emb_pag = Paginator(
             page_limit=1014,
             trunc_limit=1850,
@@ -35,7 +35,7 @@ class REPL(Cog):
         d = {
             "title": title,
             "description": desc,
-            "fields": []
+            "fields": list()
         }
         return d
 
@@ -146,6 +146,6 @@ class REPL(Cog):
         await ctx.channel.send(embed=embed)
 
 
-def setup(bot: Bot) -> None:
+def setup(bot: Bot):
     """REPL"""
     bot.add_cog(REPL(bot))
