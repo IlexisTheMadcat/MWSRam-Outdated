@@ -373,7 +373,6 @@ class Admin(Cog):
         await ctx.author.send("Reset all avatars.")
         print("[] Deleted all avatars on owner's request.")
 
-    # ------------------------------------------------------------------------------------------------------------------
     @command(aliases=["rs_bl"])
     @is_owner()
     async def resetallblacklists(self, ctx: Context):
@@ -384,8 +383,7 @@ class Admin(Cog):
         self.bot.univ.Blacklists = {"authorID": (["channelID"], ["prefix"])}
         await ctx.author.send("Reset all blacklists.")
         print("[] Deleted all blacklists on owner's request.")
-
-    # ------------------------------------------------------------------------------------------------------------------
+    
     @command(aliases=["rs_sbl"])
     @is_owner()
     async def resetallserverblacklists(self, ctx: Context):
@@ -397,7 +395,6 @@ class Admin(Cog):
         await ctx.author.send("Reset all server blacklists.")
         print("[] Deleted all server-blacklists on owner's request.")
         
-    # ------------------------------------------------------------------------------------------------------------------
     @command(aliases=["rs_cl"])
     @is_owner()
     async def resetallclosets(self, ctx: Context):
@@ -409,8 +406,7 @@ class Admin(Cog):
         await ctx.author.send("Reset all closets.")
         print("[] Deleted all closets on owner's request.")
 
-    # ------------------------------------------------------------------------------------------------------------------
-    @is_owner
+    @is_owner()
     @command(name="config", aliases=["bot"])
     async def settings(self, ctx, option, new_value = None):
         """Manage Bot settings"""
@@ -465,7 +461,6 @@ class Admin(Cog):
         
         await ctx.send(embed=em, delete_after=5)
             
-    # ------------------------------------------------------------------------------------------------------------------
     @command(name="logout")
     @is_owner()
     async def blogout(self, ctx: Context):
