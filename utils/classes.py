@@ -4,15 +4,22 @@ from datetime import datetime
 from os import getcwd, mkdir, utime
 from os.path import exists, split
 from pickle import dump, Unpickler, load
+from re import match
 
 # Site
 from dbl.client import DBLClient
 from dbl.errors import DBLException
+from discord.channel import TextChannel
 from discord.ext.commands.bot import Bot as DiscordBot
+from discord.ext.commands.context import Context
+from discord.ext.commands.converter import IDConverter
+from discord.ext.commands.errors import BadArgument
 from discord.user import User
+from discord.utils import find, get
 from typing import List, Union
 
 # Local
+from utils.utils import _get_from_guilds
 
 
 class Paginator:
@@ -99,6 +106,44 @@ class Paginator:
             ret.append(page)
         self._pages = ret
         return self.pages
+
+
+class GlobalTextChannelConverter(IDConverter):
+    """Converts to a :class:`~discord.TextChannel`.
+
+    Copy of discord.ext.commands.converters.TextChannelConverter,
+    Modified to always search global cache.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID.
+    2. Lookup by mention.
+    3. Lookup by name
+    """
+    async def convert(self, ctx: Context, argument: str) -> TextChannel:
+        bot = ctx.bot
+
+        search = self._get_id_match(argument) or match(r'<#([0-9]+)>$', argument)
+
+        if match is None:
+            # not a mention
+            if ctx.guild:
+                result = get(ctx.guild.text_channels, name=argument)
+            else:
+                def check(c):
+                    return isinstance(c, TextChannel) and c.name == argument
+                result = find(check, bot.get_all_channels())
+        else:
+            channel_id = int(search.group(1))
+            if ctx.guild:
+                result = ctx.guild.get_channel(channel_id)
+            else:
+                result = _get_from_guilds(bot, 'get_channel', channel_id)
+
+        if not isinstance(result, TextChannel):
+            raise BadArgument('Channel "{}" not found.'.format(argument))
+
+        return result
 
 
 class Globals:
