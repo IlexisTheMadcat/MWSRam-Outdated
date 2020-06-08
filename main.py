@@ -14,11 +14,11 @@ from discord.utils import oauth_url
 from utils.classes import Bot
 
 try:
-    print("Press CTRL+C for user config settings. Ignore for defauls.")
+    print("Press CTRL+C for user config settings. Ignore for defaults.", end="\r")
     for i in range(10):
         sleep(1)
 except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to configure. If no response, default options are used.
-    debug_mode = input("Enter debug mode? (D=accept)\n---| ")
+    debug_mode = input("\nEnter debug mode? (D=accept)\n---| ")
     if debug_mode == "D":
         debug_mode = True
 
@@ -27,6 +27,7 @@ except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to 
         if tz in ["EST", "CST"]:
             break
 else:
+    print("Running with default settings.")
     debug_mode = False
     tz = "und"
 
