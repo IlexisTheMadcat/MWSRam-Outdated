@@ -71,7 +71,7 @@ class BackgroundTasks(Cog):
             )
             return
 
-        elif exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and not self.bot.univ.DisableSaving:
+        elif exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and self.bot.univ.DisableSaving:
             self.bot.univ.DisableSaving = False
             print(f"[{time}] Saving re-enabled.")
             return
