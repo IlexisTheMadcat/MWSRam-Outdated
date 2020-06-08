@@ -26,7 +26,7 @@ class BackgroundTasks(Cog):
 
     @loop(seconds=60)
     async def status_change(self):
-        if self.bot.TimeZone != "UTC":
+        if self.bot.tz != "UTC":
             hour = str(datetime.now().hour)
             minute = str(datetime.now().minute)
             if len(hour) == 1:
