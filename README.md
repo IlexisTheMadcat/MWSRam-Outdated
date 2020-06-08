@@ -180,12 +180,12 @@ It shows the blacklisted items for the *server,* which apply to everyone.
 See all items that are blacklisted for the server the command is invoked in. These can be managed by members with the `Manage Server` permission.
 
 #### **LIST**
-`{self.bot.command_prefix}list`\
+`:>list`\
 **--------------------------------------------------**\
 Returns a list of all users in the server with vanities equiped.
 
 #### MANAGE_USER; Aliases: "manage", "user"
-`{self.bot.command_prefix}manage_user <mode> <user>`\
+`:>manage_user <mode> <user>`\
 **--------------------------------------------------**\
 Manage a user's ability to use the bot. This applies only in this server.\
 **--** `mode` must be one of 3 things:\
@@ -199,7 +199,7 @@ Manage a user's ability to use the bot. This applies only in this server.\
 **------** This is the bot developer's YouTube alias. The username could be different.
 
 #### **HELP**; Aliases: "h"
-`{self.bot.command_prefix}help [section] [command if <section> is "commands"]`\
+`:>help [section] [command if <section> is "commands"]`\
 **--------------------------------------------------**\
 Shows a directory including the different sections of the help message.
 
@@ -210,4 +210,3 @@ Gives you an invite link to invite this bot to any server.\
 **--** You require the "Manage Server" permission in the target server to do this. This is a discord limitation.
 
 # *This project was inspired by TupperBox.*
-</div>
