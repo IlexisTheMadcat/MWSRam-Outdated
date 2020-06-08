@@ -36,11 +36,11 @@ class BackgroundTasks(Cog):
         utctime = f"{utchour}:{utcminute}"
 
         if self.bot.univ.Inactive >= 5:
-            status_ind = Status.idle
+            status = Status.idle
         else:
-            status_ind = Status.online
+            status = Status.online
 
-        if self.bot.debug_mode == "D":
+        if self.bot.debug_mode:
             activity = Activity(type=ActivityType.playing, name="IN DEBUG MODE")
         elif self.bot.univ.DisableSaving:
             activity = Activity(type=ActivityType.listening, name=f"SAVING DISABLED")
@@ -50,7 +50,7 @@ class BackgroundTasks(Cog):
                 name=f"{self.bot.command_prefix}help | {self.bot.tz}: {utctime}"
             )
 
-        await self.bot.change_presence(status=status_ind, activity=activity)
+        await self.bot.change_presence(status=status, activity=activity)
 
     @loop(seconds=60)
     async def savetofile(self):
@@ -99,7 +99,6 @@ class BackgroundTasks(Cog):
     async def wait(self):
         await self.bot.wait_until_ready()
         await sleep(60)
-
 
 def setup(bot: Bot):
     bot.add_cog(BackgroundTasks(bot))

@@ -1,6 +1,7 @@
 
 # Lib
 from asyncio import sleep
+from traceback import print_tb
 
 # Site
 from discord.errors import Forbidden
@@ -335,6 +336,9 @@ class Events(Cog):
                         f"If you keep getting this error, let the developer know!"
                     )
                     print("[Error outside of command]", error)
+        else:
+            print_tb(error)
+
 
 
 def setup(bot: Bot):
