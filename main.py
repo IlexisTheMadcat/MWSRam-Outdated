@@ -28,12 +28,12 @@ except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to 
             break
 
     while True:
-        auto_update = input("Auto-pull from github master repository? (y/n)\n---| ")
-        if auto_update.lower() == "y":
-            auto_update = True
+        auto_pull = input("Auto-pull from github master repository? (y/n)\n---| ")
+        if auto_pull.lower() == "y":
+            auto_pull = True
             break
-        elif auto_update.lower() == "n":
-            auto_update = False
+        elif auto_pull.lower() == "n":
+            auto_pull = False
             break
 
     while True:
@@ -70,7 +70,7 @@ bot = Bot(
     description="Change your profile picture for a specific server.",
     owner_id=331551368789622784,
     debug_mode=debug_mode,
-    auto_update=auto_update,
+    auto_pull=auto_pull,
     tz=tz
 )
 

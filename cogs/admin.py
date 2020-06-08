@@ -421,7 +421,7 @@ class OwnerCommands(Cog):
         em = Embed(title="Administration: Config")
 
         if option == "auto_pull":
-            if new_value == "True" or "False":
+            if new_value in ["True", "False"]:
                 try:
                     original = deepcopy(self.bot.auto_pull)
                     self.bot.auto_pull = bool(new_value)
@@ -437,7 +437,7 @@ class OwnerCommands(Cog):
                 em.color = 0x0000FF
         
         if option == "debug_mode":
-            if new_value == "True" or "False":
+            if new_value in ["True", "False"]:
                 try:
                     original = deepcopy(self.bot.debug_mode)
                     self.bot.debug_mode = bool(new_value)
