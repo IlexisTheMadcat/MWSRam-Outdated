@@ -14,6 +14,7 @@ from discord.ext.tasks import loop
 
 # Local
 from utils.classes import Bot
+from cogs.admin.Admin import gitpull
 
 
 class BackgroundTasks(Cog):
@@ -74,14 +75,14 @@ class BackgroundTasks(Cog):
             minute = "0" + minute
         time = f"{hour}:{minute}, {date}"
 
-        if not exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and not self.bot.univ.DisableSaving:
+        if not exists(f"{self.bot.cwd}\\Serialized\\data.pkl") or not exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl") and not self.bot.univ.DisableSaving:
             self.bot.univ.DisableSaving = True
             print(
-                f"[{time} || Unable to save] data.pkl not found. Replace file before shutting down. Saving disabled."
+                f"[{time} || Unable to save] data.pkl and/or bot_config.pkl not found. Replace file before shutting down. Saving disabled."
             )
             return
 
-        elif exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and self.bot.univ.DisableSaving:
+        elif exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl") and self.bot.univ.DisableSaving:
             self.bot.univ.DisableSaving = False
             print(f"[{time}] Saving re-enabled.")
             return
@@ -89,27 +90,44 @@ class BackgroundTasks(Cog):
         if not self.bot.univ.DisableSaving:
             print("Saving...", end="\r")
             with open(f"{self.bot.cwd}\\Serialized\\data.pkl", "wb") as f:
-                try:
-                    data = {
-                        "VanityAvatars": self.bot.univ.VanityAvatars,
-                        "Blacklists": self.bot.univ.Blacklists,
-                        "Closets": self.bot.univ.Closets,
-                        "ServerBlacklists": self.bot.univ.ServerBlacklists,
-                        "ChangelogCache": self.bot.univ.ChangelogCache
-                    }
+                data = {
+                    "VanityAvatars": self.bot.univ.VanityAvatars,
+                    "Blacklists": self.bot.univ.Blacklists,
+                    "Closets": self.bot.univ.Closets,
+                    "ServerBlacklists": self.bot.univ.ServerBlacklists,
+                    "ChangelogCache": self.bot.univ.ChangelogCache
+                }
 
+                try:
                     dump(data, f)
                 except Exception as e:
                     print(f"[{time} || Unable to save] Pickle dumping Error:", e)
 
+            with open(f"{self.bot.cwd}\\Serialized\\bot_config.pkl", "wb") as f:
+                config_data = {
+                    "debug_mode":self.bot.debug_mode,
+                    "auto_pull":self.bot.auto_pull,
+                    "tz":self.bot.tz
+                }
+
+                try:
+                    dump(config_data, f)
+                except Exception as e:
+                    print("[Unknown Error] Pickle dumping error:", e)
+
+
             self.bot.univ.Inactive = self.bot.univ.Inactive + 1
             print(f"[VPP: {time}] Saved data.")
     
-    @loop(seconds=30)
+    @loop(seconds=60)
     async def auto_pull_github(self):
         if self.bot.auto_pull:
-            Popen('git pull', shell=True)
-            print("Pulled any changes from Github.")
+            # Popen('git pull', shell=True)
+            data = gitpull()
+            if str(data) != "Already up to date.":
+                await self.bot.owner.send(
+                    f"**__Auto-pulled from github repository__**\n{data}")
+                    
 
     @status_change.before_loop
     async def wait(self):

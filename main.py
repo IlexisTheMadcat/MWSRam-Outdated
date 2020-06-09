@@ -1,7 +1,8 @@
 
 # Lib
-from pickle import dump
+from pickle import dump, Unpickler
 from time import sleep
+from os import getcwd
 # Site
 from discord import __version__
 from discord.activity import Activity
@@ -40,16 +41,34 @@ except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to 
         tz = input("Time Zone:\n---| ")
         if tz in ["EST", "CST", "UTC"]: # If not UTC, python will use the host computer's time.
             break
-    
+
 else:
-    print(f'Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
-    debug_mode = False
-    auto_pull = True # Auto pulls github updates
-    tz = "UTC" # Triggers python to get real UTC time for Rams's status.
+    print("\nAttempting to open bot_config.pkl...")
+    try:
+        f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb").close()
+    except FileNotFoundError:
+        f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "x").close()
 
-
+    with open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb") as f:
+        try:
+            config_data = Unpickler(f).load()
+        except Exception as e:
+            print("[Using defaults] Unpickling error:", e)
+            debug_mode = False
+            auto_pull = True
+            tz = "UTC"
+        else:
+            try:
+                debug_mode = config_data["debug_mode"]
+                auto_pull = config_data["auto_pull"]
+                tz = config_data["tz"]
+            except KeyError:
+                print(f'[bot_config.pkl file improperly formated] Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
+                debug_mode = False # Print exceptions to stdout. Some errors will not be printed for some reason.
+                auto_pull = True # Auto pulls github updates every minute
+                tz = "UTC" # Triggers python to get real UTC time for Rams's status.
+                
 print("Loading...")
-
 
 BOT_PREFIX = ":>"
 INIT_EXTENSIONS = [
@@ -60,7 +79,6 @@ INIT_EXTENSIONS = [
     "events",
     "help",
     "moderation",
-    "repl",
     "vanity",
 ]
 
