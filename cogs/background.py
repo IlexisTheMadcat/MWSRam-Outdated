@@ -137,7 +137,6 @@ class BackgroundTasks(Cog):
         await self.bot.wait_until_ready()
         await sleep(45)
 
-
     @status_change.before_loop
     async def sc_wait(self):
         await self.bot.wait_until_ready()
