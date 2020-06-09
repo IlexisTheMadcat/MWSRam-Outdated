@@ -1,6 +1,7 @@
 
 # Lib
-from os import popen
+from os import popen, getcwd
+from os.path import exists, join
 from asyncio import sleep
 from datetime import datetime
 from os.path import exists
@@ -78,19 +79,19 @@ class BackgroundTasks(Cog):
             minute = "0" + minute
         time = f"{hour}:{minute}, {date}"
 
-        if not (exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl")) and not self.bot.univ.DisableSaving:
+        if not (exists(join(getcwd(), "Serialized", "data.pkl")) and exists(join(getcwd(), "Serialized", "bot_config.pkl"))) and not self.bot.univ.DisableSaving:
             self.bot.univ.DisableSaving = True
             print(f"[{time} || Unable to save] data.pkl and/or bot_config.pkl not found. Replace file before shutting down. Saving disabled.")
             return
 
-        elif (exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl")) and self.bot.univ.DisableSaving:
+        elif (exists(join(getcwd(), "Serialized", "data.pkl")) and exists(join(getcwd(), "Serialized", "bot_config.pkl"))) and self.bot.univ.DisableSaving:
             self.bot.univ.DisableSaving = False
             print(f"[{time}] Saving re-enabled.")
             return
 
         if not self.bot.univ.DisableSaving:
             print("Saving...", end="\r")
-            with open(f"{self.bot.cwd}\\Serialized\\data.pkl", "wb") as f:
+            with open(join(getcwd(), "Serialized", "data.pkl"), "wb") as f:
                 data = {
                     "VanityAvatars": self.bot.univ.VanityAvatars,
                     "Blacklists": self.bot.univ.Blacklists,
@@ -104,7 +105,7 @@ class BackgroundTasks(Cog):
                 except Exception as e:
                     print(f"[{time} || Unable to save] Pickle dumping Error:", e)
 
-            with open(f"{self.bot.cwd}\\Serialized\\bot_config.pkl", "wb") as f:
+            with open(join(getcwd(), "Serialized", "bot_config.pkl"), "wb") as f:
                 config_data = {
                     "debug_mode":self.bot.debug_mode,
                     "auto_pull":self.bot.auto_pull,

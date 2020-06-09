@@ -495,7 +495,7 @@ class Admin(Cog):
             except Exception as e:
                 await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
 
-        with supress("RuntimeError"):
+        with suppress(Exception):  # Comment this out and unindent logout() to disable suppressing
             await self.bot.logout()
 
 
