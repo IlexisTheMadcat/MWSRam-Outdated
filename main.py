@@ -3,6 +3,7 @@ from contextlib import suppress
 from pickle import Unpickler
 from os import getcwd
 from os.path import join
+from random import choice
 
 # Site
 from discord import __version__
@@ -15,9 +16,9 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 
-print("\nAttempting to open bot_config.pkl...")
+print("\nAttempting to open bot_config.pkl...", end="\n")
 try:
-    open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb").close()
+    open(join(getcwd(), "Serialized", "bot_config.pkl"), "r").close()
 except FileNotFoundError:
     open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
 
@@ -25,7 +26,7 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
     try:
         config_data = Unpickler(f).load()
     except Exception as e:
-        print("[Using defaults] Unpickling error:", e)
+        print(f"[Using defaults] Unpickling error: {e}{" "*30})
         debug_mode = False
         auto_pull = True
         tz = "UTC"
@@ -34,14 +35,24 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
             debug_mode = config_data["debug_mode"]
             auto_pull = config_data["auto_pull"]
             tz = config_data["tz"]
+            print("Loaded bot_default.pkl")
         except KeyError:
-            print(
-                f'[bot_config.pkl file improperly formatted] Running with default settings.{" " * 35}')  # print excess spaces to fully overwrite the '\r' above
-            debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason.
-            auto_pull = True  # Auto pulls github updates every minute
+            print(f'[Using defaults] bot_config.pkl file improperly formatted.{" " * 35}')  # print excess spaces to fully overwrite the '\r' above
+            debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
+            auto_pull = True  # Auto pulls github updates every minute and reloads all loaded cogs.
             tz = "UTC"  # Triggers python to get real UTC time for Rams's status.
 
-print("Loading...")
+loading_choices = [  # because why not
+    "Loading Random Access Memory...",
+    "\"Wanna play?\"",
+    "\"I wish you could wake me up later~\"",
+    "\"I hope this isn't for debugging...\"",
+    "Booting up the creative mind...",
+    "Waking up the older sister...",
+    "Charging RAM...",
+    "\"Mmmmm~ h-huh..? Where's Rem? Where is she?? Tell me!\""
+]
+print(random.choice(loading_choices))
 
 BOT_PREFIX = ":>"
 INIT_EXTENSIONS = [
@@ -56,6 +67,7 @@ INIT_EXTENSIONS = [
 ]
 # Extension "repl" must be loaded manually
 # as it is not automatically available
+# because it is not often needed.
 
 bot = Bot(
     command_prefix=BOT_PREFIX,
@@ -63,7 +75,7 @@ bot = Bot(
     owner_ids=[331551368789622784, 125435062127820800],
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
-    # Configurable via :>bot
+    # vv Configurable via :>bot
     debug_mode=debug_mode,
     auto_pull=auto_pull,
     tz=tz
@@ -97,7 +109,7 @@ async def on_ready():
 
     print(f"\n"
           f"#-------------------------------#"
-          f"| Loading initial cogs..."
+          f"| Loading initial cogs... "
           f"#-------------------------------#")
 
     for cog in INIT_EXTENSIONS:
