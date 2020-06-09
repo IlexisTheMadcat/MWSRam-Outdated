@@ -16,7 +16,8 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 
-print("\nAttempting to open bot_config.pkl...", end="\n")
+print("#-------------------------------#")
+print("Attempting to open bot_config.pkl...", end="\r")
 try:
     open(join(getcwd(), "Serialized", "bot_config.pkl"), "r").close()
 except FileNotFoundError:
@@ -42,17 +43,20 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
             auto_pull = True  # Auto pulls github updates every minute and reloads all loaded cogs.
             tz = "UTC"  # Triggers python to get real UTC time for Rams's status.
 
+print("#-------------------------------#\n")
 loading_choices = [  # because why not
     "Loading Random Access Memory...",
-    "\"Wanna play?\"",
-    "\"I wish you could wake me up later~\"",
-    "\"I hope this isn't for debugging...\"",
+    ''"Wanna play?"',
+    '"I wish you could wake me up later~"',
+    '"I hope this isn\'t for debugging..."',
     "Booting up the creative mind...",
     "Waking up the older sister...",
     "Charging RAM...",
-    "\"Mmmmm~ h-huh..? Where's Rem? Where is she?? Tell me!\""
+    '"Mmmmm~ h-huh..? Where\'s Rem? Where is she?? Tell me!'
 ]
-print(choice(loading_choices))
+print("#-------------------------------#\n")
+print(f"{choice(loading_choices)}\n")
+print(f"#-------------------------------#\n")
 
 BOT_PREFIX = ":>"
 INIT_EXTENSIONS = [
@@ -75,7 +79,7 @@ bot = Bot(
     owner_ids=[331551368789622784, 125435062127820800],
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
-    # vv Configurable via :>bot
+    # Configurable via :>bot
     debug_mode=debug_mode,
     auto_pull=auto_pull,
     tz=tz
@@ -83,16 +87,10 @@ bot = Bot(
 
 bot.remove_command("help")
 
+print("#-------------------------------#")
 print(f"Running in: {bot.cwd}")
 print(f"Discord API version: {__version__}")
-
-print(
-    f"Owner commands:\n"
-    f"{BOT_PREFIX}resetallavatars          - Delete all avatars\n"
-    f"{BOT_PREFIX}resetallblacklists       - Delete all blacklists\n"
-    f"{BOT_PREFIX}resetallclosets          - Delete all closets\n"
-    f"{BOT_PREFIX}resetallserverblacklists - Delete all server blacklists\n"
-)
+print("#-------------------------------#")
 
 
 @bot.event
