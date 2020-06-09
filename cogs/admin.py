@@ -86,7 +86,6 @@ class Admin(Cog):
                             f"No module `{module}` found in cogs directory",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         except ExtensionAlreadyLoaded:
             em = Embed(
@@ -95,7 +94,6 @@ class Admin(Cog):
                             f"Module `{module}` is already loaded",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         except NoEntryPointError:
             em = Embed(
@@ -104,7 +102,6 @@ class Admin(Cog):
                             f"Module `{module}` does not define a `setup` function",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         except ExtensionFailed as error:
             if isinstance(error.original, TypeError):
@@ -121,7 +118,6 @@ class Admin(Cog):
                                 f"An execution error occurred during module `{module}`'s setup function",
                     color=0xFF0000
                 )
-            await ctx.send(embed=em, delete_after=5)
 
         except Exception as error:
             em = Embed(
@@ -132,7 +128,6 @@ class Admin(Cog):
                             f"```",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         else:
             em = Embed(
@@ -140,7 +135,8 @@ class Admin(Cog):
                 description=f"Module `{module}` loaded successfully",
                 color=0x00FF00
             )
-            await ctx.send(embed=em, delete_after=5)
+
+        await ctx.send(embed=em)
 
     @is_owner()
     @module.command(name="unload", usage="(module name)")
@@ -162,7 +158,6 @@ class Admin(Cog):
                             f"Module `{module}` is not loaded",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         except Exception as error:
             em = Embed(
@@ -173,7 +168,6 @@ class Admin(Cog):
                             f"```",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         else:
             em = Embed(
@@ -181,7 +175,8 @@ class Admin(Cog):
                 description=f"Module `{module}` unloaded successfully",
                 color=0x00FF00
             )
-            await ctx.send(embed=em, delete_after=5)
+        
+        await ctx.send(embed=em)
 
     @is_owner()
     @module.command(name="reload", usage="(module name)")
@@ -203,7 +198,6 @@ class Admin(Cog):
                             f"Module `{module}` is not loaded",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         except ExtensionNotFound:
             em = Embed(
@@ -212,7 +206,6 @@ class Admin(Cog):
                             f"No module `{module}` found in cogs directory",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         except NoEntryPointError:
             em = Embed(
@@ -221,7 +214,6 @@ class Admin(Cog):
                             f"Module `{module}` does not define a `setup` function",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         except ExtensionFailed as error:
             if isinstance(error.original, TypeError):
@@ -238,7 +230,6 @@ class Admin(Cog):
                                 f"An execution error occurred during module `{module}`'s setup function",
                     color=0xFF0000
                 )
-            await ctx.send(embed=em, delete_after=5)
 
         except Exception as error:
             em = Embed(
@@ -249,7 +240,6 @@ class Admin(Cog):
                             f"```",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
 
         else:
             em = Embed(
@@ -257,7 +247,8 @@ class Admin(Cog):
                 description=f"Module `{module}` reloaded successfully",
                 color=0x00FF00
             )
-            await ctx.send(embed=em, delete_after=5)
+    
+        await ctx.send(embed=em)
 
     """ ######################
          General Use Commands
@@ -305,7 +296,7 @@ class Admin(Cog):
     #                 description=f"**__{type(error).__name__}__**: {str(error)}",
     #                 color=0xFF0000
     #             )
-    #             await ctx.send(embed=em, delete_after=5)
+    #             await ctx.send(embed=em)
     #         else:
     #             em = Embed(
     #                 title="Administration: Set `say` Destination",
@@ -315,7 +306,7 @@ class Admin(Cog):
     #                             f"ID: {self.say_dest.id}",
     #                 color=0x00FF00
     #             )
-    #             await ctx.send(embed=em, delete_after=5)
+    #             await ctx.send(embed=em)
     #     else:
     #         self.say_dest = None
     #         em = Embed(
@@ -323,7 +314,7 @@ class Admin(Cog):
     #             description=f"Say destination has been unset",
     #             color=0x00FF00
     #         )
-    #         await ctx.send(embed=em, delete_after=5)
+    #         await ctx.send(embed=em)
 
     """ #########################
          Updating and Restarting
@@ -346,7 +337,7 @@ class Admin(Cog):
             description=self.gitpull(),
             color=0x00FF00
         )
-        await ctx.send(embed=em, delete_after=5)
+        await ctx.send(embed=em)
 
     @is_owner()
     @group(name='restart', aliases=["kill", "f"], invoke_without_command=True)
@@ -359,7 +350,7 @@ class Admin(Cog):
             color=0x00FF00
         )
 
-        await ctx.send(embed=em, delete_after=5)
+        await ctx.send(embed=em)
         await self.bot.logout()
     
     @command(aliases=["rs_av"])
@@ -408,61 +399,72 @@ class Admin(Cog):
 
     @is_owner()
     @command(name="config", aliases=["bot"])
-    async def settings(self, ctx, option, new_value = None):
+    async def settings(self, ctx, option = None, new_value = None):
         """Manage Bot settings"""
         em = Embed(title="Administration: Config")
-
-        if option == "auto_pull":
-            if new_value in ["True", "False"]:
-                try:
+        if option:
+            if option == "auto_pull":
+                if new_value in ["True", "False"]:
                     original = deepcopy(self.bot.auto_pull)
-                    self.bot.auto_pull = bool(new_value)
-                except ValueError:
+                    if new_value == "True":
+                        self.bot.auto_pull = True
+                    elif new_value == "False":
+                        self.bot.auto_pull = False
+            
+                    else:
+                        em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+                        em.color = 0x00FF00
+                
+                elif new_value:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
-                else:
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
 
-            elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
-                em.color = 0x0000FF
-        
-        elif option == "debug_mode":
-            if new_value in ["True", "False"]:
-                try:
+                elif not new_value:
+                    em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
+                    em.color = 0x0000FF
+            
+            elif option == "debug_mode":
+                if new_value in ["True", "False"]:
                     original = deepcopy(self.bot.debug_mode)
-                    self.bot.debug_mode = bool(new_value)
-                except ValueError:
+                    if new_value == "True":
+                        self.bot.debug_mode = True
+                    elif new_value == "False":
+                        self.bot.debug_mode = False
+
+                    else:
+                        em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+                        em.color = 0x00FF00
+                elif new_value:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
-                else:
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+
+                elif not new_value:
+                    em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
+                    em.color = 0x0000FF
+            
+            elif option == "tz":
+                if new_value in ["EST", "CST", "UTC"]:
+                    self.bot.tz = new_value
+
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.tz}`"
                     em.color = 0x00FF00
+            
+                elif new_value:
+                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [EST], [CST], [UTC]`"
+                    em.color = 0xFF0000
 
-            elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
-                em.color = 0x0000FF
-        
-        elif option == "tz":
-            if new_value in ["EST", "CST", "UTC"]:
-                self.bot.tz = new_value
+                elif not new_value:
+                    em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
+                    em.color = 0x0000FF
+            
+            else:
+                em.description = f"Bot configuration option not found."
+                em.color = 0x000000
 
-                em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.tz}`"
-                em.color = 0x00FF00
-        
-            elif new_value:
-                em.description = f"An improper value was passed.\n`Valid responses for {option}: [EST], [CST], [UTC]`"
-                em.color = 0xFF0000
+        if not option:
+            em.description = f"The options and values are listed below:\n```Debug Mode: {self.bot.debug_mode}\nAuto-pull: {self.bot.auto_pull}\nTimeZone: {self.bot.tz}\n```"
+            em.color = 0x0000FF
 
-            elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
-                em.color = 0x0000FF
-        
-        else:
-            em.description = f"Bot configuration option not found."
-            em.color = 0x000000
-        
         await ctx.send(embed=em)
             
     @command(name="logout")

@@ -1,10 +1,10 @@
 
 # Lib
+from os import popen
 from asyncio import sleep
 from datetime import datetime
 from os.path import exists
 from pickle import dump
-from subprocess import Popen
 
 # Site
 from discord.activity import Activity
@@ -25,8 +25,9 @@ class BackgroundTasks(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
         self.dblpy = self.bot.connect_dbl()
-        self.savetofile.start()
+        self.save_data.start()
         self.status_change.start()
+        self.auto_pull_github.start()
 
     @loop(seconds=60)
     async def status_change(self):
@@ -66,7 +67,7 @@ class BackgroundTasks(Cog):
         await self.bot.change_presence(status=status, activity=activity)
 
     @loop(seconds=60)
-    async def savetofile(self):
+    async def save_data(self):
         hour = str(datetime.now().hour)
         minute = str(datetime.now().minute)
         date = str(str(datetime.now().date().month) + "/" + str(datetime.now().date().day) + "/" + str(
@@ -122,17 +123,30 @@ class BackgroundTasks(Cog):
     @loop(seconds=60)
     async def auto_pull_github(self):
         if self.bot.auto_pull:
-            # Popen('git pull', shell=True)
-            data = Admin.gitpull()
-            if str(data) != "Already up to date.":
-                await self.bot.owner.send(
-                    f"**__Auto-pulled from github repository__**\n{data}")
-                    
+            print("Checking git repository for changes...", end="\r")
+            resp = popen("git pull").read()
+            resp = f"```diff\n{resp}\n```"
+            if str(resp) != f"```diff\nAlready up to date.\n\n```":
+                await self.bot.owner.send(f"**__Auto-pulled from github repository__**\n{resp}")
+                print("Changes sent to owner via Discord.")
+                await self.bot.logout()
+            else:
+                print(f'No new changes.{" "*25}')
+
+    @auto_pull_github.before_loop # Start these 2 loops opposite of each other
+    async def apg_wait(self):
+        await self.bot.wait_until_ready()
+        await sleep(45)
 
     @status_change.before_loop
-    async def wait(self):
+    async def sc_wait(self):
         await self.bot.wait_until_ready()
-        await sleep(60)
+        await sleep(30)
+
+    @save_data.before_loop
+    async def sd_wait(self):
+        await self.bot.wait_until_ready()
+        await sleep(15)
 
 def setup(bot: Bot):
     bot.add_cog(BackgroundTasks(bot))
