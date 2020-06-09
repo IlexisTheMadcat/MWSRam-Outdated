@@ -67,7 +67,7 @@ else:
                 debug_mode = False # Print exceptions to stdout. Some errors will not be printed for some reason.
                 auto_pull = True # Auto pulls github updates every minute
                 tz = "UTC" # Triggers python to get real UTC time for Rams's status.
-                
+
 print("Loading...")
 
 BOT_PREFIX = ":>"
@@ -81,12 +81,15 @@ INIT_EXTENSIONS = [
     "moderation",
     "vanity",
 ]
-
+# Extension "repl" must be loaded manually
+# as it is not automatically available
 
 bot = Bot(
     command_prefix=BOT_PREFIX,
     description="Change your profile picture for a specific server.",
     owner_id=331551368789622784,
+    activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
+    status=Status.idle,
     debug_mode=debug_mode,
     auto_pull=auto_pull,
     tz=tz
@@ -120,9 +123,6 @@ async def on_ready():
         manage_messages=True,
         manage_webhooks=True
     )
-
-    activity = Activity(type=ActivityType.watching, name=f"Just woke up.")
-    await bot.change_presence(status=Status.idle, activity=activity)
 
     # check changelog for differences since last save
     with open(f"{bot.cwd}\\changelog.txt", "r") as clfp:
