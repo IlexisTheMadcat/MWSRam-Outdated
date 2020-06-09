@@ -3,6 +3,7 @@
 from pickle import dump, Unpickler
 from time import sleep
 from os import getcwd
+
 # Site
 from discord import __version__
 from discord.activity import Activity
@@ -18,7 +19,7 @@ try:
     print("Press CTRL+C for user config settings. Ignore for defaults.", end="\r")
     for i in range(10):
         sleep(1)
-except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to configure. If no response, default options are used.
+except KeyboardInterrupt:  # Enable a timeout that is interrupted by the user to configure. If no response, default options are used.
     while True:
         debug_mode = input("\nEnter debug mode? (y/n)\n---| ")
         if debug_mode.lower() == "y":
@@ -39,7 +40,7 @@ except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to 
 
     while True:
         tz = input("Time Zone:\n---| ")
-        if tz in ["EST", "CST", "UTC"]: # If not UTC, python will use the host computer's time.
+        if tz in ["EST", "CST", "UTC"]:  # If not UTC, python will use the host computer's time.
             break
 
 else:
@@ -63,10 +64,10 @@ else:
                 auto_pull = config_data["auto_pull"]
                 tz = config_data["tz"]
             except KeyError:
-                print(f'[bot_config.pkl file improperly formated] Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
-                debug_mode = False # Print exceptions to stdout. Some errors will not be printed for some reason.
-                auto_pull = True # Auto pulls github updates every minute
-                tz = "UTC" # Triggers python to get real UTC time for Rams's status.
+                print(f'[bot_config.pkl file improperly formatted] Running with default settings.{" "*35}')  # print excess spaces to fully overwrite the '\r' above
+                debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason.
+                auto_pull = True  # Auto pulls github updates every minute
+                tz = "UTC"  # Triggers python to get real UTC time for Rams's status.
                 
 print("Loading...")
 
@@ -196,19 +197,19 @@ if __name__ == "__main__":
 
         try:
 
-            if not bot.auth.MWS_BOT_TOKEN:
+            if not bot.auth["MWS_BOT_TOKEN"]:
                 raise LoginFailure
 
             bot.run()
 
         except LoginFailure:
             try:
-                bot.auth.MWS_BOT_TOKEN = None
+                bot.auth["MWS_BOT_TOKEN"] = None
 
                 print("\nLogin Failed: No token was provided or token provided was invalid.")
                 new_token = input("Provide new bot token: ")
 
-                bot.auth.MWS_BOT_TOKEN = new_token
+                bot.auth["MWS_BOT_TOKEN"] = new_token
 
             except KeyboardInterrupt:
                 print("\nLogin with new bot token cancelled. Aborting.")
