@@ -349,9 +349,9 @@ class Admin(Cog):
             description=f"{ctx.author.mention} initiated bot restart.",
             color=0x00FF00
         )
-        for x_loop in self.univ.Loops:
+        for x_loop in self.bot.univ.Loops:
             x_loop.cancel()
-            
+
         await ctx.send(embed=em)
         await self.bot.logout()
     
