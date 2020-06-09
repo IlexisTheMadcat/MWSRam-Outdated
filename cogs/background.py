@@ -27,6 +27,7 @@ class BackgroundTasks(Cog):
         self.dblpy = self.bot.connect_dbl()
         self.savetofile.start()
         self.status_change.start()
+        self.auto_pull_github.start()
 
     @loop(seconds=60)
     async def status_change(self):
