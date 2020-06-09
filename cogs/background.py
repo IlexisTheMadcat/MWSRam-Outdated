@@ -1,10 +1,10 @@
 
 # Lib
+from os import popen
 from asyncio import sleep
 from datetime import datetime
 from os.path import exists
 from pickle import dump
-from subprocess import Popen
 
 # Site
 from discord.activity import Activity
@@ -122,12 +122,15 @@ class BackgroundTasks(Cog):
     @loop(seconds=60)
     async def auto_pull_github(self):
         if self.bot.auto_pull:
-            # Popen('git pull', shell=True)
-            data = Admin.gitpull()
-            if str(data) != "Already up to date.":
+            print("Checking git repository for changes...", end="\r")
+            resp = popen("git pull").read()
+            resp = f"```diff\n{resp}\n```"
+            if str(resp) != "Already up to date.":
+                print("Changes sent to owner via Discord.")
                 await self.bot.owner.send(
-                    f"**__Auto-pulled from github repository__**\n{data}")
-                    
+                    f"**__Auto-pulled from github repository__**\n{resp}")
+            else:
+                print("No new changes.")
 
     @status_change.before_loop
     async def wait(self):

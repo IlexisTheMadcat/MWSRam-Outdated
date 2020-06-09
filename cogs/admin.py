@@ -416,7 +416,13 @@ class Admin(Cog):
             if new_value in ["True", "False"]:
                 try:
                     original = deepcopy(self.bot.auto_pull)
-                    self.bot.auto_pull = bool(new_value)
+                    if new_value == "True":
+                        self.bot.auto_pull = True
+                    elif new_value == "False":
+                        self.bot.auto_pull = False
+                    else:
+                        raise ValueError
+            
                 except ValueError:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
@@ -432,7 +438,13 @@ class Admin(Cog):
             if new_value in ["True", "False"]:
                 try:
                     original = deepcopy(self.bot.debug_mode)
-                    self.bot.debug_mode = bool(new_value)
+                    if new_value == "True":
+                        self.bot.debug_mode = True
+                    elif new_value == "False":
+                        self.bot.debug_mode = False
+                    else:
+                        raise ValueError
+            
                 except ValueError:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
