@@ -408,73 +408,77 @@ class Admin(Cog):
 
     @is_owner()
     @command(name="config", aliases=["bot"])
-    async def settings(self, ctx, option, new_value = None):
+    async def settings(self, ctx, option = None, new_value = None):
         """Manage Bot settings"""
         em = Embed(title="Administration: Config")
-
-        if option == "auto_pull":
-            if new_value in ["True", "False"]:
-                try:
-                    original = deepcopy(self.bot.auto_pull)
-                    if new_value == "True":
-                        self.bot.auto_pull = True
-                    elif new_value == "False":
-                        self.bot.auto_pull = False
+        if option:
+            if option == "auto_pull":
+                if new_value in ["True", "False"]:
+                    try:
+                        original = deepcopy(self.bot.auto_pull)
+                        if new_value == "True":
+                            self.bot.auto_pull = True
+                        elif new_value == "False":
+                            self.bot.auto_pull = False
+                        else:
+                            raise ValueError
+                
+                    except ValueError:
+                        em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
+                        em.color = 0xFF0000
                     else:
-                        raise ValueError
-            
-                except ValueError:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
-                    em.color = 0xFF0000
-                else:
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
+                        em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+                        em.color = 0x00FF00
 
-            elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
-                em.color = 0x0000FF
-        
-        elif option == "debug_mode":
-            if new_value in ["True", "False"]:
-                try:
-                    original = deepcopy(self.bot.debug_mode)
-                    if new_value == "True":
-                        self.bot.debug_mode = True
-                    elif new_value == "False":
-                        self.bot.debug_mode = False
+                elif not new_value:
+                    em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
+                    em.color = 0x0000FF
+            
+            elif option == "debug_mode":
+                if new_value in ["True", "False"]:
+                    try:
+                        original = deepcopy(self.bot.debug_mode)
+                        if new_value == "True":
+                            self.bot.debug_mode = True
+                        elif new_value == "False":
+                            self.bot.debug_mode = False
+                        else:
+                            raise ValueError
+                
+                    except ValueError:
+                        em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
+                        em.color = 0xFF0000
                     else:
-                        raise ValueError
+                        em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+                        em.color = 0x00FF00
+
+                elif not new_value:
+                    em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
+                    em.color = 0x0000FF
             
-                except ValueError:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
-                    em.color = 0xFF0000
-                else:
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+            elif option == "tz":
+                if new_value in ["EST", "CST", "UTC"]:
+                    self.bot.tz = new_value
+
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.tz}`"
                     em.color = 0x00FF00
+            
+                elif new_value:
+                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [EST], [CST], [UTC]`"
+                    em.color = 0xFF0000
 
-            elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
-                em.color = 0x0000FF
-        
-        elif option == "tz":
-            if new_value in ["EST", "CST", "UTC"]:
-                self.bot.tz = new_value
+                elif not new_value:
+                    em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
+                    em.color = 0x0000FF
+            
+            else:
+                em.description = f"Bot configuration option not found."
+                em.color = 0x000000
+                
+        if not option:
+            em.description = f"The options and values are listed below:\n```Debug Mode: {self.bot.debug_mode}\nAuto-pull: {self.bot.auto_pull}\nTimeZone: {self.bot.tz}\n```"
+            em.color = 0x0000FF
 
-                em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.tz}`"
-                em.color = 0x00FF00
-        
-            elif new_value:
-                em.description = f"An improper value was passed.\n`Valid responses for {option}: [EST], [CST], [UTC]`"
-                em.color = 0xFF0000
-
-            elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
-                em.color = 0x0000FF
-        
-        else:
-            em.description = f"Bot configuration option not found."
-            em.color = 0x000000
-        
         await ctx.send(embed=em)
             
     @command(name="logout")
