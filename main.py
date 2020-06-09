@@ -1,5 +1,6 @@
 
-# Lib
+# Libf
+from contextlib import suppress
 from pickle import dump, Unpickler
 from time import sleep
 from os import getcwd
@@ -144,8 +145,10 @@ if __name__ == "__main__":
 
             if not bot.auth["MWS_BOT_TOKEN"]:
                 raise LoginFailure
+            
 
-            bot.run()
+            with suppress("RuntimeError"):
+                bot.run()
 
         except LoginFailure:
             try:
