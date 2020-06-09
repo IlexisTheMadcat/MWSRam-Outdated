@@ -126,13 +126,12 @@ class BackgroundTasks(Cog):
             print("Checking git repository for changes...", end="\r")
             resp = popen("git pull").read()
             resp = f"```diff\n{resp}\n```"
-            print(str(resp))
             if str(resp) != f"```diff\nAlready up to date.\n\n```":
                 print("Changes sent to owner via Discord.")
-                # await self.bot.owner.send(
-                    # f"**__Auto-pulled from github repository__**\n{resp}")
+                await self.bot.owner.send(
+                    f"**__Auto-pulled from github repository__**\n{resp}")
             else:
-                print("No new changes.")
+                print(f'No new changes.{" "*10}')
 
     @status_change.before_loop
     async def wait(self):
