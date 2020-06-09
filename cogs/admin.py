@@ -428,7 +428,7 @@ class Admin(Cog):
                 em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
                 em.color = 0x0000FF
         
-        if option == "debug_mode":
+        elif option == "debug_mode":
             if new_value in ["True", "False"]:
                 try:
                     original = deepcopy(self.bot.debug_mode)
@@ -444,7 +444,7 @@ class Admin(Cog):
                 em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
                 em.color = 0x0000FF
         
-        if option == "tz":
+        elif option == "tz":
             if new_value in ["EST", "CST", "UTC"]:
                 self.bot.tz = new_value
 
