@@ -131,7 +131,7 @@ class BackgroundTasks(Cog):
                 await self.bot.owner.send(
                     f"**__Auto-pulled from github repository__**\n{resp}")
             else:
-                print(f'No new changes.{" "*10}')
+                print(f'No new changes.{" "*25}')
 
     @status_change.before_loop
     async def wait(self):
