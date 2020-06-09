@@ -130,7 +130,9 @@ class BackgroundTasks(Cog):
             if str(resp) != f"```diff\nAlready up to date.\n\n```":
                 await self.bot.owner.send(f"**__Auto-pulled from github repository__**\n{resp}")
                 print("Changes sent to owner via Discord.")
-                self.bot.schedule_loops_cancel = True
+                for x_loop in self.bot.univ.Loops:
+                    x_loop.cancel()
+
                 modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
                 for module in modules.keys():
                     self.bot.reload_extension(module)
@@ -155,3 +157,6 @@ class BackgroundTasks(Cog):
 
 def setup(bot: Bot):
     bot.add_cog(BackgroundTasks(bot))
+
+def teardown(bot: Bot):
+    bot.remove_cog(BackgroundTasks(bot))

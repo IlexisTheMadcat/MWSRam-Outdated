@@ -293,3 +293,6 @@ class ClosetCommands(Cog):
 
 def setup(bot: Bot):
     bot.add_cog(ClosetCommands(bot))
+
+def teardown(bot: Bot):
+    bot.remove_cog(ClosetCommands(bot))

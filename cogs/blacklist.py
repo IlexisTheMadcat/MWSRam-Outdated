@@ -230,3 +230,6 @@ class BlacklistCommands(Cog):
 
 def setup(bot: Bot):
     bot.add_cog(BlacklistCommands(bot))
+
+def teardown(bot: Bot):
+    bot.remove_cog(BlacklistCommands(bot))

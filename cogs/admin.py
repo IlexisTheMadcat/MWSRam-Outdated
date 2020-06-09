@@ -497,3 +497,7 @@ class Admin(Cog):
 def setup(bot: Bot):
     """Admin"""
     bot.add_cog(Admin(bot))
+
+def teardown(bot: Bot):
+    bot.remove_cog(Admin())
+    
