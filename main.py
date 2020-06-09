@@ -3,6 +3,7 @@
 from pickle import dump, Unpickler
 from time import sleep
 from os import getcwd
+
 # Site
 from discord import __version__
 from discord.activity import Activity
@@ -168,19 +169,19 @@ if __name__ == "__main__":
 
         try:
 
-            if not bot.auth.MWS_BOT_TOKEN:
+            if not bot.auth["MWS_BOT_TOKEN"]:
                 raise LoginFailure
 
             bot.run()
 
         except LoginFailure:
             try:
-                bot.auth.MWS_BOT_TOKEN = None
+                bot.auth["MWS_BOT_TOKEN"] = None
 
                 print("\nLogin Failed: No token was provided or token provided was invalid.")
                 new_token = input("Provide new bot token: ")
 
-                bot.auth.MWS_BOT_TOKEN = new_token
+                bot.auth["MWS_BOT_TOKEN"] = new_token
 
             except KeyboardInterrupt:
                 print("\nLogin with new bot token cancelled. Aborting.")

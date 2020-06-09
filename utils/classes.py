@@ -1,8 +1,9 @@
 
 # Lib
 from datetime import datetime
-from os import getcwd, mkdir, utime
-from os.path import exists, split
+from os import getcwd, utime
+from os.path import exists, join, split, splitext
+from pathlib import Path
 from pickle import dump, Unpickler, load
 from re import match
 
@@ -16,10 +17,9 @@ from discord.ext.commands.converter import IDConverter
 from discord.ext.commands.errors import BadArgument
 from discord.user import User
 from discord.utils import find, get
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 # Local
-from utils.utils import _get_from_guilds
 
 
 class Paginator:
@@ -120,6 +120,18 @@ class GlobalTextChannelConverter(IDConverter):
     2. Lookup by mention.
     3. Lookup by name
     """
+
+    @staticmethod
+    def _get_from_guilds(bot, getter, argument):
+        """Copied from discord.ext.commands.converter to prevent
+        access to protected attributes inspection error"""
+        result = None
+        for guild in bot.guilds:
+            result = getattr(guild, getter)(argument)
+            if result:
+                return result
+        return result
+
     async def convert(self, ctx: Context, argument: str) -> TextChannel:
         bot = ctx.bot
 
@@ -138,7 +150,7 @@ class GlobalTextChannelConverter(IDConverter):
             if ctx.guild:
                 result = ctx.guild.get_channel(channel_id)
             else:
-                result = _get_from_guilds(bot, 'get_channel', channel_id)
+                result = self._get_from_guilds(bot, 'get_channel', channel_id)
 
         if not isinstance(result, TextChannel):
             raise BadArgument('Channel "{}" not found.'.format(argument))
@@ -202,25 +214,25 @@ class Bot(DiscordBot):
         super().__init__(*args, **kwargs)
 
     def run(self, *args, **kwargs):
-        super().run(self.auth.MWS_BOT_TOKEN, *args, **kwargs)
+        super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
 
     def connect_dbl(self, autopost: bool = None):
 
         print("Connecting DBL with token.")
         try:
-            if not self.auth.MWS_DBL_TOKEN:
+            if not self.auth["MWS_DBL_TOKEN"]:
                 raise DBLException
-            dbl = DBLClient(self, self.auth.MWS_DBL_TOKEN, autopost=autopost)
+            dbl = DBLClient(self, self.auth["MWS_DBL_TOKEN"], autopost=autopost)
 
         except DBLException:
-            self.auth.MWS_DBL_TOKEN = None
+            self.auth["MWS_DBL_TOKEN"] = None
             print("\nDBL Login Failed: No token was provided or token provided was invalid.")
             dbl = None
 
         if dbl:
-            self.auth.MWS_DBL_SUCCESS = True
+            self.auth["MWS_DBL_SUCCESS"] = True
         else:
-            self.auth.MWS_DBL_SUCCESS = False
+            self.auth["MWS_DBL_SUCCESS"] = False
 
         return dbl
 
@@ -264,43 +276,42 @@ class Bot(DiscordBot):
 
 class PickleInterface:
 
-    def __init__(self, fp: str = f"{getcwd()}\\Serialized\\tokens.pkl"):
+    def __init__(self, fp: str = "file.pkl"):  # TODO: Add loop and lock
         self._fp = fp
 
-    def __getitem__(self, item: Union[str, int, bool]):
+        try:
+            self._fp = self._path
+        except Exception as error:
+            raise error
+
+    def __getitem__(self, item: Union[str, int]):
         return self._payload.get(item, None)
 
-    def __setitem__(self, key: Union[str, int, bool], val: Union[str, int, bool]):
+    def __setitem__(self, key: Union[str, int], val: Union[str, int, bool, None]):
         self._set(key, val)
-
-    def keys(self):
-        return self._payload.keys()
-
-    def values(self):
-        return self._payload.values()
-
-    def items(self):
-        return self._payload.items()
 
     @property
     def _path(self):
         dir_path, file_name = split(self._fp)
 
-        if not exists(self._fp):
+        file, ext = splitext(file_name)
+        if ext != ".pkl":
+            raise NameError(f"File name provided is not a valid pickle file (*.pkl): {file_name}")
 
-            try:
-                dir_paths = list()
-                while not exists(dir_path):
-                    dir_paths.insert(3, dir_path)
+        if not dir_path:
+            dir_path = getcwd()
+            self._fp = join(dir_path, file_name)
 
-                for dp in dir_paths:
-                    mkdir(dp)
+        try:
+            if not exists(self._fp):
+                if not exists(dir_path):
+                    Path(dir_path).mkdir(parents=True, exist_ok=True)
 
-            except PermissionError:
-                raise PermissionError(f"Access is denied to file path `{self._fp}`")
+                with open(self._fp, "a"):
+                    utime(self._fp, None)
 
-            with open(self._fp, "a"):
-                utime(self._fp, None)
+        except PermissionError:
+            raise PermissionError(f"Access is denied to file path `{self._fp}`")
 
         return self._fp
 
@@ -319,26 +330,19 @@ class PickleInterface:
         with open(self._path, "wb") as fp:
             dump(payload, fp)
 
-    @property
-    def MWS_BOT_TOKEN(self):
-        return self._payload.get("MWS_BOT_TOKEN", None)
+    def update(self, mapping: Dict):
+        for key, val in mapping.items():
+            self._set(key, val)
 
-    @property
-    def MWS_DBL_TOKEN(self):
-        return self._payload.get("MWS_DBL_TOKEN", None)
+    def get(self, key: Union[str, int], default: Any = None):
+        val = self[key]
+        return val if val is not None else default
 
-    @property
-    def MWS_DBL_SUCCESS(self):
-        return bool(self._payload.get("MWS_DBL_SUCCESS", False))
+    def keys(self):
+        return self._payload.keys()
 
-    @MWS_BOT_TOKEN.setter
-    def MWS_BOT_TOKEN(self, val: str):
-        self._set("MWS_BOT_TOKEN", val)
+    def values(self):
+        return self._payload.values()
 
-    @MWS_DBL_TOKEN.setter
-    def MWS_DBL_TOKEN(self, val: str):
-        self._set("MWS_DBL_TOKEN", val)
-
-    @MWS_DBL_SUCCESS.setter
-    def MWS_DBL_SUCCESS(self, val: str):
-        self._set("MWS_DBL_SUCCESS", str(bool(val)))
+    def items(self):
+        return self._payload.items()
