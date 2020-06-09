@@ -443,9 +443,10 @@ class Admin(Cog):
             
             elif option == "tz":
                 if new_value in ["EST", "CST", "UTC"]:
+                    original = deepcopy(self.bot.tz)
                     self.bot.tz = new_value
 
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {self.bot.tz}`"
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
                     em.color = 0x00FF00
             
                 elif new_value:
