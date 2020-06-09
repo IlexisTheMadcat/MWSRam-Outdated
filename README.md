@@ -217,4 +217,3 @@ Gives you an invite link to invite this bot to any server.\
 **--** You require the "Manage Server" permission in the target server to do this. This is a discord limitation.
 
 # *This project was inspired by TupperBox.*
-...
