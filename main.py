@@ -1,8 +1,6 @@
-
-# Libf
+# Lib
 from contextlib import suppress
-from pickle import dump, Unpickler
-from time import sleep
+from pickle import Unpickler
 from os import getcwd
 from os.path import join
 
@@ -19,9 +17,9 @@ from utils.classes import Bot
 
 print("\nAttempting to open bot_config.pkl...")
 try:
-    f = open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb").close()
+    open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb").close()
 except FileNotFoundError:
-    f = open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
+    open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
 
 with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
     try:
@@ -37,10 +35,11 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
             auto_pull = config_data["auto_pull"]
             tz = config_data["tz"]
         except KeyError:
-            print(f'[bot_config.pkl file improperly formated] Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
-            debug_mode = False # Print exceptions to stdout. Some errors will not be printed for some reason.
-            auto_pull = True # Auto pulls github updates every minute
-            tz = "UTC" # Triggers python to get real UTC time for Rams's status.
+            print(
+                f'[bot_config.pkl file improperly formatted] Running with default settings.{" " * 35}')  # print excess spaces to fully overwrite the '\r' above
+            debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason.
+            auto_pull = True  # Auto pulls github updates every minute
+            tz = "UTC"  # Triggers python to get real UTC time for Rams's status.
 
 print("Loading...")
 
@@ -72,10 +71,8 @@ bot = Bot(
 
 bot.remove_command("help")
 
-
 print(f"Running in: {bot.cwd}")
 print(f"Discord API version: {__version__}")
-
 
 print(
     f"Owner commands:\n"
@@ -88,7 +85,6 @@ print(
 
 @bot.event
 async def on_ready():
-
     app_info = await bot.application_info()
     bot.owner = bot.get_user(app_info.owner.id)
 
@@ -145,7 +141,6 @@ if __name__ == "__main__":
 
             if not bot.auth["MWS_BOT_TOKEN"]:
                 raise LoginFailure
-            
 
             with suppress(RuntimeError):
                 bot.run()
