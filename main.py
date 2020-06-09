@@ -95,7 +95,7 @@ bot.remove_command("help")
 print("#-------------------------------#")
 print(f"Running in: {bot.cwd}")
 print(f"Discord API version: {__version__}")
-print("#-------------------------------#")
+print("#-------------------------------#\n")
 
 
 @bot.event
@@ -111,9 +111,9 @@ async def on_ready():
     )
 
     print(f"\n"
-          f"#-------------------------------#"
-          f"| Loading initial cogs... "
-          f"#-------------------------------#")
+          f"#-------------------------------#\n"
+          f"| Loading initial cogs...\n"
+          f"#-------------------------------#\n")
 
     for cog in INIT_EXTENSIONS:
         print(f"| Loading initial cog {cog}")
