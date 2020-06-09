@@ -1,10 +1,9 @@
 
 # Lib
 from os import popen, getcwd
-from os.path import exists, join
+from os.path import join, exists
 from asyncio import sleep
 from datetime import datetime
-from os.path import exists
 from pickle import dump
 
 # Site
@@ -15,8 +14,6 @@ from discord.ext.tasks import loop
 
 # Local
 from utils.classes import Bot
-
-
 
 
 class BackgroundTasks(Cog):
@@ -79,12 +76,21 @@ class BackgroundTasks(Cog):
             minute = "0" + minute
         time = f"{hour}:{minute}, {date}"
 
-        if not (exists(join(getcwd(), "Serialized", "data.pkl")) and exists(join(getcwd(), "Serialized", "bot_config.pkl"))) and not self.bot.univ.DisableSaving:
+        if not (exists(join(getcwd(), "Serialized", "data.pkl")) and
+                exists(join(getcwd(), "Serialized", "bot_config.pkl"))) and \
+                not self.bot.univ.DisableSaving:
+
             self.bot.univ.DisableSaving = True
-            print(f"[{time} || Unable to save] data.pkl and/or bot_config.pkl not found. Replace file before shutting down. Saving disabled.")
+            print(
+                f"[{time} || Unable to save] data.pkl and/or bot_config.pkl not found. Replace file before "
+                f"shutting down. Saving disabled.")
+
             return
 
-        elif (exists(join(getcwd(), "Serialized", "data.pkl")) and exists(join(getcwd(), "Serialized", "bot_config.pkl"))) and self.bot.univ.DisableSaving:
+        elif (exists(join(getcwd(), "Serialized", "data.pkl")) and
+              exists(join(getcwd(), "Serialized", "bot_config.pkl"))) and \
+                self.bot.univ.DisableSaving:
+
             self.bot.univ.DisableSaving = False
             print(f"[{time}] Saving re-enabled.")
             return
@@ -107,16 +113,15 @@ class BackgroundTasks(Cog):
 
             with open(join(getcwd(), "Serialized", "bot_config.pkl"), "wb") as f:
                 config_data = {
-                    "debug_mode":self.bot.debug_mode,
-                    "auto_pull":self.bot.auto_pull,
-                    "tz":self.bot.tz
+                    "debug_mode": self.bot.debug_mode,
+                    "auto_pull": self.bot.auto_pull,
+                    "tz": self.bot.tz
                 }
 
                 try:
                     dump(config_data, f)
                 except Exception as e:
                     print("[Unknown Error] Pickle dumping error:", e)
-
 
             self.bot.univ.Inactive = self.bot.univ.Inactive + 1
             print(f"[VPP: {time}] Saved data.")
@@ -140,7 +145,7 @@ class BackgroundTasks(Cog):
             else:
                 print(f'No new changes.{" "*25}')
 
-    @auto_pull_github.before_loop # Start these 2 loops opposite of each other
+    @auto_pull_github.before_loop  # Start these 2 loops opposite of each other
     async def apg_wait(self):
         await self.bot.wait_until_ready()
         await sleep(45)
@@ -155,8 +160,6 @@ class BackgroundTasks(Cog):
         await self.bot.wait_until_ready()
         await sleep(15)
 
+
 def setup(bot: Bot):
     bot.add_cog(BackgroundTasks(bot))
-
-def teardown(bot: Bot):
-    bot.remove_cog(BackgroundTasks(bot))

@@ -5,7 +5,6 @@ from contextlib import suppress
 from os import popen
 from os.path import exists, join
 from pickle import dump
-from typing import Union
 from copy import deepcopy
 # Site
 # from discord.abc import Messageable
@@ -405,7 +404,7 @@ class Admin(Cog):
     @command(name="config", aliases=["bot"])
     async def settings(self, ctx, option = None, new_value = None):
         """Manage Bot settings"""
-        em = Embed(title="Administration: Config")
+        em = Embed(title="Administration: Config", description="Description not set.", color=0x000000)
         if option:
             if option == "auto_pull":
                 if new_value in ["True", "False"]:
@@ -417,7 +416,7 @@ class Admin(Cog):
 
                     em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
                     em.color = 0x00FF00
-                
+
                 elif new_value:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
@@ -502,7 +501,3 @@ class Admin(Cog):
 def setup(bot: Bot):
     """Admin"""
     bot.add_cog(Admin(bot))
-
-def teardown(bot: Bot):
-    bot.remove_cog(Admin())
-    
