@@ -25,7 +25,7 @@ class BackgroundTasks(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
         self.dblpy = self.bot.connect_dbl()
-        self.savetofile.start()
+        self.save_data.start()
         self.status_change.start()
         self.auto_pull_github.start()
 
@@ -127,8 +127,10 @@ class BackgroundTasks(Cog):
             resp = popen("git pull").read()
             resp = f"```diff\n{resp}\n```"
             if str(resp) != f"```diff\nAlready up to date.\n\n```":
-                print("Changes sent to owner via Discord.")
                 await self.bot.owner.send(f"**__Auto-pulled from github repository__**\n{resp}")
+                print("Changes sent to owner via Discord.")
+                for module in self.bot.cogs:
+                    self.bot.reload_extension(f"cogs.{module}")
             else:
                 print(f'No new changes.{" "*25}')
 
@@ -143,7 +145,7 @@ class BackgroundTasks(Cog):
         await sleep(30)
 
     @save_data.before_loop
-    async def stf_wait(self):
+    async def sd_wait(self):
         await self.bot.wait_until_ready()
         await sleep(15)
 
