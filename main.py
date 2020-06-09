@@ -52,7 +52,7 @@ loading_choices = [  # because why not
     "Charging RAM...",
     "\"Mmmmm~ h-huh..? Where's Rem? Where is she?? Tell me!\""
 ]
-print(random.choice(loading_choices))
+print(choice(loading_choices))
 
 BOT_PREFIX = ":>"
 INIT_EXTENSIONS = [
