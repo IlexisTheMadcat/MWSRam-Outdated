@@ -3,6 +3,7 @@
 from pickle import dump, Unpickler
 from time import sleep
 from os import getcwd
+from os.path import join
 
 # Site
 from discord import __version__
@@ -15,14 +16,13 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 
-
 print("\nAttempting to open bot_config.pkl...")
 try:
-    f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb").close()
+    f = open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb").close()
 except FileNotFoundError:
-    f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "x").close()
+    f = open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
 
-with open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb") as f:
+with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
     try:
         config_data = Unpickler(f).load()
     except Exception as e:

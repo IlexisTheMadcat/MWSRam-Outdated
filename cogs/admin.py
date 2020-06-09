@@ -2,7 +2,7 @@
 
 # Lib
 from os import popen
-from os.path import exists
+from os.path import exists, join
 from pickle import dump
 from typing import Union
 from copy import deepcopy
@@ -471,13 +471,13 @@ class Admin(Cog):
     @is_owner()
     async def blogout(self, ctx: Context):
         await ctx.send("Logging out...")
-        if not exists(f"{self.bot.cwd}\\Serialized\\data.pkl"):
+        if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
             await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
             print("[Unable to save] data.pkl not found. Replace file before shutting down.")
             return
 
         print("Saving files and awaiting logout...")
-        with open(f"{self.bot.cwd}\\Serialized\\data.pkl", "wb") as f:
+        with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
             try:
                 data = {
                     "VanityAvatars": self.bot.univ.VanityAvatars,
