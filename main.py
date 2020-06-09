@@ -14,59 +14,31 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 
+
+print("\nAttempting to open bot_config.pkl...")
 try:
-    print("Press CTRL+C for user config settings. Ignore for defaults.", end="\r")
-    for i in range(10):
-        sleep(1)
-except KeyboardInterrupt: # Enable a timeout that is interrupted by the user to configure. If no response, default options are used.
-    while True:
-        debug_mode = input("\nEnter debug mode? (y/n)\n---| ")
-        if debug_mode.lower() == "y":
-            debug_mode = True
-            break        
-        elif debug_mode.lower() == "n":
-            debug_mode = False
-            break
+    f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb").close()
+except FileNotFoundError:
+    f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "x").close()
 
-    while True:
-        auto_pull = input("Auto-pull from github master repository? (y/n)\n---| ")
-        if auto_pull.lower() == "y":
-            auto_pull = True
-            break
-        elif auto_pull.lower() == "n":
-            auto_pull = False
-            break
-
-    while True:
-        tz = input("Time Zone:\n---| ")
-        if tz in ["EST", "CST", "UTC"]: # If not UTC, python will use the host computer's time.
-            break
-
-else:
-    print("\nAttempting to open bot_config.pkl...")
+with open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb") as f:
     try:
-        f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb").close()
-    except FileNotFoundError:
-        f = open(f"{getcwd()}\\Serialized\\bot_config.pkl", "x").close()
-
-    with open(f"{getcwd()}\\Serialized\\bot_config.pkl", "rb") as f:
+        config_data = Unpickler(f).load()
+    except Exception as e:
+        print("[Using defaults] Unpickling error:", e)
+        debug_mode = False
+        auto_pull = True
+        tz = "UTC"
+    else:
         try:
-            config_data = Unpickler(f).load()
-        except Exception as e:
-            print("[Using defaults] Unpickling error:", e)
-            debug_mode = False
-            auto_pull = True
-            tz = "UTC"
-        else:
-            try:
-                debug_mode = config_data["debug_mode"]
-                auto_pull = config_data["auto_pull"]
-                tz = config_data["tz"]
-            except KeyError:
-                print(f'[bot_config.pkl file improperly formated] Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
-                debug_mode = False # Print exceptions to stdout. Some errors will not be printed for some reason.
-                auto_pull = True # Auto pulls github updates every minute
-                tz = "UTC" # Triggers python to get real UTC time for Rams's status.
+            debug_mode = config_data["debug_mode"]
+            auto_pull = config_data["auto_pull"]
+            tz = config_data["tz"]
+        except KeyError:
+            print(f'[bot_config.pkl file improperly formated] Running with default settings.{" "*35}') # print excess spaces to fully overwrite the '\r' above 
+            debug_mode = False # Print exceptions to stdout. Some errors will not be printed for some reason.
+            auto_pull = True # Auto pulls github updates every minute
+            tz = "UTC" # Triggers python to get real UTC time for Rams's status.
 
 print("Loading...")
 
