@@ -1,5 +1,6 @@
 
 # Lib
+from contextlib import suppress
 from datetime import datetime
 from os import getcwd, utime
 from os.path import exists, join, split, splitext
@@ -274,7 +275,8 @@ class Bot(DiscordBot):
         for x_loop in self.univ.Loops:
             x_loop.cancel()
 
-        await super().logout()
+        with suppress("RuntimeError"):
+            await super().logout()
 
 
 class PickleInterface:

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Lib
+from contextlib import suppress
 from os import popen
 from os.path import exists, join
 from pickle import dump
@@ -353,7 +354,8 @@ class Admin(Cog):
             x_loop.cancel()
 
         await ctx.send(embed=em)
-        await self.bot.logout()
+        with suppress("RuntimeError"):
+            await self.bot.logout()
     
     @command(aliases=["rs_av"])
     @is_owner()
@@ -493,7 +495,8 @@ class Admin(Cog):
             except Exception as e:
                 await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
 
-        await self.bot.logout()
+        with supress("RuntimeError"):
+            await self.bot.logout()
 
 
 def setup(bot: Bot):

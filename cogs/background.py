@@ -14,7 +14,6 @@ from discord.ext.tasks import loop
 
 # Local
 from utils.classes import Bot
-from cogs.admin import Admin
 
 
 
