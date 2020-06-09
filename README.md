@@ -33,7 +33,7 @@ With a vanity equiped, send a message anywhere in a specific server to transform
 "Send Messages"       - To send notifications/messages for warnings, confirmations, etc.
 ```
 
-A vanity is your avatar specific to a server.
+A vanity is your avatar specific to a server.\
 [![Vanity Message Difference](https://media.discordapp.net/attachments/655456170391109663/719668552365244536/unknown.png)](about:blank)
 
 Your ownership of a vanity message is acquired using a special method Ram uses to engrave your messages with your ID.\
