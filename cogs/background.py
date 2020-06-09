@@ -128,15 +128,19 @@ class BackgroundTasks(Cog):
             resp = f"```diff\n{resp}\n```"
             if str(resp) != f"```diff\nAlready up to date.\n\n```":
                 print("Changes sent to owner via Discord.")
-                await self.bot.owner.send(
-                    f"**__Auto-pulled from github repository__**\n{resp}")
+                await self.bot.owner.send(f"**__Auto-pulled from github repository__**\n{resp}")
             else:
                 print(f'No new changes.{" "*25}')
 
-    @status_change.before_loop
-    async def wait(self):
+    @auto_pull_github.before_loop # Start these 2 loops opposite of each other
+    async def apg_wait(self):
         await self.bot.wait_until_ready()
         await sleep(60)
+
+    @status_change.before_loop
+    async def sc_wait(self):
+        await self.bot.wait_until_ready()
+        await sleep(30)
 
 def setup(bot: Bot):
     bot.add_cog(BackgroundTasks(bot))
