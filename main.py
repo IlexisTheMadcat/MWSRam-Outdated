@@ -97,34 +97,6 @@ async def on_ready():
         manage_webhooks=True
     )
 
-    # check changelog for differences since last save
-    with open(f"{bot.cwd}\\changelog.txt", "r") as clfp:
-        content = clfp.read()
-        if content != bot.univ.ChangelogCache:
-            for guild in bot.guilds:
-                if guild.system_channel:
-                    try:
-                        await guild.system_channel.send(f"Changelog updated:\n```{content} ​```")
-                    except Exception:
-                        pass
-
-            bot.univ.ChangelogCache = content
-            with open(f"{bot.cwd}\\Serialized\\data.pkl", "wb") as pkfp:
-                try:
-                    data = {
-                        "VanityAvatars": bot.univ.VanityAvatars,
-                        "Blacklists": bot.univ.Blacklists,
-                        "Closets": bot.univ.Closets,
-                        "ServerBlacklists": bot.univ.ServerBlacklists,
-                        "ChangelogCache": bot.univ.ChangelogCache
-                    }
-
-                    dump(data, pkfp)
-                except Exception:
-                    pass
-
-            print("[] Sent changelog updates.")
-
     print(f"\n"
           f"#-------------------------------#"
           f"| Loading initial cogs..."
