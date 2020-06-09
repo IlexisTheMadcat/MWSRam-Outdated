@@ -26,7 +26,7 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
     try:
         config_data = Unpickler(f).load()
     except Exception as e:
-        print(f"[Using defaults] Unpickling error: {e}{" "*30}")
+        print(f'[Using defaults] Unpickling error: {e}{" "*30}')
         debug_mode = False
         auto_pull = True
         tz = "UTC"
