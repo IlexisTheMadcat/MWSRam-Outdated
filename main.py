@@ -179,8 +179,8 @@ async def on_ready():
 
 if __name__ == "__main__":
 
-    if not bot.auth.MWS_DBL_SUCCESS:
-        if bot.auth.MWS_DBL_TOKEN:
+    if not bot.auth["MWS_DBL_SUCCESS"]:
+        if bot.auth["MWS_DBL_TOKEN"]:
             confirm_new_dbl_token = input("Last DBL login failed or unknown. Enter new token? (Y/n): ")
             confirm_new_dbl_token = confirm_new_dbl_token.lower().startswith("y")
         else:
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
         if confirm_new_dbl_token:
             new_bdl_token = input("Enter new DBL token:\n")
-            bot.auth.MWS_DBL_SUCCESS = new_bdl_token
+            bot.auth["MWS_DBL_SUCCESS"] = new_bdl_token
 
     print("Logging in with token.")
 
