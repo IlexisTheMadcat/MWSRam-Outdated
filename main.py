@@ -46,7 +46,7 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
 print("#-------------------------------#\n")
 loading_choices = [  # because why not
     "Loading Random Access Memory...",
-    ''"Wanna play?"',
+    '"Wanna play?"',
     '"I wish you could wake me up later~"',
     '"I hope this isn\'t for debugging..."',
     "Booting up the creative mind...",
