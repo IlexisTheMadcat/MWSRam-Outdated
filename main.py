@@ -60,9 +60,10 @@ INIT_EXTENSIONS = [
 bot = Bot(
     command_prefix=BOT_PREFIX,
     description="Change your profile picture for a specific server.",
-    owner_id=331551368789622784,
+    owner_ids=[331551368789622784, 125435062127820800],
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
+    # Configurable via :>bot
     debug_mode=debug_mode,
     auto_pull=auto_pull,
     tz=tz
