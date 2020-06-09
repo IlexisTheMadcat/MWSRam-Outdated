@@ -23,10 +23,6 @@ Removes your vanity avatar
 React to a message with "❌" to delete a vanity message.\
 React to a message with "❓" to recieve a DM telling you the real user who sent it.
 
-This data is acquired using a special method Ram uses to engrave your messages with your ID.\
-You may notice this here:\
-[![Engraved ID Example](https://media.discordapp.net/attachments/655456170391109663/719668125846601839/unknown.png)](about:blank)
-
 With a vanity equiped, send a message anywhere in a specific server to transform your message into your new avatar.
 
 **Required Permissions:**
@@ -39,6 +35,10 @@ With a vanity equiped, send a message anywhere in a specific server to transform
 
 A vanity is your avatar specific to a server.
 [![Vanity Message Difference](https://media.discordapp.net/attachments/655456170391109663/719668552365244536/unknown.png)](about:blank)
+
+Your ownership of a vanity message is acquired using a special method Ram uses to engrave your messages with your ID.\
+You may notice this here:\
+[![Engraved ID Example](https://media.discordapp.net/attachments/655456170391109663/719668125846601839/unknown.png)](about:blank)
 
 # Commands
 ```
