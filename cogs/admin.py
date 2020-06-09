@@ -86,7 +86,7 @@ class Admin(Cog):
                             f"No module `{module}` found in cogs directory",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except ExtensionAlreadyLoaded:
             em = Embed(
@@ -95,7 +95,7 @@ class Admin(Cog):
                             f"Module `{module}` is already loaded",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except NoEntryPointError:
             em = Embed(
@@ -104,7 +104,7 @@ class Admin(Cog):
                             f"Module `{module}` does not define a `setup` function",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except ExtensionFailed as error:
             if isinstance(error.original, TypeError):
@@ -121,7 +121,7 @@ class Admin(Cog):
                                 f"An execution error occurred during module `{module}`'s setup function",
                     color=0xFF0000
                 )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except Exception as error:
             em = Embed(
@@ -132,7 +132,7 @@ class Admin(Cog):
                             f"```",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         else:
             em = Embed(
@@ -140,7 +140,7 @@ class Admin(Cog):
                 description=f"Module `{module}` loaded successfully",
                 color=0x00FF00
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
     @is_owner()
     @module.command(name="unload", usage="(module name)")
@@ -162,7 +162,7 @@ class Admin(Cog):
                             f"Module `{module}` is not loaded",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except Exception as error:
             em = Embed(
@@ -173,7 +173,7 @@ class Admin(Cog):
                             f"```",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         else:
             em = Embed(
@@ -181,7 +181,7 @@ class Admin(Cog):
                 description=f"Module `{module}` unloaded successfully",
                 color=0x00FF00
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
     @is_owner()
     @module.command(name="reload", usage="(module name)")
@@ -203,7 +203,7 @@ class Admin(Cog):
                             f"Module `{module}` is not loaded",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except ExtensionNotFound:
             em = Embed(
@@ -212,7 +212,7 @@ class Admin(Cog):
                             f"No module `{module}` found in cogs directory",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except NoEntryPointError:
             em = Embed(
@@ -221,7 +221,7 @@ class Admin(Cog):
                             f"Module `{module}` does not define a `setup` function",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except ExtensionFailed as error:
             if isinstance(error.original, TypeError):
@@ -238,7 +238,7 @@ class Admin(Cog):
                                 f"An execution error occurred during module `{module}`'s setup function",
                     color=0xFF0000
                 )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         except Exception as error:
             em = Embed(
@@ -249,7 +249,7 @@ class Admin(Cog):
                             f"```",
                 color=0xFF0000
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
         else:
             em = Embed(
@@ -257,7 +257,7 @@ class Admin(Cog):
                 description=f"Module `{module}` reloaded successfully",
                 color=0x00FF00
             )
-            await ctx.send(embed=em, delete_after=5)
+            await ctx.send(embed=em)
 
     """ ######################
          General Use Commands
@@ -305,7 +305,7 @@ class Admin(Cog):
     #                 description=f"**__{type(error).__name__}__**: {str(error)}",
     #                 color=0xFF0000
     #             )
-    #             await ctx.send(embed=em, delete_after=5)
+    #             await ctx.send(embed=em)
     #         else:
     #             em = Embed(
     #                 title="Administration: Set `say` Destination",
@@ -315,7 +315,7 @@ class Admin(Cog):
     #                             f"ID: {self.say_dest.id}",
     #                 color=0x00FF00
     #             )
-    #             await ctx.send(embed=em, delete_after=5)
+    #             await ctx.send(embed=em)
     #     else:
     #         self.say_dest = None
     #         em = Embed(
@@ -323,7 +323,7 @@ class Admin(Cog):
     #             description=f"Say destination has been unset",
     #             color=0x00FF00
     #         )
-    #         await ctx.send(embed=em, delete_after=5)
+    #         await ctx.send(embed=em)
 
     """ #########################
          Updating and Restarting
@@ -346,7 +346,7 @@ class Admin(Cog):
             description=self.gitpull(),
             color=0x00FF00
         )
-        await ctx.send(embed=em, delete_after=5)
+        await ctx.send(embed=em)
 
     @is_owner()
     @group(name='restart', aliases=["kill", "f"], invoke_without_command=True)
@@ -359,7 +359,7 @@ class Admin(Cog):
             color=0x00FF00
         )
 
-        await ctx.send(embed=em, delete_after=5)
+        await ctx.send(embed=em)
         await self.bot.logout()
     
     @command(aliases=["rs_av"])
