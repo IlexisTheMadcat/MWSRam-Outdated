@@ -16,7 +16,7 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 
-print("#-------------------------------#")
+print("...\n\n#-------------------------------#")
 print("Attempting to open bot_config.pkl...", end="\r")
 try:
     open(join(getcwd(), "Serialized", "bot_config.pkl"), "r").close()
@@ -36,7 +36,7 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
             debug_mode = config_data["debug_mode"]
             auto_pull = config_data["auto_pull"]
             tz = config_data["tz"]
-            print("Loaded bot_default.pkl")
+            print(f"Loaded bot_default.pkl{' '+5}")
         except KeyError:
             print(f'[Using defaults] bot_config.pkl file improperly formatted.{" " * 35}')  # print excess spaces to fully overwrite the '\r' above
             debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
@@ -54,9 +54,9 @@ loading_choices = [  # because why not
     "Charging RAM...",
     '"Mmmmm~ h-huh..? Where\'s Rem? Where is she?? Tell me!'
 ]
-print("#-------------------------------#\n")
-print(f"{choice(loading_choices)}\n")
-print(f"#-------------------------------#\n")
+print("#-------------------------------#")
+print(f"{choice(loading_choices)}")
+print(f"#-------------------------------#")
 
 BOT_PREFIX = ":>"
 INIT_EXTENSIONS = [
