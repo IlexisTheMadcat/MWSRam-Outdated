@@ -410,10 +410,9 @@ class Admin(Cog):
                         self.bot.auto_pull = True
                     elif new_value == "False":
                         self.bot.auto_pull = False
-            
-                    else:
-                        em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                        em.color = 0x00FF00
+
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+                    em.color = 0x00FF00
                 
                 elif new_value:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
@@ -431,9 +430,9 @@ class Admin(Cog):
                     elif new_value == "False":
                         self.bot.debug_mode = False
 
-                    else:
-                        em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                        em.color = 0x00FF00
+                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
+                    em.color = 0x00FF00
+
                 elif new_value:
                     em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
                     em.color = 0xFF0000
