@@ -147,7 +147,7 @@ if __name__ == "__main__":
                 raise LoginFailure
             
 
-            with suppress("RuntimeError"):
+            with suppress(RuntimeError):
                 bot.run()
 
         except LoginFailure:
