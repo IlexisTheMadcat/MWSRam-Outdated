@@ -25,9 +25,10 @@ class BackgroundTasks(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
         self.dblpy = self.bot.connect_dbl()
-        self.save_data.start()
-        self.status_change.start()
-        self.auto_pull_github.start()
+        self.bot.univ.Loops = []
+        self.bot.univ.Loops.append(self.save_data.start())
+        self.bot.univ.Loops.append(self.status_change.start())
+        self.bot.univ.Loops.append(self.auto_pull_github.start())
 
     @loop(seconds=60)
     async def status_change(self):
@@ -129,7 +130,13 @@ class BackgroundTasks(Cog):
             if str(resp) != f"```diff\nAlready up to date.\n\n```":
                 await self.bot.owner.send(f"**__Auto-pulled from github repository__**\n{resp}")
                 print("Changes sent to owner via Discord.")
-                await self.bot.logout()
+                for x_loop in self.bot.univ.bot.Loops:
+                    x_loop.close()
+
+                modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
+                for module in modules.keys():
+                    self.bot.reload_extension(module)
+                # await self.bot.logout()
             else:
                 print(f'No new changes.{" "*25}')
 

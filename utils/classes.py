@@ -271,6 +271,9 @@ class Bot(DiscordBot):
             self.univ.Inactive = self.univ.Inactive + 1
             print(f"[VPP: {time}] Saved data.")
 
+        for x_loop in self.bot.univ.bot.Loops:
+            x_loop.close()
+
         await super().logout()
 
 
