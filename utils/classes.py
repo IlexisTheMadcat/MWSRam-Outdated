@@ -206,7 +206,7 @@ class Bot(DiscordBot):
         self.tz = kwargs.pop("tz", "UTC")
 
         # Attribute for accessing tokens from file
-        self.auth = PickleInterface()
+        self.auth = PickleInterface(f"{self.cwd}\\Serialized\\tokens.pkl")
 
         # Attribute will be filled in `on_ready`
         self.owner: User = kwargs.pop("owner", None)
