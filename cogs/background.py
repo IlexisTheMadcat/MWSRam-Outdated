@@ -14,7 +14,9 @@ from discord.ext.tasks import loop
 
 # Local
 from utils.classes import Bot
-from cogs.admin.Admin import gitpull
+from cogs.admin import Admin
+
+
 
 
 class BackgroundTasks(Cog):
@@ -77,9 +79,7 @@ class BackgroundTasks(Cog):
 
         if not exists(f"{self.bot.cwd}\\Serialized\\data.pkl") or not exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl") and not self.bot.univ.DisableSaving:
             self.bot.univ.DisableSaving = True
-            print(
-                f"[{time} || Unable to save] data.pkl and/or bot_config.pkl not found. Replace file before shutting down. Saving disabled."
-            )
+            print(f"[{time} || Unable to save] data.pkl and/or bot_config.pkl not found. Replace file before shutting down. Saving disabled.")
             return
 
         elif exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl") and self.bot.univ.DisableSaving:
@@ -123,7 +123,7 @@ class BackgroundTasks(Cog):
     async def auto_pull_github(self):
         if self.bot.auto_pull:
             # Popen('git pull', shell=True)
-            data = gitpull()
+            data = Admin.gitpull()
             if str(data) != "Already up to date.":
                 await self.bot.owner.send(
                     f"**__Auto-pulled from github repository__**\n{data}")
