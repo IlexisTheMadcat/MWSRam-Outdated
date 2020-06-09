@@ -277,7 +277,7 @@ class Bot(DiscordBot):
         for x_loop in self.univ.Loops:
             x_loop.cancel()
 
-        with suppress("RuntimeError"):
+        with suppress(RuntimeError, RuntimeWarning):
             await super().logout()
 
 

@@ -354,7 +354,7 @@ class Admin(Cog):
             x_loop.cancel()
 
         await ctx.send(embed=em)
-        with suppress("RuntimeError"):
+        with suppress(RuntimeError, RuntimeWarning):
             await self.bot.logout()
     
     @command(aliases=["rs_av"])
