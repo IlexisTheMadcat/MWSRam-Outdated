@@ -459,7 +459,11 @@ class Admin(Cog):
                 em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
                 em.color = 0x0000FF
         
-        await ctx.send(embed=em, delete_after=5)
+        else:
+            em.description = f"Bot configuration option not found."
+            em.color = 0x000000
+        
+        await ctx.send(embed=em)
             
     @command(name="logout")
     @is_owner()
