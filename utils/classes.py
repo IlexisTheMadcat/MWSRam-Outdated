@@ -183,7 +183,9 @@ class Globals:
                     self.Closets = data["Closets"]
                     self.ServerBlacklists = data["ServerBlacklists"]
                     self.ChangelogCache = data["ChangelogCache"]
+                    print("#-------------------------------#")
                     print("[] Loaded data.pkl.")
+                    print("#-------------------------------#\n")
                 except Exception as e:
                     self.VanityAvatars = {"guildID": {"userID":["avatar_url", "previous", "is_blocked"]}}
                     self.Blacklists = {"authorID": (["channelID"], ["prefix"])}

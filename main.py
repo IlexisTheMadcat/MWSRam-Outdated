@@ -46,17 +46,22 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
 print("#-------------------------------#\n")
 loading_choices = [  # because why not
     "Loading Random Access Memory...",
-    '"Wanna play?"',
-    '"I wish you could wake me up later~"',
-    '"I hope this isn\'t for debugging..."',
-    "Booting up the creative mind...",
+    '"It appears nothing here will fit except women\'s clothes."',
+    "Booting up the creative but stubbern mind...",
     "Waking up the older sister...",
     "Charging RAM...",
-    '"Mmmmm~ h-huh..? Where\'s Rem? Where is she?? Tell me!'
+    '"I was only waiting to help Roswaal-sama put on fresh clothes."',
+    '"By the way, do you have plans after this?"',
+    '"I see you really are studying, sir."',
+    '"No, thank you, sir."',
+    '"What can you do by learning anything now?!"',
+    '"I\'m not interested."',
+    "Requesting the one they call Ram..."
 ]
+
 print("#-------------------------------#")
 print(f"{choice(loading_choices)}")
-print(f"#-------------------------------#")
+print(f"#-------------------------------#\n")
 
 BOT_PREFIX = ":>"
 INIT_EXTENSIONS = [
