@@ -67,7 +67,7 @@ class BackgroundTasks(Cog):
         await self.bot.change_presence(status=status, activity=activity)
 
     @loop(seconds=60)
-    async def savetofile(self):
+    async def save_data(self):
         hour = str(datetime.now().hour)
         minute = str(datetime.now().minute)
         date = str(str(datetime.now().date().month) + "/" + str(datetime.now().date().day) + "/" + str(
@@ -135,12 +135,18 @@ class BackgroundTasks(Cog):
     @auto_pull_github.before_loop # Start these 2 loops opposite of each other
     async def apg_wait(self):
         await self.bot.wait_until_ready()
-        await sleep(60)
+        await sleep(45)
+
 
     @status_change.before_loop
     async def sc_wait(self):
         await self.bot.wait_until_ready()
         await sleep(30)
+
+    @save_data.before_loop
+    async def stf_wait(self):
+        await self.bot.wait_until_ready()
+        await sleep(15)
 
 def setup(bot: Bot):
     bot.add_cog(BackgroundTasks(bot))
