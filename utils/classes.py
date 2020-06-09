@@ -272,7 +272,7 @@ class Bot(DiscordBot):
             print(f"[VPP: {time}] Saved data.")
 
         for x_loop in self.univ.Loops:
-            x_loop.close()
+            x_loop.cancel()
 
         await super().logout()
 
