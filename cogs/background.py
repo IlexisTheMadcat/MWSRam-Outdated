@@ -78,7 +78,7 @@ class BackgroundTasks(Cog):
             minute = "0" + minute
         time = f"{hour}:{minute}, {date}"
 
-        if not (exists(f"{self.bot.cwd}\\Serialized\\data.pkl") or exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl")) and not self.bot.univ.DisableSaving:
+        if not (exists(f"{self.bot.cwd}\\Serialized\\data.pkl") and exists(f"{self.bot.cwd}\\Serialized\\bot_config.pkl")) and not self.bot.univ.DisableSaving:
             self.bot.univ.DisableSaving = True
             print(f"[{time} || Unable to save] data.pkl and/or bot_config.pkl not found. Replace file before shutting down. Saving disabled.")
             return
