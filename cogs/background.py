@@ -25,7 +25,6 @@ class BackgroundTasks(Cog):
         self.bot.univ.Loops = []
         self.bot.univ.Loops.append(self.save_data.start())
         self.bot.univ.Loops.append(self.status_change.start())
-        self.bot.univ.Loops.append(self.auto_pull_github.start())
 
     @loop(seconds=60)
     async def status_change(self):
@@ -124,31 +123,26 @@ class BackgroundTasks(Cog):
                     print("[Unknown Error] Pickle dumping error:", e)
 
             self.bot.univ.Inactive = self.bot.univ.Inactive + 1
-            print(f"[VPP: {time}] Saved data.")
-    
-    @loop(seconds=60)
-    async def auto_pull_github(self):
-        if self.bot.auto_pull:
-            print("Checking git repository for changes...", end="\r")
-            resp = popen("git pull").read()
-            resp = f"```diff\n{resp}\n```"
-            if str(resp) != f"```diff\nAlready up to date.\n\n```":
-                await self.bot.owner.send(f"**__Auto-pulled from github repository__**\n{resp}")
-                print("Changes sent to owner via Discord.")
-                for x_loop in self.bot.univ.Loops:
-                    x_loop.cancel()
+            print(f"[VPP: {time}] Saved data.", end="\r")
 
-                modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
-                for module in modules.keys():
-                    self.bot.reload_extension(module)
-                # await self.bot.logout()
-            else:
-                print(f'No new changes.{" "*25}')
+            if self.bot.auto_pull:
+                print(f"[VPP: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
+                resp = popen("git pull").read()
+                resp = f"```diff\n{resp}\n```"
+                if str(resp) != f"```diff\nAlready up to date.\n\n```":
+                    for i in self.bot.owner_ids:
+                        owner = self.bot.get_user(i)
+                        await owner.send(f"**__Auto-pulled from github repository and restarted cogs.__**\n{resp}")
+                        print(f"[VPP: {time}] Saved data. Changes sent to owner via Discord.")
 
-    @auto_pull_github.before_loop  # Start these 2 loops opposite of each other
-    async def apg_wait(self):
-        await self.bot.wait_until_ready()
-        await sleep(45)
+                    for x_loop in self.bot.univ.Loops:
+                        x_loop.cancel()
+
+                    modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
+                    for module in modules.keys():
+                        self.bot.reload_extension(module)
+                else:
+                    print(f'[VPP: {time}] Saved data. No new changes.{" "*30}')
 
     @status_change.before_loop
     async def sc_wait(self):
