@@ -101,8 +101,7 @@ class BackgroundTasks(Cog):
                     "VanityAvatars": self.bot.univ.VanityAvatars,
                     "Blacklists": self.bot.univ.Blacklists,
                     "Closets": self.bot.univ.Closets,
-                    "ServerBlacklists": self.bot.univ.ServerBlacklists,
-                    "ChangelogCache": self.bot.univ.ChangelogCache
+                    "ServerBlacklists": self.bot.univ.ServerBlacklists
                 }
 
                 try:
@@ -114,7 +113,8 @@ class BackgroundTasks(Cog):
                 config_data = {
                     "debug_mode": self.bot.debug_mode,
                     "auto_pull": self.bot.auto_pull,
-                    "tz": self.bot.tz
+                    "tz": self.bot.tz,
+                    "prefix": self.bot.command_prefix
                 }
 
                 try:

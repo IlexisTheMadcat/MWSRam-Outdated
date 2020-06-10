@@ -17,11 +17,11 @@ from discord.utils import oauth_url
 from utils.classes import Bot
 
 print("...\n\n#-------------------------------#")
-print("Attempting to open bot_config.pkl...", end="\r")
-try:
-    open(join(getcwd(), "Serialized", "bot_config.pkl"), "r").close()
-except FileNotFoundError:
-    open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
+# print("Attempting to open bot_config.pkl...", end="\r")
+# try:
+#     open(join(getcwd(), "Serialized", "bot_config.pkl"), "r").close()
+# except FileNotFoundError:
+#     open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
 
 with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
     try:
@@ -31,17 +31,20 @@ with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
         debug_mode = False
         auto_pull = True
         tz = "UTC"
+        prefix = ":>"
     else:
         try:
             debug_mode = config_data["debug_mode"]
             auto_pull = config_data["auto_pull"]
             tz = config_data["tz"]
+            prefix = config_data["prefix"]
             print(f"Loaded bot_default.pkl{' '*20}")
         except KeyError:
             print(f'[Using defaults] bot_config.pkl file improperly formatted.{" "*35}')  # print excess spaces to fully overwrite the '\r' above
             debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
             auto_pull = True  # Auto pulls github updates every minute and reloads all loaded cogs.
             tz = "UTC"  # Triggers python to get real UTC time for Rams's status.
+            prefix = ":>"
 
 print("#-------------------------------#\n")
 loading_choices = [  # because why not
@@ -63,7 +66,6 @@ print("#-------------------------------#")
 print(f"{choice(loading_choices)}")
 print(f"#-------------------------------#\n")
 
-BOT_PREFIX = ":>"
 INIT_EXTENSIONS = [
     "admin",
     "background",
@@ -74,17 +76,18 @@ INIT_EXTENSIONS = [
     "moderation",
     "vanity",
 ]
+
 # Extension "repl" must be loaded manually
 # as it is not automatically available
 # because it is not often needed.
 
 bot = Bot(
-    command_prefix=BOT_PREFIX,
     description="Change your profile picture for a specific server.",
     owner_ids=[331551368789622784, 125435062127820800],
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
     # Configurable via :>bot
+    command_prefix=prefix,
     debug_mode=debug_mode,
     auto_pull=auto_pull,
     tz=tz
@@ -141,7 +144,7 @@ if __name__ == "__main__":
             confirm_new_dbl_token = input("Last DBL login failed or unknown. Enter new token? (Y/n): ")
             confirm_new_dbl_token = confirm_new_dbl_token.lower().startswith("y")
         else:
-            print("No DBL token stored.", end="")
+            print("No DBL token stored. ", end="")
             confirm_new_dbl_token = True
 
         if confirm_new_dbl_token:
