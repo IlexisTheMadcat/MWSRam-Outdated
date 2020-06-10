@@ -1,5 +1,7 @@
 # Lib
 from contextlib import suppress
+from pickle import Unpickler
+from os import getcwd
 from os.path import join
 from random import choice
 
@@ -13,32 +15,37 @@ from discord.utils import oauth_url
 
 # Local
 from utils.classes import Bot
-from utils.fileinterface import PickleInterface
-
 
 print("...\n\n#-------------------------------#")
+# print("Attempting to open bot_config.pkl...", end="\r")
+# try:
+#     open(join(getcwd(), "Serialized", "bot_config.pkl"), "r").close()
+# except FileNotFoundError:
+#     open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
 
-CONFIG_DEFAULTS = {
-    "debug_mode": False,  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
-    "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
-    "tz": "UTC",          # Triggers python to get real UTC time for Rams's status.
-    "command_prefix": ":>",
-}
-
-config_data = PickleInterface(join("Serialized", "bot_config.pkl"), verify_create_file=True)
-
-bot_config = {
-    "debug_mode": config_data.get("debug_mode"),
-    "auto_pull": config_data.get("auto_pull"),
-    "tz": config_data.get("tz"),
-    "command_prefix": config_data.get("prefix"),
-}
-
-for key, val in bot_config.items():
-    if val is None:
-        config_data[key] = CONFIG_DEFAULTS[key]
-        bot_config[key] = CONFIG_DEFAULTS[key]
-        print(f"[USING CONFIG DEFAULT] Config '{key}' missing. Inserted default '{CONFIG_DEFAULTS[key]}'")
+print("[] Loading bot_config.pkl...")
+with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
+    try:
+        config_data = Unpickler(f).load()
+    except Exception as e:
+        print(f'[Using defaults] Unpickling error: {e}{" "*30}')
+        debug_mode = False
+        auto_pull = True
+        tz = "UTC"
+        prefix = ":>"
+    else:
+        try:
+            debug_mode = config_data["debug_mode"]
+            auto_pull = config_data["auto_pull"]
+            tz = config_data["tz"]
+            prefix = config_data["prefix"]
+            print(f"Loaded bot_default.pkl{' '*20}")
+        except KeyError:
+            print(f'[Using defaults] bot_config.pkl file improperly formatted.{" "*35}')  # print excess spaces to fully overwrite the '\r' above
+            debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
+            auto_pull = True  # Auto pulls github updates every minute and reloads all loaded cogs.
+            tz = "UTC"  # Triggers python to get real UTC time for Rams's status.
+            prefix = ":>"
 
 print("#-------------------------------#\n")
 loading_choices = [  # because why not
@@ -80,9 +87,11 @@ bot = Bot(
     owner_ids=[331551368789622784, 125435062127820800],
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
-
     # Configurable via :>bot
-    **bot_config
+    command_prefix=prefix,
+    debug_mode=debug_mode,
+    auto_pull=auto_pull,
+    tz=tz
 )
 
 bot.remove_command("help")
@@ -111,9 +120,9 @@ async def on_ready():
           f"#-------------------------------#\n")
 
     for cog in INIT_EXTENSIONS:
+        print(f"| Loading initial cog {cog}")
         try:
             bot.load_extension(f"cogs.{cog}")
-            print(f"| Loaded initial cog {cog}")
         except Exception as e:
             print(f"| Failed to load extension {cog}\n|   {type(e).__name__}: {e}")
 
