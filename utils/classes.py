@@ -171,7 +171,6 @@ class Globals:
             self.Blacklists = {"authorID": (["channelID"], ["prefix"])}
             self.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
             self.Closets = {"auhthorID": {"closet_name":"closet_url"}}
-            self.ChangelogCache = None
 
         else:
             self.DisableSaving = False
@@ -182,7 +181,6 @@ class Globals:
                     self.Blacklists = data["Blacklists"]
                     self.Closets = data["Closets"]
                     self.ServerBlacklists = data["ServerBlacklists"]
-                    self.ChangelogCache = data["ChangelogCache"]
                     print("#-------------------------------#")
                     print("[] Loaded data.pkl.")
                     print("#-------------------------------#\n")
@@ -191,7 +189,6 @@ class Globals:
                     self.Blacklists = {"authorID": (["channelID"], ["prefix"])}
                     self.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
                     self.Closets = {"auhthorID": {"closet_name": "closet_url"}}
-                    self.ChangelogCache = None
                     print("[Data Reset] Unpickling Error:", e)
 
 
@@ -264,7 +261,6 @@ class Bot(DiscordBot):
                         "Blacklists": self.univ.Blacklists,
                         "Closets": self.univ.Closets,
                         "ServerBlacklists": self.univ.ServerBlacklists,
-                        "ChangelogCache": self.univ.ChangelogCache
                     }
 
                     dump(data, f)
