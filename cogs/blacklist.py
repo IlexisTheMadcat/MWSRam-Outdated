@@ -19,25 +19,26 @@ class BlacklistCommands(Cog):
     @command(aliases=["bl"])
     @bot_has_permissions(send_messages=True)
     async def blacklist(self, ctx: Context, mode: str, item: str = None):
-        if not ctx.guild:
+
+        if ctx.guild:
             await ctx.send(
                 "This command cannot be used in a DM channel. "
                 "Consider using it in a private channel in one of your servers."
             )
             return
-        
+
+        if not item:
+            item = str(ctx.channel.id)
+            here = True
+        else:
+            here = False
+
         channeladd = ["channel-add", "ch-a"]  # TODO: Maybe `blacklist` should be `group` with `mode`s as subcommands.
         channelremove = ["channel-remove", "ch-r"]  # TODO: Ask me about this.
         prefixadd = ["prefix-add", "pf-a"]
         prefixremove = ["prefix-remove", "pf-r"]
 
         if mode in channeladd:
-            if not item:
-                item = str(ctx.channel.id)
-                here = True
-            else:
-                here = False
-
             if item.startswith("<#") and item.endswith(">"):
                 item = item.replace("<#", "")
                 item = item.replace(">", "")
@@ -94,12 +95,6 @@ class BlacklistCommands(Cog):
                         return
 
         elif mode in channelremove:
-            if not item:
-                item = str(ctx.channel.id)
-                here = True
-            else:
-                here = False
-
             if item.startswith("<#") and item.endswith(">"):
                 item = item.replace("<#", "")
                 item = item.replace(">", "")

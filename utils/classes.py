@@ -2,10 +2,9 @@
 # Lib
 from contextlib import suppress
 from datetime import datetime
-from os import getcwd, utime
-from os.path import exists, join, split, splitext
-from pathlib import Path
-from pickle import dump, Unpickler, load
+from os import getcwd
+from os.path import exists
+from pickle import dump, Unpickler
 from re import match
 
 # Site
@@ -18,9 +17,10 @@ from discord.ext.commands.converter import IDConverter
 from discord.ext.commands.errors import BadArgument
 from discord.user import User
 from discord.utils import find, get
-from typing import Any, Dict, List, Union
+from typing import List
 
 # Local
+from utils.fileinterface import PickleInterface
 
 
 class Paginator:
@@ -167,10 +167,11 @@ class Globals:
         if not exists(f"{self.cwd}\\Serialized\\data.pkl"):
             print("[Unable to load] data.pkl not found. Replace file before shutting down. Saving disabled.")
             self.DisableSaving = True
-            self.VanityAvatars = {"guildID": {"userID":["avatar_url", "previous", "is_blocked"]}}
+            self.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
             self.Blacklists = {"authorID": (["channelID"], ["prefix"])}
             self.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
-            self.Closets = {"auhthorID": {"closet_name":"closet_url"}}
+            self.Closets = {"auhthorID": {"closet_name": "closet_url"}}
+            self.ChangelogCache = None
 
         else:
             self.DisableSaving = False
@@ -181,14 +182,16 @@ class Globals:
                     self.Blacklists = data["Blacklists"]
                     self.Closets = data["Closets"]
                     self.ServerBlacklists = data["ServerBlacklists"]
-                    print("#-------------------------------#")
-                    print("[] Loaded data.pkl.")
-                    print("#-------------------------------#\n")
+                    self.ChangelogCache = data["ChangelogCache"]
+                    print("#-------------------------------#"
+                          "[] Loaded data.pkl."
+                          "#-------------------------------#\n")
                 except Exception as e:
-                    self.VanityAvatars = {"guildID": {"userID":["avatar_url", "previous", "is_blocked"]}}
+                    self.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
                     self.Blacklists = {"authorID": (["channelID"], ["prefix"])}
                     self.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
                     self.Closets = {"auhthorID": {"closet_name": "closet_url"}}
+                    self.ChangelogCache = None
                     print("[Data Reset] Unpickling Error:", e)
 
 
@@ -204,10 +207,9 @@ class Bot(DiscordBot):
         self.auto_pull = kwargs.pop("auto_pull", True)
         self.debug_mode = kwargs.pop("debug_mode", False)
         self.tz = kwargs.pop("tz", "UTC")
-        self.command_prefix = kwargs.pop("commands_prefix", ":>")
 
         # Attribute for accessing tokens from file
-        self.auth = PickleInterface(f"{self.cwd}\\Serialized\\tokens.pkl")
+        self.auth = PickleInterface(f"{self.cwd}\\Serialized\\tokens.pkl", True)
 
         # Attribute will be filled in `on_ready`
         self.owner: User = kwargs.pop("owner", None)
@@ -262,6 +264,7 @@ class Bot(DiscordBot):
                         "Blacklists": self.univ.Blacklists,
                         "Closets": self.univ.Closets,
                         "ServerBlacklists": self.univ.ServerBlacklists,
+                        "ChangelogCache": self.univ.ChangelogCache
                     }
 
                     dump(data, f)
@@ -276,77 +279,3 @@ class Bot(DiscordBot):
 
         with suppress(RuntimeError, RuntimeWarning):
             await super().logout()
-
-
-class PickleInterface:
-
-    def __init__(self, fp: str = "file.pkl"):  # TODO: Add loop and lock
-        self._fp = fp
-
-        try:
-            self._fp = self._path
-        except Exception as error:
-            raise error
-
-    def __getitem__(self, item: Union[str, int]):
-        return self._payload.get(item, None)
-
-    def __setitem__(self, key: Union[str, int], val: Union[str, int, bool, None]):
-        self._set(key, val)
-
-    @property
-    def _path(self):
-        dir_path, file_name = split(self._fp)
-
-        file, ext = splitext(file_name)
-        if ext != ".pkl":
-            raise NameError(f"File name provided is not a valid pickle file (*.pkl): {file_name}")
-
-        if not dir_path:
-            dir_path = getcwd()
-            self._fp = join(dir_path, file_name)
-
-        try:
-            if not exists(self._fp):
-                if not exists(dir_path):
-                    Path(dir_path).mkdir(parents=True, exist_ok=True)
-
-                with open(self._fp, "a"):
-                    utime(self._fp, None)
-
-        except PermissionError:
-            raise PermissionError(f"Access is denied to file path `{self._fp}`")
-
-        return self._fp
-
-    @property
-    def _payload(self):
-        with open(self._path, "rb") as fp:
-            try:
-                payload = dict(load(fp))
-            except EOFError:
-                payload = dict()
-        return payload
-
-    def _set(self, key: str, val: str):
-        payload = self._payload
-        payload[key] = val
-        with open(self._path, "wb") as fp:
-            dump(payload, fp)
-
-    def update(self, mapping: Dict):
-        for key, val in mapping.items():
-            self._set(key, val)
-
-    def get(self, key: Union[str, int], default: Any = None):
-        val = self[key]
-        return val if val is not None else default
-
-    def keys(self):
-        return self._payload.keys()
-
-    def values(self):
-        return self._payload.values()
-
-    def items(self):
-        return self._payload.items()
