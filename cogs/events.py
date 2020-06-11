@@ -63,7 +63,7 @@ class Events(Cog):
         # Check if the message is a command. Terminates the event if so, so the command can run.
         verify_command = await self.bot.get_context(msg)
         if verify_command.valid:
-            self.bot.univ.Inactive = 0
+            self.bot.Inactive = 0
             return
 
         # React with passion
@@ -81,11 +81,11 @@ class Events(Cog):
 
         # Self-Blacklisted
         try:
-            for i in self.bot.univ.Blacklists[msg.author.id][1]:
+            for i in self.bot.Blacklists[msg.author.id][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.univ.Blacklists[msg.author.id][0]:
+            for i in self.bot.Blacklists[msg.author.id][0]:
                 if msg.channel.id == i:
                     return
 
@@ -94,11 +94,11 @@ class Events(Cog):
 
         # Server-Blacklisted
         try:
-            for i in self.bot.univ.ServerBlacklists[msg.guild.id][1]:
+            for i in self.bot.ServerBlacklists[msg.guild.id][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.univ.ServerBlacklists[msg.guild.id][0]:
+            for i in self.bot.ServerBlacklists[msg.guild.id][0]:
                 if msg.channel.id == i:
                     return
 
@@ -117,9 +117,9 @@ class Events(Cog):
                 continue
 
         try:
-            if msg.author.id in self.bot.univ.VanityAvatars[msg.guild.id].keys() and \
+            if msg.author.id in self.bot.VanityAvatars[msg.guild.id].keys() and \
                     not msg.author.bot and \
-                    self.bot.univ.VanityAvatars[msg.guild.id][msg.author.id][0]:
+                    self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]:
 
                 EngravedID_encode = list()
                 for i in str(msg.author.id):
@@ -150,7 +150,7 @@ class Events(Cog):
                     await dummy.send(
                         new_content,
                         files=AttachmentFiles,
-                        avatar_url=self.bot.univ.VanityAvatars[msg.guild.id][msg.author.id][0]
+                        avatar_url=self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]
                     )
 
                     stop = default_timer()
@@ -172,8 +172,8 @@ class Events(Cog):
                     f"Last message response time: {comptime} seconds from user \"{msg.author}\"."
                 )
 
-                self.bot.univ.LatestRS = comptime
-                self.bot.univ.Inactive = 0
+                self.bot.LatestRS = comptime
+                self.bot.Inactive = 0
 
                 if comptime > 3:
                     if self.bot.owner.id == msg.author.id:
