@@ -153,14 +153,14 @@ class VanityCommands(Cog):
             if not standard:
                 if ctx.guild.id in self.bot.univ.VanityAvatars and \
                     user.id in self.bot.univ.VanityAvatars[ctx.guild.id] and \
-                    self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]:
+                        self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]:
 
-                        await ctx.channel.send(
-                            f"Their current vanity avatar is located here:\n"
-                            f"{self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]}"
-                        )
-                        print(f'[] Sent vanity avatar url for \"{user}\" to user \"{ctx.author}\".')
-                        return
+                    await ctx.channel.send(
+                        f"Their current vanity avatar is located here:\n"
+                        f"{self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]}"
+                    )
+                    print(f'[] Sent vanity avatar url for \"{user}\" to user \"{ctx.author}\".')
+                    return
 
                 else:
                     await show_standard()
