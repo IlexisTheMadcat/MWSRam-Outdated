@@ -349,7 +349,7 @@ class Admin(Cog):
             description=f"{ctx.author.mention} initiated bot restart.",
             color=0x00FF00
         )
-        for x_loop in self.bot.univ.Loops:
+        for x_loop in self.bot.Loops:
             x_loop.cancel()
 
         await ctx.send(embed=em)
@@ -363,7 +363,7 @@ class Admin(Cog):
             await ctx.message.delete()
             return
 
-        self.bot.univ.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
+        self.bot.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
         await ctx.author.send("Reset all avatars.")
         print("[] Deleted all avatars on owner's request.")
 
@@ -374,7 +374,7 @@ class Admin(Cog):
             await ctx.message.delete()
             return
 
-        self.bot.univ.Blacklists = {"authorID": (["channelID"], ["prefix"])}
+        self.bot.Blacklists = {"authorID": (["channelID"], ["prefix"])}
         await ctx.author.send("Reset all blacklists.")
         print("[] Deleted all blacklists on owner's request.")
     
@@ -385,7 +385,7 @@ class Admin(Cog):
             await ctx.message.delete()
             return
         
-        self.bot.univ.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
+        self.bot.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
         await ctx.author.send("Reset all server blacklists.")
         print("[] Deleted all server-blacklists on owner's request.")
         
@@ -396,7 +396,7 @@ class Admin(Cog):
             await ctx.message.delete()
             return
         
-        self.bot.univ.Closets = {"auhthorID": {"closet_name": "closet_url"}}
+        self.bot.Closets = {"auhthorID": {"closet_name": "closet_url"}}
         await ctx.author.send("Reset all closets.")
         print("[] Deleted all closets on owner's request.")
 
@@ -476,7 +476,12 @@ class Admin(Cog):
                 em.color = 0x000000
 
         if not option:
-            em.description = f"The options and values are listed below:\n```debug_mode: {self.bot.debug_mode}\nauto_pull: {self.bot.auto_pull}\ntz: {self.bot.tz}\n```"
+            em.description = f"The options and values are listed below:\n" \
+                             f"```debug_mode: {self.bot.debug_mode}\n" \
+                             f"auto_pull: {self.bot.auto_pull}\n" \
+                             f"tz: {self.bot.tz}\n" \
+                             f"prefix: {self.bot.command_prefix}```"
+
             em.color = 0x0000FF
 
         await ctx.send(embed=em)
@@ -494,11 +499,10 @@ class Admin(Cog):
         with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
             try:
                 data = {
-                    "VanityAvatars": self.bot.univ.VanityAvatars,
-                    "Blacklists": self.bot.univ.Blacklists,
-                    "Closets": self.bot.univ.Closets,
-                    "ServerBlacklists": self.bot.univ.ServerBlacklists,
-                    "ChangelogCache": self.bot.univ.ChangelogCache
+                    "VanityAvatars": self.bot.VanityAvatars,
+                    "Blacklists": self.bot.Blacklists,
+                    "Closets": self.bot.Closets,
+                    "ServerBlacklists": self.bot.ServerBlacklists
                 }
 
                 dump(data, f)

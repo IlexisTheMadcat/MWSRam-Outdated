@@ -26,9 +26,9 @@ class VanityCommands(Cog):
             )
             return
 
-        if ctx.guild.id in self.bot.univ.VanityAvatars and \
-                ctx.author.id in self.bot.univ.VanityAvatars[ctx.guild.id].keys():
-            if self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id][2]:
+        if ctx.guild.id in self.bot.VanityAvatars and \
+                ctx.author.id in self.bot.VanityAvatars[ctx.guild.id].keys():
+            if self.bot.VanityAvatars[ctx.guild.id][ctx.author.id][2]:
                 await ctx.send(
                     "You are currently blocked from using vanity avatars in this server. "
                     "Contact a moderator with the `Manage Messages` permission to unblock you."
@@ -36,7 +36,7 @@ class VanityCommands(Cog):
                 return
         
         try:
-            if url in self.bot.univ.Closets[ctx.author.id]:
+            if url in self.bot.Closets[ctx.author.id]:
                 if ctx.author.id != self.bot.owner.id:
 
                     check = await self.dblpy.get_user_vote(ctx.author.id)
@@ -50,7 +50,7 @@ class VanityCommands(Cog):
                     )
                     return
                 elif check:
-                    url = self.bot.univ.Closets[ctx.author.id][url]
+                    url = self.bot.Closets[ctx.author.id][url]
                     await ctx.send("Used closet entry.")
         except KeyError or IndexError:
             pass
@@ -61,7 +61,7 @@ class VanityCommands(Cog):
                 await ctx.send("Used attachment...")
             except IndexError:
                 try:
-                    url = self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id][1]
+                    url = self.bot.VanityAvatars[ctx.guild.id][ctx.author.id][1]
                     if url is None:
                         raise KeyError
                     else:
@@ -82,18 +82,18 @@ class VanityCommands(Cog):
             return
 
         else:
-            if ctx.guild.id not in self.bot.univ.VanityAvatars:
-                self.bot.univ.VanityAvatars.update({ctx.guild.id: dict()})
+            if ctx.guild.id not in self.bot.VanityAvatars:
+                self.bot.VanityAvatars.update({ctx.guild.id: dict()})
                 
-            if ctx.author.id not in self.bot.univ.VanityAvatars[ctx.guild.id].keys():
-                self.bot.univ.VanityAvatars[ctx.guild.id].update({ctx.author.id: [None, None, False]})
+            if ctx.author.id not in self.bot.VanityAvatars[ctx.guild.id].keys():
+                self.bot.VanityAvatars[ctx.guild.id].update({ctx.author.id: [None, None, False]})
 
-            if self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id][0] is None:
-                self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id] = [url, url, False]
+            if self.bot.VanityAvatars[ctx.guild.id][ctx.author.id][0] is None:
+                self.bot.VanityAvatars[ctx.guild.id][ctx.author.id] = [url, url, False]
             else:
-                self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id] = [
+                self.bot.VanityAvatars[ctx.guild.id][ctx.author.id] = [
                     url,
-                    self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id][0],
+                    self.bot.VanityAvatars[ctx.guild.id][ctx.author.id][0],
                     False
                 ]
                 
@@ -110,13 +110,13 @@ class VanityCommands(Cog):
             )
             return
         
-        if ctx.guild.id in self.bot.univ.VanityAvatars and \
-                ctx.author.id in self.bot.univ.VanityAvatars[ctx.guild.id] and \
-                self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id][0]:
-            self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id] = [
+        if ctx.guild.id in self.bot.VanityAvatars and \
+                ctx.author.id in self.bot.VanityAvatars[ctx.guild.id] and \
+                self.bot.VanityAvatars[ctx.guild.id][ctx.author.id][0]:
+            self.bot.VanityAvatars[ctx.guild.id][ctx.author.id] = [
                 None,
-                self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id][0],
-                self.bot.univ.VanityAvatars[ctx.guild.id][ctx.author.id][2]
+                self.bot.VanityAvatars[ctx.guild.id][ctx.author.id][0],
+                self.bot.VanityAvatars[ctx.guild.id][ctx.author.id][2]
             ]
 
             await ctx.send("Removed vanity.")
@@ -151,16 +151,16 @@ class VanityCommands(Cog):
                 return
             
             if not standard:
-                if ctx.guild.id in self.bot.univ.VanityAvatars and \
-                    user.id in self.bot.univ.VanityAvatars[ctx.guild.id] and \
-                    self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]:
+                if ctx.guild.id in self.bot.VanityAvatars and \
+                    user.id in self.bot.VanityAvatars[ctx.guild.id] and \
+                        self.bot.VanityAvatars[ctx.guild.id][user.id][0]:
 
-                        await ctx.channel.send(
-                            f"Their current vanity avatar is located here:\n"
-                            f"{self.bot.univ.VanityAvatars[ctx.guild.id][user.id][0]}"
-                        )
-                        print(f'[] Sent vanity avatar url for \"{user}\" to user \"{ctx.author}\".')
-                        return
+                    await ctx.channel.send(
+                        f"Their current vanity avatar is located here:\n"
+                        f"{self.bot.VanityAvatars[ctx.guild.id][user.id][0]}"
+                    )
+                    print(f'[] Sent vanity avatar url for \"{user}\" to user \"{ctx.author}\".')
+                    return
 
                 else:
                     await show_standard()

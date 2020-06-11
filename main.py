@@ -1,8 +1,5 @@
 # Lib
 from contextlib import suppress
-from pickle import Unpickler
-from os import getcwd
-from os.path import join
 from random import choice
 
 # Site
@@ -15,36 +12,48 @@ from discord.utils import oauth_url
 
 # Local
 from utils.classes import Bot
+from utils.fileinterface import PickleInterface as PI
+
+
+CONFIG_DEFAULTS = {
+    "debug_mode": False,  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
+    "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
+    "tz": "UTC",          # Triggers python to get real UTC time for Rams's status.
+    "command_prefix": ":>",
+}
+
+INIT_EXTENSIONS = [
+    "admin",
+    "background",
+    "blacklist",
+    "closet",
+    "events",
+    "help",
+    "moderation",
+    "vanity",
+]
+
 
 print("...\n\n#-------------------------------#")
-# print("Attempting to open bot_config.pkl...", end="\r")
-# try:
-#     open(join(getcwd(), "Serialized", "bot_config.pkl"), "r").close()
-# except FileNotFoundError:
-#     open(join(getcwd(), "Serialized", "bot_config.pkl"), "x").close()
 
-with open(join(getcwd(), "Serialized", "bot_config.pkl"), "rb") as f:
-    try:
-        config_data = Unpickler(f).load()
-    except Exception as e:
-        print(f'[Using defaults] Unpickling error: {e}{" "*30}')
-        debug_mode = False
-        auto_pull = True
-        tz = "UTC"
-        prefix = ":>"
-    else:
-        try:
-            debug_mode = config_data["debug_mode"]
-            auto_pull = config_data["auto_pull"]
-            tz = config_data["tz"]
-            prefix = config_data["prefix"]
-            print(f"Loaded bot_default.pkl{' '*20}")
-        except KeyError:
-            print(f'[Using defaults] bot_config.pkl file improperly formatted.{" "*35}')  # print excess spaces to fully overwrite the '\r' above
-            debug_mode = False  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
-            auto_pull = True  # Auto pulls github updates every minute and reloads all loaded cogs.
-            tz = "UTC"  # Triggers python to get real UTC time for Rams's status.
-            prefix = ":>"
+config_data = PI("Serialized/bot_config.pkl", verify_create_file=True)
+
+bot_config = {
+    "debug_mode": config_data.get("debug_mode"),
+    "auto_pull": config_data.get("auto_pull"),
+    "tz": config_data.get("tz"),
+    "command_prefix": config_data.get("prefix"),
+}
+
+defaults_used = False
+for key, val in bot_config.items():
+    if val is None:
+        config_data[key] = CONFIG_DEFAULTS[key]
+        bot_config[key] = CONFIG_DEFAULTS[key]
+        defaults_used = True
+        print(f"[USING CONFIG DEFAULT] Config '{key}' missing. Inserted default '{CONFIG_DEFAULTS[key]}'")
+if not defaults_used:
+    print("[CONFIG LOADED] Configurations successfully loaded from Serialized/bot_config.pkl")
 
 print("#-------------------------------#\n")
 loading_choices = [  # because why not
@@ -66,17 +75,6 @@ print("#-------------------------------#")
 print(f"{choice(loading_choices)}")
 print(f"#-------------------------------#\n")
 
-INIT_EXTENSIONS = [
-    "admin",
-    "background",
-    "blacklist",
-    "closet",
-    "events",
-    "help",
-    "moderation",
-    "vanity",
-]
-
 # Extension "repl" must be loaded manually
 # as it is not automatically available
 # because it is not often needed.
@@ -86,13 +84,12 @@ bot = Bot(
     owner_ids=[331551368789622784, 125435062127820800],
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
+
     # Configurable via :>bot
-    command_prefix=prefix,
-    debug_mode=debug_mode,
-    auto_pull=auto_pull,
-    tz=tz
+    **bot_config
 )
 
+# To be replaced by custom help command  # TODO: Move to `help.py` when done
 bot.remove_command("help")
 
 print("#-------------------------------#")
@@ -119,9 +116,9 @@ async def on_ready():
           f"#-------------------------------#\n")
 
     for cog in INIT_EXTENSIONS:
-        print(f"| Loading initial cog {cog}")
         try:
             bot.load_extension(f"cogs.{cog}")
+            print(f"| Loaded initial cog {cog}")
         except Exception as e:
             print(f"| Failed to load extension {cog}\n|   {type(e).__name__}: {e}")
 
@@ -139,8 +136,8 @@ async def on_ready():
 
 if __name__ == "__main__":
 
-    if not bot.auth["MWS_DBL_SUCCESS"]:
-        if bot.auth["MWS_DBL_TOKEN"]:
+    if not bot.auth.get("MWS_DBL_SUCCESS"):
+        if bot.auth.get("MWS_DBL_TOKEN"):
             confirm_new_dbl_token = input("Last DBL login failed or unknown. Enter new token? (Y/n): ")
             confirm_new_dbl_token = confirm_new_dbl_token.lower().startswith("y")
         else:
@@ -157,7 +154,7 @@ if __name__ == "__main__":
 
         try:
 
-            if not bot.auth["MWS_BOT_TOKEN"]:
+            if not bot.auth.get("MWS_BOT_TOKEN"):
                 raise LoginFailure
 
             with suppress(RuntimeError):
