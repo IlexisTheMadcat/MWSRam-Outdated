@@ -4,6 +4,7 @@ from datetime import datetime
 from os import stat
 
 # Site
+from discord import Embed
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.core import bot_has_permissions, command
