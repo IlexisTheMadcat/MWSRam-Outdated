@@ -34,7 +34,7 @@ class MiscCommands(Cog):
     @command(name="help")
     @bot_has_permissions(send_messages=True)
     async def bhelp(self, ctx: Context, section: str = "directory", subsection: str = None):
-        em = Embed(title="Ram: Help", color=0xff547c)
+        em = Embed(title="Ram: Help", color=0xff87a3)
         if section == "directory":
             em.description = f"""
 Simple commands:
