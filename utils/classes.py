@@ -3,8 +3,8 @@
 from contextlib import suppress
 from datetime import datetime
 from os import getcwd
-from os.path import exists
-from pickle import dump, Unpickler
+# from os.path import exists
+# from pickle import dump, Unpickler
 from re import match
 
 # Site
@@ -20,7 +20,7 @@ from discord.utils import find, get
 from typing import List
 
 # Local
-from utils.fileinterface import PickleInterface
+from utils.fileinterface import PickleInterface as PI
 
 
 class Paginator:
@@ -159,46 +159,61 @@ class GlobalTextChannelConverter(IDConverter):
         return result
 
 
-class Globals:
-    def __init__(self):
-        self.Inactive = 0
-        self.cwd = getcwd()
-
-        if not exists(f"{self.cwd}\\Serialized\\data.pkl"):
-            print("[Unable to load] data.pkl not found. Replace file before shutting down. Saving disabled.")
-            self.DisableSaving = True
-            self.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
-            self.Blacklists = {"authorID": (["channelID"], ["prefix"])}
-            self.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
-            self.Closets = {"auhthorID": {"closet_name": "closet_url"}}
-
-        else:
-            self.DisableSaving = False
-            with open(f"{self.cwd}\\Serialized\\data.pkl", "rb") as f:
-                try:
-                    data = Unpickler(f).load()
-                    self.VanityAvatars = data["VanityAvatars"]
-                    self.Blacklists = data["Blacklists"]
-                    self.Closets = data["Closets"]
-                    self.ServerBlacklists = data["ServerBlacklists"]
-                    print("#-------------------------------#"
-                          "[] Loaded data.pkl."
-                          "#-------------------------------#\n")
-                except Exception as e:
-                    self.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
-                    self.Blacklists = {"authorID": (["channelID"], ["prefix"])}
-                    self.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
-                    self.Closets = {"auhthorID": {"closet_name": "closet_url"}}
-                    print("[Data Reset] Unpickling Error:", e)
+VANITY_AVATARS_TEMPLATE = {
+    "guildID": {
+        "userID": [
+            "avatar_url",
+            "previous",
+            "is_blocked"
+        ]
+    }
+}
+BLACKLISTS_TEMPLATE = {
+    "authorID": (["channelID"], ["prefix"])
+}
+SERVER_BLACKLISTS_TEMPLATE = {
+    "guildID": (["channelID"], ["prefix"])
+}
+CLOSETS_TEMPLATE = {
+    "auhthorID": {
+        "closet_name": "closet_url"
+    }
+}
 
 
 class Bot(DiscordBot):
 
     def __init__(self, *args, **kwargs):
 
-        # Backwards patch Globals class for availability to cogs
-        self.univ = Globals()
-        self.cwd = self.univ.cwd
+        # Timer to track minutes since responded to a command
+        self.Inactive = 0
+
+        self.cwd = getcwd()
+
+        # List to store scheduled task loops  # TODO: Investigate
+        self.Loops = list()
+
+        # Load data from pkl
+        try:
+            self.user_data_pkl = PI(f"{self.cwd}/Serialized/data.pkl")
+
+            self.VanityAvatars = self.user_data_pkl.get("VanityAvatars", VANITY_AVATARS_TEMPLATE)
+            self.Blacklists = self.user_data_pkl.get("Blacklists", BLACKLISTS_TEMPLATE)
+            self.ServerBlacklists = self.user_data_pkl.get("ServerBlacklists", SERVER_BLACKLISTS_TEMPLATE)
+            self.Closets = self.user_data_pkl.get("Closets", CLOSETS_TEMPLATE)
+
+            print("#-------------------------------#\n"
+                  "[DATA LOADED] Loaded data.pkl.\n"
+                  "#-------------------------------#\n")
+
+        except FileNotFoundError:
+            print("[CANNOT LOAD DATA] data.pkl not found. Replace file before shutting down. Saving disabled.")
+            self.DisableSaving = True
+
+            self.VanityAvatars = VANITY_AVATARS_TEMPLATE
+            self.Blacklists = BLACKLISTS_TEMPLATE
+            self.ServerBlacklists = SERVER_BLACKLISTS_TEMPLATE
+            self.Closets = CLOSETS_TEMPLATE
 
         # Capture extra meta from init for cogs, former `global`s
         self.auto_pull = kwargs.pop("auto_pull", True)
@@ -206,7 +221,7 @@ class Bot(DiscordBot):
         self.tz = kwargs.pop("tz", "UTC")
 
         # Attribute for accessing tokens from file
-        self.auth = PickleInterface(f"{self.cwd}\\Serialized\\tokens.pkl", True)
+        self.auth = PI(f"{self.cwd}/Serialized/tokens.pkl", True)
 
         # Attribute will be filled in `on_ready`
         self.owner: User = kwargs.pop("owner", None)
@@ -220,57 +235,45 @@ class Bot(DiscordBot):
 
         print("Connecting DBL with token.")
         try:
-            if not self.auth["MWS_DBL_TOKEN"]:
+            token = self.auth.get("MWS_DBL_TOKEN")
+
+            if not token:
                 raise DBLException
-            dbl = DBLClient(self, self.auth["MWS_DBL_TOKEN"], autopost=autopost)
+
+            dbl = DBLClient(self, token, autopost=autopost)
 
         except DBLException:
             self.auth["MWS_DBL_TOKEN"] = None
-            print("\nDBL Login Failed: No token was provided or token provided was invalid.")
+            print("DBL Login Failed: No token was provided or token provided was invalid.")
             dbl = None
-
-        if dbl:
-            self.auth["MWS_DBL_SUCCESS"] = True
-        else:
-            self.auth["MWS_DBL_SUCCESS"] = False
 
         return dbl
 
-    async def logout(self):
-        hour = str(datetime.now().hour)
-        minute = str(datetime.now().minute)
-        date = str(str(datetime.now().date().month) + "/" + str(datetime.now().date().day) + "/" + str(
-            datetime.now().date().year))
-        if len(hour) == 1:
-            hour = "0" + hour
-        if len(minute) == 1:
-            minute = "0" + minute
-        time = f"{hour}:{minute}, {date}"
+    async def logout(self):  # TODO: Clean this up. A lot was copied from 60s sch task
 
-        if not exists(f"{self.cwd}\\Serialized\\data.pkl") and not self.univ.DisableSaving:
-            self.univ.DisableSaving = True
+        time = datetime.now().strftime("%H:%M, %m/%d/%Y")
+
+        if not self.user_data_pkl and not self.DisableSaving:
+            self.DisableSaving = True
             print(f"[Unable to save] data.pkl not found. Replace file before shutting down. Saving disabled.")
-            return
+            # return
     
-        if not self.univ.DisableSaving:
+        if not self.DisableSaving:
+
             print("Saving...", end="\r")
-            with open(f"{self.cwd}\\Serialized\\data.pkl", "wb") as f:
-                try:
-                    data = {
-                        "VanityAvatars": self.univ.VanityAvatars,
-                        "Blacklists": self.univ.Blacklists,
-                        "Closets": self.univ.Closets,
-                        "ServerBlacklists": self.univ.ServerBlacklists,
-                    }
 
-                    dump(data, f)
-                except Exception as e:
-                    print(f"[{time} || Unable to save] Pickle dumping Error:", e)
+            data = {
+                "VanityAvatars": self.VanityAvatars,
+                "Blacklists": self.Blacklists,
+                "Closets": self.Closets,
+                "ServerBlacklists": self.ServerBlacklists,
+                # "ChangelogCache": self.ChangelogCache
+            }
+            self.user_data_pkl.update(data)
 
-            self.univ.Inactive = self.univ.Inactive + 1
             print(f"[VPP: {time}] Saved data.")
 
-        for x_loop in self.univ.Loops:
+        for x_loop in self.Loops:
             x_loop.cancel()
 
         with suppress(RuntimeError, RuntimeWarning):
