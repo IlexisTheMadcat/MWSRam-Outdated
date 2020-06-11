@@ -20,7 +20,7 @@ class BlacklistCommands(Cog):
     @bot_has_permissions(send_messages=True)
     async def blacklist(self, ctx: Context, mode: str, item: str = None):
 
-        if ctx.guild:
+        if not ctx.guild:
             await ctx.send(
                 "This command cannot be used in a DM channel. "
                 "Consider using it in a private channel in one of your servers."
