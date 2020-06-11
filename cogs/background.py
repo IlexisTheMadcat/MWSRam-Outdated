@@ -125,24 +125,24 @@ class BackgroundTasks(Cog):
             self.bot.univ.Inactive = self.bot.univ.Inactive + 1
             print(f"[VPP: {time}] Saved data.", end="\r")
 
-            if self.bot.auto_pull:
-                print(f"[VPP: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
-                resp = popen("git pull").read()
-                resp = f"```diff\n{resp}\n```"
-                if str(resp) != f"```diff\nAlready up to date.\n\n```":
-                    for i in self.bot.owner_ids:
-                        owner = self.bot.get_user(i)
-                        await owner.send(f"**__Auto-pulled from github repository and restarted cogs.__**\n{resp}")
-                        print(f"[VPP: {time}] Saved data. Changes sent to owner via Discord.")
+        if self.bot.auto_pull:
+            print(f"[VPP: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
+            resp = popen("git pull").read()
+            resp = f"```diff\n{resp}\n```"
+            if str(resp) != f"```diff\nAlready up to date.\n\n```":
+                for i in self.bot.owner_ids:
+                    owner = self.bot.get_user(i)
+                    await owner.send(f"**__Auto-pulled from github repository and restarted cogs.__**\n{resp}")
+                    print(f"[VPP: {time}] Saved data. Changes sent to owner via Discord.")
 
-                    for x_loop in self.bot.univ.Loops:
-                        x_loop.cancel()
+                for x_loop in self.bot.univ.Loops:
+                    x_loop.cancel()
 
-                    modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
-                    for module in modules.keys():
-                        self.bot.reload_extension(module)
-                else:
-                    print(f'[VPP: {time}] Saved data. No new changes.{" "*30}')
+                modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
+                for module in modules.keys():
+                    self.bot.reload_extension(module)
+            else:
+                print(f'[VPP: {time}] Saved data. No new changes.{" "*30}')
 
     @status_change.before_loop
     async def sc_wait(self):
