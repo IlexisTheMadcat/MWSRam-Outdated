@@ -261,7 +261,6 @@ class Bot(DiscordBot):
         if not self.DisableSaving:
 
             print("Saving...", end="\r")
-
             data = {
                 "VanityAvatars": self.VanityAvatars,
                 "Blacklists": self.Blacklists,
@@ -270,7 +269,6 @@ class Bot(DiscordBot):
                 # "ChangelogCache": self.ChangelogCache
             }
             self.user_data_pkl.update(data)
-
             print(f"[VPP: {time}] Saved data.")
 
         for x_loop in self.Loops:
