@@ -1,6 +1,5 @@
 # Lib
 from contextlib import suppress
-from os.path import join
 from random import choice
 
 # Site
@@ -13,10 +12,8 @@ from discord.utils import oauth_url
 
 # Local
 from utils.classes import Bot
-from utils.fileinterface import PickleInterface
+from utils.fileinterface import PickleInterface as PI
 
-
-print("...\n\n#-------------------------------#")
 
 CONFIG_DEFAULTS = {
     "debug_mode": False,  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
@@ -25,7 +22,21 @@ CONFIG_DEFAULTS = {
     "command_prefix": ":>",
 }
 
-config_data = PickleInterface(join("Serialized", "bot_config.pkl"), verify_create_file=True)
+INIT_EXTENSIONS = [
+    "admin",
+    "background",
+    "blacklist",
+    "closet",
+    "events",
+    "help",
+    "moderation",
+    "vanity",
+]
+
+
+print("...\n\n#-------------------------------#")
+
+config_data = PI("Serialized/bot_config.pkl", verify_create_file=True)
 
 bot_config = {
     "debug_mode": config_data.get("debug_mode"),
@@ -34,11 +45,15 @@ bot_config = {
     "command_prefix": config_data.get("prefix"),
 }
 
+defaults_used = False
 for key, val in bot_config.items():
     if val is None:
         config_data[key] = CONFIG_DEFAULTS[key]
         bot_config[key] = CONFIG_DEFAULTS[key]
+        defaults_used = True
         print(f"[USING CONFIG DEFAULT] Config '{key}' missing. Inserted default '{CONFIG_DEFAULTS[key]}'")
+if not defaults_used:
+    print("[CONFIG LOADED] Configurations successfully loaded from Serialized/bot_config.pkl")
 
 print("#-------------------------------#\n")
 loading_choices = [  # because why not
@@ -60,17 +75,6 @@ print("#-------------------------------#")
 print(f"{choice(loading_choices)}")
 print(f"#-------------------------------#\n")
 
-INIT_EXTENSIONS = [
-    "admin",
-    "background",
-    "blacklist",
-    "closet",
-    "events",
-    "help",
-    "moderation",
-    "vanity",
-]
-
 # Extension "repl" must be loaded manually
 # as it is not automatically available
 # because it is not often needed.
@@ -85,6 +89,7 @@ bot = Bot(
     **bot_config
 )
 
+# To be replaced by custom help command  # TODO: Move to `help.py` when done
 bot.remove_command("help")
 
 print("#-------------------------------#")
@@ -131,8 +136,8 @@ async def on_ready():
 
 if __name__ == "__main__":
 
-    if not bot.auth["MWS_DBL_SUCCESS"]:
-        if bot.auth["MWS_DBL_TOKEN"]:
+    if not bot.auth.get("MWS_DBL_SUCCESS"):
+        if bot.auth.get("MWS_DBL_TOKEN"):
             confirm_new_dbl_token = input("Last DBL login failed or unknown. Enter new token? (Y/n): ")
             confirm_new_dbl_token = confirm_new_dbl_token.lower().startswith("y")
         else:
@@ -149,7 +154,7 @@ if __name__ == "__main__":
 
         try:
 
-            if not bot.auth["MWS_BOT_TOKEN"]:
+            if not bot.auth.get("MWS_BOT_TOKEN"):
                 raise LoginFailure
 
             with suppress(RuntimeError):
