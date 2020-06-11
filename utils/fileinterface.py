@@ -29,8 +29,11 @@ class PickleInterface:
         except Exception as error:
             raise error
 
-    def __getitem__(self, item: Union[str, int]):
-        return self._payload.get(item, None)
+    def __getitem__(self, key: Union[str, int]):
+        payload = self._payload
+        if key not in payload.keys():
+            raise KeyError(f"KeyError: {key}")
+        return self._payload.get(key, None)
 
     def __setitem__(self, key: Union[str, int], val: Union[str, int, bool, None]):
         self._set(key, val)
