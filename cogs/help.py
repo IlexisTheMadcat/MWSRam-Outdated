@@ -24,10 +24,7 @@ class MiscCommands(Cog):
         """"""
 
         await ctx.send(
-            f"**If you are not going to use the bot, I encourage to cancel the invite. "
-            f"I can only join so many servers.**\n"
-            f"Here: https://discordapp.com/api/oauth2/authorize?client_id=687427956364279873&"
-            f"permissions=536881152&scope=bot"
+            f"Here: https://discordapp.com/api/oauth2/authorize?client_id=687427956364279873&permissions=536881152&scope=bot"
         )
         print(f'[] Sent invite link to user "{ctx.author}"')
 
@@ -44,9 +41,14 @@ Simple commands:
 ```
 Required Permissions:
 ```
-"Manage Messages"     - Step 1: To delete a message
-"Manage Webhooks"     - Step 2: To send a transformed version of that message.
-"Send Messages"       - To send notifications/messages for warnings, confirmations, etc.
+"Manage Messages"
+Step 1: To delete a message
+
+"Manage Webhooks"
+Step 2: To send a transformed version of that message.
+
+"Send Messages"
+To send notifications/messages for warnings, confirmations, etc.
 ```
 **To see important announcements and command changes, Type and enter `{self.bot.command_prefix}help updates`**
 **Use this if you think a command isn't working the same way it did last time you used it.**

@@ -51,9 +51,9 @@ class BackgroundTasks(Cog):
             status = Status.online
 
         if self.bot.debug_mode:
-            activity = Activity(type=ActivityType.playing, name="IN DEBUG MODE")
+            activity = Activity(type=ActivityType.playing, name="in DEBUG MODE")
         elif self.bot.DisableSaving:
-            activity = Activity(type=ActivityType.listening, name=f"SAVING DISABLED")
+            activity = Activity(type=ActivityType.watching, name=f"with SAVING DISABLED")
         else:
             activity = Activity(
                 type=ActivityType.watching,
