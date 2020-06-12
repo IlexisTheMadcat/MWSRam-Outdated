@@ -1,12 +1,10 @@
 # Lib
-from contextlib import suppress
 from random import choice
 
 # Site
 from discord import __version__
 from discord.activity import Activity
 from discord.enums import ActivityType, Status
-from discord.errors import LoginFailure
 from discord.permissions import Permissions
 from discord.utils import oauth_url
 
@@ -93,13 +91,15 @@ bot = Bot(
 bot.remove_command("help")
 
 print("#-------------------------------#")
-print(f"Running in: {bot.cwd}")
-print(f"Discord API version: {__version__}")
+print(f"[BOT INIT] Running in: {bot.cwd}")
+print(f"[BOT INIT] Discord API version: {__version__}")
 print("#-------------------------------#\n")
 
 
 @bot.event
 async def on_ready():
+    bot.connect_dbl(autopost=True)
+
     app_info = await bot.application_info()
     bot.owner = bot.get_user(app_info.owner.id)
 
@@ -136,42 +136,5 @@ async def on_ready():
 
 if __name__ == "__main__":
 
-    if not bot.auth.get("MWS_DBL_SUCCESS"):
-        if bot.auth.get("MWS_DBL_TOKEN"):
-            confirm_new_dbl_token = input("Last DBL login failed or unknown. Enter new token? (Y/n): ")
-            confirm_new_dbl_token = confirm_new_dbl_token.lower().startswith("y")
-        else:
-            print("No DBL token stored. ", end="")
-            confirm_new_dbl_token = True
-
-        if confirm_new_dbl_token:
-            new_bdl_token = input("Enter new DBL token:\n")
-            bot.auth["MWS_DBL_SUCCESS"] = new_bdl_token
-
-    print("Logging in with token.")
-
-    while True:
-
-        try:
-
-            if not bot.auth.get("MWS_BOT_TOKEN"):
-                raise LoginFailure
-
-            with suppress(RuntimeError):
-                bot.run()
-
-        except LoginFailure:
-            try:
-                bot.auth["MWS_BOT_TOKEN"] = None
-
-                print("\nLogin Failed: No token was provided or token provided was invalid.")
-                new_token = input("Provide new bot token: ")
-
-                bot.auth["MWS_BOT_TOKEN"] = new_token
-
-            except KeyboardInterrupt:
-                print("\nLogin with new bot token cancelled. Aborting.")
-                break
-
-        except KeyboardInterrupt:
-            break
+    print("[BOT INIT] Logging in with token.")
+    bot.run()

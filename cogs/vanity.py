@@ -14,7 +14,6 @@ from utils.classes import Bot
 class VanityCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.dblpy = self.bot.connect_dbl()
 
     @command(aliases=["set"])
     @bot_has_permissions(manage_webhooks=True)
@@ -37,11 +36,7 @@ class VanityCommands(Cog):
         
         try:
             if url in self.bot.Closets[ctx.author.id]:
-                if ctx.author.id != self.bot.owner.id:
-
-                    check = await self.dblpy.get_user_vote(ctx.author.id)
-                else:
-                    check = True
+                check = await self.bot.get_user_vote(ctx.author.id)
 
                 if not check:
                     await ctx.send(
