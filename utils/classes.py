@@ -196,6 +196,7 @@ class Bot(DiscordBot):
         # Load data from pkl
         try:
             self.user_data_pkl = PI(f"{self.cwd}/Serialized/data.pkl")
+            self.DisableSaving = False
 
             self.VanityAvatars = self.user_data_pkl.get("VanityAvatars", VANITY_AVATARS_TEMPLATE)
             self.Blacklists = self.user_data_pkl.get("Blacklists", BLACKLISTS_TEMPLATE)
