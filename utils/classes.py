@@ -1,10 +1,7 @@
 
 # Lib
-from contextlib import suppress
 from datetime import datetime
 from os import getcwd
-# from os.path import exists
-# from pickle import dump, Unpickler
 from re import match
 
 # Site
@@ -227,28 +224,35 @@ class Bot(DiscordBot):
         # Attribute will be filled in `on_ready`
         self.owner: User = kwargs.pop("owner", None)
 
+        # To be filled by self.connect_dbl() in on_ready
+        self.dbl: DBLClient = kwargs.pop("dbl", None)
+
         super().__init__(*args, **kwargs)
 
     def run(self, *args, **kwargs):
         super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
 
     def connect_dbl(self, autopost: bool = None):
-
-        print("Connecting DBL with token.")
         try:
             token = self.auth.get("MWS_DBL_TOKEN")
+            self.dbl = DBLClient(self, token, autopost=autopost)
 
-            if not token:
-                raise DBLException
-
-            dbl = DBLClient(self, token, autopost=autopost)
+            print("[DBL LOGIN] Logged in to DBL with token.")
 
         except DBLException:
             self.auth["MWS_DBL_TOKEN"] = None
-            print("DBL Login Failed: No token was provided or token provided was invalid.")
-            dbl = None
+            self.dbl = None
 
-        return dbl
+            print("[DBL ERROR] Login Failed: No token was provided or token provided was invalid.")
+
+    async def get_user_vote(self, user_id: int):
+        if user_id == self.owner.id:
+            return True
+
+        elif not self.dbl:
+            return False
+
+        return await self.dbl.get_user_vote(user_id)
 
     async def logout(self):  # TODO: Clean this up. A lot was copied from 60s sch task
 
@@ -272,8 +276,10 @@ class Bot(DiscordBot):
             self.user_data_pkl.update(data)
             print(f"[VPP: {time}] Saved data.")
 
+        if self.dbl:
+            await self.dbl.close()
+
         for x_loop in self.Loops:
             x_loop.cancel()
 
-        with suppress(RuntimeError, RuntimeWarning):
-            await super().logout()
+        await super().logout()

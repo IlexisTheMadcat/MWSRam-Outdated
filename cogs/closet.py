@@ -1,7 +1,6 @@
 # Migration
 
 # Lib
-from dbl import DBLClient
 
 # Site
 from discord.ext.commands.cog import Cog
@@ -16,16 +15,12 @@ from utils.classes import Bot
 class ClosetCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.dblpy = self.bot.connect_dbl(autopost=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     @command(aliases=["cl_add"])
     @bot_has_permissions(send_messages=True)
     async def add_to_closet(self, ctx: Context, name: str):
-        if ctx.author.id != self.bot.owner.id:
-            check = await self.dblpy.get_user_vote(ctx.author.id)
-        else:
-            check = True
+        check = await self.bot.get_user_vote(ctx.author.id)
     
         if not check:
             await ctx.send(
@@ -93,10 +88,7 @@ class ClosetCommands(Cog):
     @command(aliases=["cl_remove"])
     @bot_has_permissions(send_messages=True)
     async def remove_from_closet(self, ctx: Context, name: str):
-        if ctx.author.id != self.bot.owner.id:
-            check = await self.dblpy.get_user_vote(ctx.author.id)
-        else:
-            check = True
+        check = await self.bot.get_user_vote(ctx.author.id)
 
         if not check:
             await ctx.send(
@@ -130,10 +122,7 @@ class ClosetCommands(Cog):
     @command(aliases=["cl_rename"])
     @bot_has_permissions(send_messages=True)
     async def rename_closet_entry(self, ctx: Context, name: str, rename: str):
-        if ctx.author.id != self.bot.owner.id:
-            check = await self.dblpy.get_user_vote(ctx.author.id)
-        else:
-            check = True
+        check = await self.bot.get_user_vote(ctx.author.id)
     
         if not check:
             await ctx.send(
@@ -187,11 +176,8 @@ class ClosetCommands(Cog):
             name = ctx.author
             if name.id not in self.bot.Closets.keys():
                 self.bot.Closets[name.id] = {}
-    
-            if ctx.author.id != self.bot.owner.id:
-                check = await self.dblpy.get_user_vote(ctx.author.id)
-            else:
-                check = True
+
+            check = await self.bot.get_user_vote(ctx.author.id)
                 
             if not check:
                 await ctx.send(
@@ -219,7 +205,8 @@ class ClosetCommands(Cog):
             if name.id not in self.bot.Closets.keys():
                 self.bot.Closets[name.id] = dict()
     
-            check = await self.dblpy.get_user_vote(name.id)
+            check = await self.bot.get_user_vote(name.id)
+
             if not check:
                 await ctx.send(
                     f"Closets are vote-locked. Tell {name.name} to go to "
@@ -253,10 +240,7 @@ class ClosetCommands(Cog):
     async def preview_closet_entry(self, ctx, name):
         """"""
 
-        if ctx.author.id != self.bot.owner.id:
-            check = await self.dblpy.get_user_vote(ctx.author.id)
-        else:
-            check = True
+        check = await self.bot.get_user_vote(ctx.author.id)
 
         if not check:
             await ctx.send(
@@ -293,6 +277,3 @@ class ClosetCommands(Cog):
 
 def setup(bot: Bot):
     bot.add_cog(ClosetCommands(bot))
-
-def teardown(bot: Bot):
-    bot.remove_cog(ClosetCommands(bot))
