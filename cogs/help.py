@@ -363,9 +363,9 @@ Unlike\nthe\ndefault\nstacking\nmechanic.
 """
 
         elif section.lower() == "updates":
-            lastmodified = stat(f"{self.bot.cwd}\\changelog.txt").st_mtime
+            lastmodified = stat(f"{self.bot.cwd}/changelog.txt").st_mtime
             lastmodified = datetime.fromtimestamp(lastmodified).strftime("%H:%M %m/%d/%Y")
-            with open(f"{self.bot.cwd}\\changelog.txt", "r") as f:
+            with open(f"{self.bot.cwd}/changelog.txt", "r") as f:
                 text = f.read()
 
             em.description = f"""
