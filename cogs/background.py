@@ -21,7 +21,6 @@ class BackgroundTasks(Cog):
 
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.dblpy = self.bot.connect_dbl()
         self.bot.Loops = []
         self.bot.Loops.append(self.save_data.start())
         self.bot.Loops.append(self.status_change.start())
