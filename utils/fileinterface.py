@@ -1,7 +1,8 @@
 
 # Lib
+from json import dumps
 from os import getcwd, utime
-from os.path import exists, join, split, splitext
+from os.path import exists, join, split, splitext, getmtime
 from pathlib import Path
 from pickle import dump, load
 from typing import Any, Iterator, Tuple
@@ -14,35 +15,30 @@ from typing import Any, Iterator, Tuple
 def autosave(method):
     def wrap(self, *args, **kwargs):
         ret = method(self, *args, **kwargs)
-        if self._autowrite:
+        if self._autowrite and self._hash != hash(dumps(self._cache)):
             self.save()
         return ret
-
     return wrap
 
 
 class PickleInterface:
 
-    def __init__(
-            self,
-            fp: str = "file.pkl",
-            *,
-            create_file: bool = True,
-            autowrite: bool = True
-    ):
+    def __init__(self, fp: str = "file.pkl", **kwargs):
 
-        self.__fp = fp
-        self._create_file = create_file
-        self._autowrite = autowrite
         self._exists = True
 
-        try:
-            self.__fp = self._path
+        self._create_file = kwargs.pop("create_file", True)
+        self._autowrite = kwargs.pop("autowrite", True)
+        self._autoload = kwargs.pop("autoload", True)
 
+        try:
+            self._fp = self.filepath(fp)
         except Exception as error:
             raise error
 
-        self.__cache = self.__read()
+        self._cache = self.__read()
+        self._hash = hash(dumps(self._cache))
+        self._mtime = self.modified_ts
 
     """ ##############
          Presentation
@@ -133,11 +129,12 @@ class PickleInterface:
         ################################################### """
 
     def __write(self, mapping: dict) -> None:
-        with open(self._path, "wb") as fp:
+        with open(self.filepath(), "wb") as fp:
             dump(mapping, fp)
+        self._mtime = self.modified_ts
 
     def __read(self) -> dict:
-        with open(self._path, "rb") as fp:
+        with open(self.filepath(), "rb") as fp:
             try:
                 payload = dict(load(fp))
             except EOFError:
@@ -146,8 +143,30 @@ class PickleInterface:
         return payload
 
     @property
-    def _path(self) -> str:
-        dir_path, file_name = split(self.__fp)
+    def _payload(self) -> dict:
+        if self._autoload and self.modified_ts != self._mtime:
+            self.load()
+        return self._cache
+
+    """ #####################
+         Public File Methods
+        ##################### """
+
+    def save(self) -> None:
+        self.__write(self._cache)
+        self._hash = hash(dumps(self._cache))
+        self._mtime = self.modified_ts
+
+    def load(self) -> None:
+        self._cache = self.__read()
+        self._hash = hash(dumps(self._cache))
+        self._mtime = self.modified_ts
+
+    def filepath(self, fp: str = None) -> str:
+        if fp:
+            self._fp = fp
+
+        dir_path, file_name = split(self._fp)
 
         file, ext = splitext(file_name)
         if ext != ".pkl":
@@ -155,39 +174,32 @@ class PickleInterface:
 
         if not dir_path:
             dir_path = getcwd()
-            self.__fp = join(dir_path, file_name)
+            self._fp = join(dir_path, file_name)
 
-        if not exists(self.__fp):
+        if not exists(self._fp):
             self._exists = False
 
             if not self._create_file:
-                raise FileNotFoundError(f"Cannot load pickle file: `{self.__fp}`")
+                raise FileNotFoundError(f"Cannot load pickle file: `{self._fp}`")
 
             try:
                 if not exists(dir_path):
                     Path(dir_path).mkdir(parents=True, exist_ok=True)
 
-                with open(self.__fp, "a"):
-                    utime(self.__fp, None)
+                with open(self._fp, "a"):
+                    utime(self._fp, None)
 
             except PermissionError:
-                raise PermissionError(f"Access is denied to file path `{self.__fp}`")
+                raise PermissionError(f"Access is denied to file path `{self._fp}`")
 
-        return self.__fp
+        return self._fp
 
     @property
-    def _payload(self) -> dict:
-        return self.__cache
-
-    """ ########
-         Saving
-        ######## """
-
-    def save(self) -> None:
-        self.__write(self.__cache)
+    def modified_ts(self) -> float:
+        return getmtime(self.filepath())
 
     """ ##########################
-         Dict-Like Public Methods
+         Public Dict-Like Methods
         ########################## """
 
     @autosave
@@ -211,7 +223,7 @@ class PickleInterface:
         return self._payload.popitem()
 
     @autosave
-    def setdefault(self, *args, **kwargs):
+    def setdefault(self, *args, **kwargs) -> None:
         return self._payload.setdefault(*args, **kwargs)
 
     @autosave
