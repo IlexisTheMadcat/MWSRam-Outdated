@@ -219,7 +219,7 @@ class Bot(DiscordBot):
         self.tz = kwargs.pop("tz", "UTC")
 
         # Attribute for accessing tokens from file
-        self.auth = PI(f"{self.cwd}/Serialized/tokens.pkl", True)
+        self.auth = PI(f"{self.cwd}/Serialized/tokens.pkl")
 
         # Attribute will be filled in `on_ready`
         self.owner: User = kwargs.pop("owner", None)

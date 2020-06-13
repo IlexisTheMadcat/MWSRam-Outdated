@@ -14,7 +14,7 @@ from utils.fileinterface import PickleInterface as PI
 
 
 CONFIG_DEFAULTS = {
-    "debug_mode": False,  # Print exceptions to stdout. Some errors will not be printed for some reason, such as NameError outside of commands.
+    "debug_mode": False,  # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
     "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
     "tz": "UTC",          # Triggers python to get real UTC time for Rams's status.
     "command_prefix": ":>",
@@ -34,7 +34,7 @@ INIT_EXTENSIONS = [
 
 print("...\n\n#-------------------------------#")
 
-config_data = PI("Serialized/bot_config.pkl", verify_create_file=True)
+config_data = PI("Serialized/bot_config.pkl", create_file=True)
 
 bot_config = {
     "debug_mode": config_data.get("debug_mode"),
@@ -113,7 +113,7 @@ async def on_ready():
     print(f"\n"
           f"#-------------------------------#\n"
           f"| Loading initial cogs...\n"
-          f"#-------------------------------#\n")
+          f"#-------------------------------#")
 
     for cog in INIT_EXTENSIONS:
         try:
