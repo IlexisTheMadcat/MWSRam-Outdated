@@ -421,101 +421,148 @@ class Admin(Cog):
         #################### """
 
     @is_owner()
-    @command(name="settings", aliases=["bot", "config"])  # TODO: Make these a command group
-    async def settings(self, ctx, option=None, new_value=None):
-        """Manage Bot settings"""
-        if option:
-            if option == "auto_pull":
-                if new_value in ["True", "False"]:
-                    original = deepcopy(self.bot.auto_pull)
-                    if new_value == "True":
-                        self.bot.auto_pull = True
-                    elif new_value == "False":
-                        self.bot.auto_pull = False
+    @group(name="config", aliases=["bot", "settings"], invoke_without_command=True)
+    async def config(self, ctx: Context):
+        """View Bot settings"""
+        em = Embed(
+            title="Administration: Config",
+            description=f"The options and values are listed below:\n"
+                        f"```debug_mode: {self.bot.debug_mode}\n"
+                        f"auto_pull: {self.bot.auto_pull}\n"
+                        f"tz: {self.bot.tz}\n"
+                        f"prefix: {self.bot.command_prefix}```",
+            color=0x0000FF
+        )
+        return await ctx.send(embed=em)
 
-                    description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
-                                  f"`Original value: {original}`"
-                    color = 0x00FF00
+    @is_owner()
+    @config.command(name="prefix", aliases=["command_prefix"])
+    async def prefix(self, ctx: Context, *, val: str = None):
+        """View or set bot prefix"""
 
-                elif new_value:
-                    description = f"An improper value was passed.\n" \
-                                  f"`Valid responses for {option}: [True], [False]`"
-                    color = 0xFF0000
+        if val:
+            orig = deepcopy(self.bot.command_prefix)
+            self.bot.command_prefix = val
 
-                else:
-                    description = f"The current value for {option} is:\n" \
-                                  f"`{self.bot.auto_pull}`"
-                    color = 0x0000FF
-            
-            elif option == "debug_mode":
-                if new_value in ["True", "False"]:
-                    original = deepcopy(self.bot.debug_mode)
-                    if new_value == "True":
-                        self.bot.debug_mode = True
-                    elif new_value == "False":
-                        self.bot.debug_mode = False
-
-                    description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
-                                  f"`Original value: {original}`"
-                    color = 0x00FF00
-
-                elif new_value:
-                    description = f"An improper value was passed.\n" \
-                                  f"`Valid responses for {option}: [True], [False]`"
-                    color = 0xFF0000
-
-                else:
-                    description = f"The current value for {option} is:\n" \
-                                  f"`{self.bot.debug_mode}`"
-                    color = 0x0000FF
-            
-            elif option == "tz":
-                if new_value in ["EST", "CST", "UTC"]:
-                    original = deepcopy(self.bot.tz)
-                    self.bot.tz = new_value
-
-                    description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
-                                  f"`Original value: {original}`"
-                    color = 0x00FF00
-            
-                elif new_value:
-                    description = f"An improper value was passed.\n" \
-                                  f"`Valid responses for {option}: [EST], [CST], [UTC]`"
-                    color = 0xFF0000
-
-                else:
-                    description = f"The current value for {option} is:\n" \
-                                  f"`{self.bot.tz}`"
-                    color = 0x0000FF
-
-            elif option == "prefix":
-                original = deepcopy(self.bot.command_prefix)
-                self.bot.command_prefix = new_value
-
-                description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
-                              f"`Original value: {original}`"
-                color = 0x00FF00
-
-            elif not new_value:
-                description = f"The current value for {option} is:\n" \
-                              f"`{self.bot.command_prefix}`"
-                color = 0x0000FF
-            
-            else:
-                description = f"Bot configuration option not found."
-                color = 0x000000
+            em = Embed(
+                title="Administration: Bot Prefix Config",
+                description=f"New prefix: `{val}`\n"
+                            f"Original prefix: `{orig}`",
+                color=0x00FF00
+            )
 
         else:
-            description = f"The options and values are listed below:\n" \
-                             f"```debug_mode: {self.bot.debug_mode}\n" \
-                             f"auto_pull: {self.bot.auto_pull}\n" \
-                             f"tz: {self.bot.tz}\n" \
-                             f"prefix: {self.bot.command_prefix}```"
+            em = Embed(
+                title="Administration: Bot Prefix Config",
+                description=f"Bot prefix: `{self.bot.command_prefix}`",
+                color=0x0000FF
+            )
 
-            color = 0x0000FF
+        return await ctx.send(embed=em)
 
-        em = Embed(title="Administration: Config", description=description, color=color)
-        await ctx.send(embed=em)
+    @is_owner()
+    @config.command(name="tz", aliases=["timezone"])
+    async def tz(self, ctx: Context, *, val: str = None):
+        """View or set bot time zone"""
+
+        if val:
+            if val in ["EST", "CST", "UTC"]:
+                orig = deepcopy(self.bot.tz)
+                self.bot.tz = val
+
+                em = Embed(
+                    title="Administration: Bot Timezone Config",
+                    description=f"New timezone: `{val}`\n"
+                                f"Original timezone: `{orig}`",
+                    color=0x00FF00
+                )
+
+            else:
+                em = Embed(
+                    title="Administration: Bot Timezone Config",
+                    description=f"Invalid timezone given: `{val}`\n"
+                                f"Valid values: `EST` `CST` `UTC`",
+                    color=0xFF0000
+                )
+
+        else:
+            em = Embed(
+                title="Administration: Bot Timezone Config",
+                description=f"Bot timezone: `{self.bot.tz}`",
+                color=0x00FF00
+            )
+
+        return await ctx.send(embed=em)
+
+    @is_owner()
+    @config.command(name="debug", aliases=["debug_mode"])
+    async def debug(self, ctx: Context, *, val: str = None):
+        """View or set bot prefix"""
+
+        if val:
+            if val.lower() in ["true", "false"]:
+                val = True if val == "true" else False
+                orig = deepcopy(self.bot.debug_mode)
+                self.bot.debug_mode = val
+
+                em = Embed(
+                    title="Administration: Bot Debug Mode Config",
+                    description=f"New value: `{val}`\n"
+                                f"Original value: `{orig}`",
+                    color=0x00FF00
+                )
+
+            else:
+                em = Embed(
+                    title="Administration: Bot Debug Mode Config",
+                    description=f"Invalid value given: `{val}`\n"
+                                f"Valid values: `True` `False`",
+                    color=0xFF0000
+                )
+
+        else:
+            em = Embed(
+                title="Administration: Bot Debug Mode Config",
+                description=f"Debug Mode: `{self.bot.debug_mode}`",
+                color=0x0000FF
+            )
+
+        return await ctx.send(embed=em)
+
+    @is_owner()
+    @config.command(name="autopull", aliases=["auto_pull"])
+    async def autopull(self, ctx: Context, *, val: str = None):
+        """View or set bot prefix"""
+
+        if val:
+            if val.lower() in ["true", "false"]:
+                val = True if val == "true" else False
+                orig = deepcopy(self.bot.auto_pull)
+                self.bot.auto_pull = val
+
+                em = Embed(
+                    title="Administration: Bot Auto-Pull Config",
+                    description=f"New value: `{val}`\n"
+                                f"Original value: `{orig}`",
+                    color=0x00FF00
+                )
+
+            else:
+                em = Embed(
+                    title="Administration: Bot Auto-Pull Config",
+                    description=f"Invalid value given: `{val}`\n"
+                                f"Valid values: `True` `False`",
+                    color=0xFF0000
+                )
+
+        else:
+            em = Embed(
+                title="Administration: Auto-Pull Config",
+                description=f"Auto-Git Pull Mode: `{self.bot.debug_mode}`",
+                color=0x0000FF
+            )
+
+        return await ctx.send(embed=em)
 
 
 def setup(bot: Bot):
