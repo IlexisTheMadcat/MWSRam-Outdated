@@ -147,7 +147,7 @@ class Events(Cog):
 
                 try:
                     dummy = await msg.channel.create_webhook(name=msg.author.display_name)
-                    await dummy.send(
+                    wh_msg = await dummy.send(
                         new_content,
                         files=AttachmentFiles,
                         avatar_url=self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]
@@ -155,6 +155,11 @@ class Events(Cog):
 
                     stop = default_timer()
                     await dummy.delete()
+
+                    await wh_msg.add_reaction("❌")
+                    await sleep(3)
+                    await wh_msg.remove_reaction("❌", msg.guild.me)
+
 
                 except Forbidden:
                     await msg.author.send(
