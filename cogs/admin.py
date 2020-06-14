@@ -1,31 +1,26 @@
 # -*- coding: utf-8 -*-
 
 # Lib
-from contextlib import suppress
 from os import popen
 from os.path import exists, join
 from pickle import dump
 from copy import deepcopy
+
 # Site
-# from discord.abc import Messageable
-# from discord.channel import TextChannel
 from discord.embeds import Embed
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.core import command, group, is_owner
 from discord.ext.commands.errors import (
-    # BadArgument,
     ExtensionAlreadyLoaded,
     ExtensionFailed,
     ExtensionNotFound,
     ExtensionNotLoaded,
     NoEntryPointError
 )
-# from discord.permissions import Permissions
-# from discord.utils import oauth_url
 
 # Local
-from utils.classes import Bot  # , GlobalTextChannelConverter
+from utils.classes import Bot
 
 
 class Admin(Cog):
@@ -341,9 +336,28 @@ class Admin(Cog):
         await ctx.send(embed=em)
 
     @is_owner()
-    @group(name='restart', aliases=["kill", "f"], invoke_without_command=True)
+    @group(name='restart', aliases=["kill", "f", "logout"], invoke_without_command=True)
     async def _restart(self, ctx: Context):
         """Restarts the bot"""
+
+        if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
+            await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
+            print("[Unable to save] data.pkl not found. Replace file before shutting down.")
+            return
+
+        print("Saving files and awaiting logout...")
+        with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
+            try:
+                data = {
+                    "VanityAvatars": self.bot.VanityAvatars,
+                    "Blacklists": self.bot.Blacklists,
+                    "Closets": self.bot.Closets,
+                    "ServerBlacklists": self.bot.ServerBlacklists
+                }
+
+                dump(data, f)
+            except Exception as e:
+                await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
 
         em = Embed(
             title="Administration: Restart",
@@ -353,6 +367,10 @@ class Admin(Cog):
 
         await ctx.send(embed=em)
         await self.bot.logout()
+
+    """ ######################
+         User Data Management
+        ###################### """
     
     @command(aliases=["rs_av"])
     @is_owner()
@@ -398,11 +416,14 @@ class Admin(Cog):
         await ctx.author.send("Reset all closets.")
         print("[] Deleted all closets on owner's request.")
 
+    """ ####################
+         Bot Configurations
+        #################### """
+
     @is_owner()
-    @command(name="config", aliases=["bot"])
-    async def settings(self, ctx, option = None, new_value = None):
+    @command(name="settings", aliases=["bot", "config"])  # TODO: Make these a command group
+    async def settings(self, ctx, option=None, new_value=None):
         """Manage Bot settings"""
-        em = Embed(title="Administration: Config", description="Description not set.", color=0x000000)
         if option:
             if option == "auto_pull":
                 if new_value in ["True", "False"]:
@@ -412,16 +433,19 @@ class Admin(Cog):
                     elif new_value == "False":
                         self.bot.auto_pull = False
 
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
+                    description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
+                                  f"`Original value: {original}`"
+                    color = 0x00FF00
 
                 elif new_value:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
-                    em.color = 0xFF0000
+                    description = f"An improper value was passed.\n" \
+                                  f"`Valid responses for {option}: [True], [False]`"
+                    color = 0xFF0000
 
-                elif not new_value:
-                    em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
-                    em.color = 0x0000FF
+                else:
+                    description = f"The current value for {option} is:\n" \
+                                  f"`{self.bot.auto_pull}`"
+                    color = 0x0000FF
             
             elif option == "debug_mode":
                 if new_value in ["True", "False"]:
@@ -431,84 +455,67 @@ class Admin(Cog):
                     elif new_value == "False":
                         self.bot.debug_mode = False
 
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
+                    description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
+                                  f"`Original value: {original}`"
+                    color = 0x00FF00
 
                 elif new_value:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
-                    em.color = 0xFF0000
+                    description = f"An improper value was passed.\n" \
+                                  f"`Valid responses for {option}: [True], [False]`"
+                    color = 0xFF0000
 
-                elif not new_value:
-                    em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
-                    em.color = 0x0000FF
+                else:
+                    description = f"The current value for {option} is:\n" \
+                                  f"`{self.bot.debug_mode}`"
+                    color = 0x0000FF
             
             elif option == "tz":
                 if new_value in ["EST", "CST", "UTC"]:
                     original = deepcopy(self.bot.tz)
                     self.bot.tz = new_value
 
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
+                    description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
+                                  f"`Original value: {original}`"
+                    color = 0x00FF00
             
                 elif new_value:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [EST], [CST], [UTC]`"
-                    em.color = 0xFF0000
+                    description = f"An improper value was passed.\n" \
+                                  f"`Valid responses for {option}: [EST], [CST], [UTC]`"
+                    color = 0xFF0000
 
-                elif not new_value:
-                    em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
-                    em.color = 0x0000FF
+                else:
+                    description = f"The current value for {option} is:\n" \
+                                  f"`{self.bot.tz}`"
+                    color = 0x0000FF
 
             elif option == "prefix":
                 original = deepcopy(self.bot.command_prefix)
                 self.bot.command_prefix = new_value
 
-                em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                em.color = 0x00FF00
+                description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n" \
+                              f"`Original value: {original}`"
+                color = 0x00FF00
 
             elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.command_prefix}`"
-                em.color = 0x0000FF
+                description = f"The current value for {option} is:\n" \
+                              f"`{self.bot.command_prefix}`"
+                color = 0x0000FF
             
             else:
-                em.description = f"Bot configuration option not found."
-                em.color = 0x000000
+                description = f"Bot configuration option not found."
+                color = 0x000000
 
-        if not option:
-            em.description = f"The options and values are listed below:\n" \
+        else:
+            description = f"The options and values are listed below:\n" \
                              f"```debug_mode: {self.bot.debug_mode}\n" \
                              f"auto_pull: {self.bot.auto_pull}\n" \
                              f"tz: {self.bot.tz}\n" \
                              f"prefix: {self.bot.command_prefix}```"
 
-            em.color = 0x0000FF
+            color = 0x0000FF
 
+        em = Embed(title="Administration: Config", description=description, color=color)
         await ctx.send(embed=em)
-            
-    @command(name="logout")
-    @is_owner()
-    async def blogout(self, ctx: Context):
-        await ctx.send("Logging out...")
-        if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
-            await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
-            print("[Unable to save] data.pkl not found. Replace file before shutting down.")
-            return
-
-        print("Saving files and awaiting logout...")
-        with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
-            try:
-                data = {
-                    "VanityAvatars": self.bot.VanityAvatars,
-                    "Blacklists": self.bot.Blacklists,
-                    "Closets": self.bot.Closets,
-                    "ServerBlacklists": self.bot.ServerBlacklists
-                }
-
-                dump(data, f)
-            except Exception as e:
-                await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
-
-        with suppress(Exception):  # Comment this out and unindent logout() to disable suppressing
-            await self.bot.logout()
 
 
 def setup(bot: Bot):
