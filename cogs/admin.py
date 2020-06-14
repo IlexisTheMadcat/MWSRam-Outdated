@@ -27,6 +27,7 @@ from discord.ext.commands.errors import (
 # Local
 from utils.classes import Bot  # , GlobalTextChannelConverter
 
+
 class Admin(Cog):
     """Administrative Commands"""
 
@@ -349,12 +350,9 @@ class Admin(Cog):
             description=f"{ctx.author.mention} initiated bot restart.",
             color=0x00FF00
         )
-        for x_loop in self.bot.Loops:
-            x_loop.cancel()
 
         await ctx.send(embed=em)
-        with suppress(RuntimeError, RuntimeWarning):
-            await self.bot.logout()
+        await self.bot.logout()
     
     @command(aliases=["rs_av"])
     @is_owner()

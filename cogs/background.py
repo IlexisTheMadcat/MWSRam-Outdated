@@ -21,9 +21,8 @@ class BackgroundTasks(Cog):
 
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.bot.Loops = []
-        self.bot.Loops.append(self.save_data.start())
-        self.bot.Loops.append(self.status_change.start())
+        self.save_data.start()
+        self.status_change.start()
 
     @loop(seconds=60)
     async def status_change(self):
@@ -134,9 +133,6 @@ class BackgroundTasks(Cog):
                     owner = self.bot.get_user(i)
                     await owner.send(f"**__Auto-pulled from github repository and restarted cogs.__**\n{resp}")
                     print(f"[VPP: {time}] Saved data. Changes sent to owner via Discord.")
-
-                    for x_loop in self.bot.Loops:
-                        x_loop.cancel()
 
                 modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
                 for module in modules.keys():

@@ -125,7 +125,7 @@ async def on_ready():
     print(f"#-------------------------------#\n"
           f"| Successfully logged in.\n"
           f"#-------------------------------#\n"
-          f"| Usern:     {bot.user}\n"
+          f"| User:      {bot.user}\n"
           f"| User ID:   {bot.user.id}\n"
           f"| Owner:     {bot.owner}\n"
           f"| Guilds:    {len(bot.guilds)}\n"

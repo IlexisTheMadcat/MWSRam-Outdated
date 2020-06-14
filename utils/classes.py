@@ -187,9 +187,6 @@ class Bot(DiscordBot):
 
         self.cwd = getcwd()
 
-        # List to store scheduled task loops  # TODO: Investigate
-        self.Loops = list()
-
         # Load data from pkl
         try:
             self.user_data_pkl = PI(f"{self.cwd}/Serialized/data.pkl")
@@ -278,8 +275,5 @@ class Bot(DiscordBot):
 
         if self.dbl:
             await self.dbl.close()
-
-        for x_loop in self.Loops:
-            x_loop.cancel()
 
         await super().logout()
