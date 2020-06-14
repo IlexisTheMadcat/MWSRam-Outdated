@@ -53,7 +53,8 @@ class BackgroundTasks(Cog):
         if self.bot.debug_mode:
             activity = Activity(type=ActivityType.playing, name="in DEBUG MODE")
         elif self.bot.DisableSaving:
-            activity = Activity(type=ActivityType.watching, name=f"with SAVING DISABLED")
+            activity = Activity(type=ActivityType.playing, name=f"with SAVING DISABLED")
+
         else:
             activity = Activity(
                 type=ActivityType.watching,
@@ -122,7 +123,7 @@ class BackgroundTasks(Cog):
                     print("[Unknown Error] Pickle dumping error:", e)
 
             self.bot.Inactive = self.bot.Inactive + 1
-            print(f"[VPP: {time}] Saved data.", end="\r")
+            print(f"[VPP: {time}] Saved data.", end="\n" if not self.bot.auto_pull else "\r")
 
         if self.bot.auto_pull:
             print(f"[VPP: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
