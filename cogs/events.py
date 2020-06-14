@@ -117,6 +117,21 @@ class Events(Cog):
                 continue
 
         try:
+            if msg.author.bot and msg.author.discriminator == "0000":
+                EngravedID_decode = list(msg.content[-19:])
+                EngravedID_decode.pop()
+
+                EngravedID_decode_part = []
+                for i in EngravedID_decode:
+                    EngravedID_decode_part.append(str(C[i]))
+
+                EngravedID = ''.join(EngravedID_decode_part)
+                EngravedID = int(EngravedID)
+                if self.bot.get_user(EngravedID):
+                    await msg.add_reaction("❌")
+                    await sleep(3)
+                    await msg.remove_reaction("❌", msg.guild.me)
+
             if msg.author.id in self.bot.VanityAvatars[msg.guild.id].keys() and \
                     not msg.author.bot and \
                     self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]:
@@ -147,7 +162,7 @@ class Events(Cog):
 
                 try:
                     dummy = await msg.channel.create_webhook(name=msg.author.display_name)
-                    wh_msg = await dummy.send(
+                    await dummy.send(
                         new_content,
                         files=AttachmentFiles,
                         avatar_url=self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]
@@ -155,11 +170,6 @@ class Events(Cog):
 
                     stop = default_timer()
                     await dummy.delete()
-
-                    await wh_msg.add_reaction("❌")
-                    await sleep(3)
-                    await wh_msg.remove_reaction("❌", msg.guild.me)
-
 
                 except Forbidden:
                     await msg.author.send(
@@ -218,8 +228,7 @@ class Events(Cog):
             reaction.guild = await self.bot.fetch_guild(payload.guild_id)
             reaction.member = await reaction.guild.fetch_member(payload.user_id)
             user = await self.bot.fetch_user(payload.user_id)
-        except Exception as e:
-            print("[Error in event \"on_reaction_add\"]", e)
+        except Exception:
             return
 
         if reaction.guild is None:
@@ -240,7 +249,6 @@ class Events(Cog):
                 EngravedID = int(EngravedID)
                 identification = await self.bot.fetch_user(EngravedID)
             except Exception as e:
-                print("[Error in event \"on_raw_reaction_add\"]", e)
                 return
 
             if identification == user:
@@ -259,7 +267,8 @@ class Events(Cog):
                     )
                     await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
             else:
-                await user.send("That's not your message.\nThe reaction was left unchanged.")
+                if user != self.bot.user:
+                    await user.send("That's not your message.\nThe reaction was left unchanged.")
 
         if str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
