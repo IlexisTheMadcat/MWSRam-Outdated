@@ -54,6 +54,7 @@ class BackgroundTasks(Cog):
             activity = Activity(type=ActivityType.playing, name="in DEBUG MODE")
         elif self.bot.DisableSaving:
             activity = Activity(type=ActivityType.playing, name=f"with SAVING DISABLED")
+
         else:
             activity = Activity(
                 type=ActivityType.watching,

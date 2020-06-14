@@ -4,4 +4,4 @@
 *.bat
 *.replit*
 *start.json*
-changelog.txt
+*changelog.txt*
