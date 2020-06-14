@@ -1,21 +1,23 @@
 
 # Lib
+from asyncio.events import AbstractEventLoop, get_event_loop
+from asyncio.locks import Lock
 from json import dumps
 from os import getcwd, utime
 from os.path import exists, join, split, splitext, getmtime
 from pathlib import Path
 from pickle import dump, load
-from typing import Any, Iterator, Tuple
+from typing import Any, Coroutine, Iterator, Optional, Tuple, Union
 
 # Site
 
 # Local
 
 
-def autosave(method):
+def auto_save(method):
     def wrap(self, *args, **kwargs):
         ret = method(self, *args, **kwargs)
-        if self._autowrite and self._hash != hash(dumps(self._cache)):
+        if self._autosave and self._hash != hash(self):
             self.save()
         return ret
     return wrap
@@ -23,76 +25,103 @@ def autosave(method):
 
 class PickleInterface:
 
-    def __init__(self, fp: str = "file.pkl", **kwargs):
+    def __init__(
+            self,
+            fp: str = "file.pkl",
+            *,
+            create_file: bool = True,
+            autosave: bool = True,
+            autoload: bool = True,
+            loop: Union[bool, AbstractEventLoop] = False
+    ):
 
         self._exists = True
 
-        self._create_file = kwargs.pop("create_file", True)
-        self._autowrite = kwargs.pop("autowrite", True)
-        self._autoload = kwargs.pop("autoload", True)
+        self._create_file = create_file
+        self._autosave = autosave
+        self._autoload = autoload
+
+        if loop:
+            if isinstance(loop, AbstractEventLoop):
+                self._autoload = False
+                self._autosave = False
+                self._loop = loop
+                self._lock = Lock()
+
+            else:
+                self._loop = get_event_loop()
+                self._lock = Lock()
+
+        else:
+            self._loop = None
+            self._lock = None
 
         try:
             self._fp = self.filepath(fp)
         except Exception as error:
             raise error
 
-        self._cache = self.__read()
-        self._hash = hash(dumps(self._cache))
-        self._mtime = self.modified_ts
+        if self._loop:
+            self._loop.create_task(self._async_load())
+        else:
+            self._load()
 
     """ ##############
          Presentation
         ############## """
 
-    @autosave
+    @auto_save
     def __repr__(self) -> str:
         return self._payload.__repr__()
 
-    @autosave
+    @auto_save
     def __str__(self) -> str:
         return self._payload.__str__()
-
-    @autosave
-    def __len__(self) -> int:
-        return self._payload.__len__()
 
     """ #############
          Information
         ############# """
 
-    @autosave
+    @auto_save
+    def __len__(self) -> int:
+        return self._payload.__len__()
+
+    @auto_save
     def __sizeof__(self) -> int:
         return self._payload.__sizeof__()
+
+    def __hash__(self) -> float:
+        return hash(dumps(self._cache))
 
     """ ###################
          Conditional Tests
         ################### """
 
-    @autosave
+    @auto_save
     def __contains__(self, *args, **kwargs) -> bool:
         return self._payload.__contains__(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def __eq__(self, *args, **kwargs) -> bool:
         return self._payload.__eq__(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def __ge__(self, *args, **kwargs) -> bool:
         return self._payload.__ge__(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def __gt__(self, *args, **kwargs) -> bool:
         return self._payload.__gt__(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def __le__(self, *args, **kwargs) -> bool:
         return self._payload.__le__(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def __lt__(self, *args, **kwargs) -> bool:
         return self._payload.__lt__(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def __ne__(self, *args, **kwargs) -> bool:
         return self._payload.__ne__(*args, **kwargs)
 
@@ -100,11 +129,11 @@ class PickleInterface:
          Transform To New
         ################## """
 
-    @autosave
+    @auto_save
     def __iter__(self) -> Any:
         return self._payload.__iter__()
 
-    @autosave
+    @auto_save
     def __reversed__(self) -> Iterator:
         return self._payload.__reversed__()
 
@@ -112,21 +141,21 @@ class PickleInterface:
          Element Access By Index
         ######################### """
 
-    @autosave
+    @auto_save
     def __getitem__(self, key: Any) -> Any:
         return self._payload.__getitem__(key)
 
-    @autosave
+    @auto_save
     def __setitem__(self, key: Any, val: Any) -> None:
         return self._payload.__setitem__(key, val)
 
-    @autosave
+    @auto_save
     def __delitem__(self, key: Any) -> None:
         return self._payload.__delitem__(key)
 
-    """ ###################################################
-         Internal Methods For Interacting With Pickle File
-        ################################################### """
+    """ #######################
+         Internal File Methods
+        ####################### """
 
     def __write(self, mapping: dict) -> None:
         with open(self.filepath(), "wb") as fp:
@@ -142,6 +171,28 @@ class PickleInterface:
 
         return payload
 
+    """ ########################
+         Protected File Methods
+        ######################## """
+
+    def _save(self) -> None:
+        self.__write(self._cache)
+        self._hash = hash(self)
+        self._mtime = self.modified_ts
+
+    def _load(self) -> None:
+        self._cache = self.__read()
+        self._hash = hash(self)
+        self._mtime = self.modified_ts
+
+    async def _async_save(self):
+        async with self._lock:
+            await self._loop.run_in_executor(None, self._save)
+
+    async def _async_load(self):
+        async with self._lock:
+            await self._loop.run_in_executor(None, self._load)
+
     @property
     def _payload(self) -> dict:
         if self._autoload and self.modified_ts != self._mtime:
@@ -152,15 +203,15 @@ class PickleInterface:
          Public File Methods
         ##################### """
 
-    def save(self) -> None:
-        self.__write(self._cache)
-        self._hash = hash(dumps(self._cache))
-        self._mtime = self.modified_ts
+    def save(self) -> Optional[Coroutine]:
+        if self._loop:
+            return self._async_save()
+        self._save()
 
-    def load(self) -> None:
-        self._cache = self.__read()
-        self._hash = hash(dumps(self._cache))
-        self._mtime = self.modified_ts
+    def load(self) -> Optional[Coroutine]:
+        if self._loop:
+            return self._async_load()
+        self._load()
 
     def filepath(self, fp: str = None) -> str:
         if fp:
@@ -202,42 +253,42 @@ class PickleInterface:
          Public Dict-Like Methods
         ########################## """
 
-    @autosave
+    @auto_save
     def clear(self) -> None:
         return self._payload.clear()
 
-    @autosave
+    @auto_save
     def copy(self) -> dict:
         return self._payload.copy()
 
-    @autosave
+    @auto_save
     def get(self, *args, **kwargs) -> Any:
         return self._payload.get(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def pop(self, *args, **kwargs):
         return self._payload.pop(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def popitem(self) -> Tuple[Any, Any]:
         return self._payload.popitem()
 
-    @autosave
+    @auto_save
     def setdefault(self, *args, **kwargs) -> None:
         return self._payload.setdefault(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def update(self, *args, **kwargs) -> None:
         return self._payload.update(*args, **kwargs)
 
-    @autosave
+    @auto_save
     def keys(self) -> dict.keys:
         return self._payload.keys()
 
-    @autosave
+    @auto_save
     def values(self) -> dict.values:
         return self._payload.values()
 
-    @autosave
+    @auto_save
     def items(self) -> dict.items:
         return self._payload.items()
