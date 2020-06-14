@@ -27,22 +27,9 @@ class BackgroundTasks(Cog):
     @loop(seconds=60)
     async def status_change(self):
         if self.bot.tz != "UTC":
-            hour = str(datetime.now().hour)
-            minute = str(datetime.now().minute)
-            if len(hour) == 1:
-                hour = "0" + hour
-            if len(minute) == 1:
-                minute = "0" + minute
-            time = f"{hour}:{minute}"
-
+            time = datetime.now().strftime("%H:%M")
         else:
-            utchour = str(datetime.utcnow().hour)
-            utcminute = str(datetime.utcnow().minute)
-            if len(utchour) == 1:
-                utchour = "0" + utchour
-            if len(utcminute) == 1:
-                utcminute = "0" + utcminute
-            time = f"{utchour}:{utcminute}"
+            time = datetime.utcnow().strftime("%H:%M")
 
         if self.bot.Inactive >= 5:
             status = Status.idle
@@ -64,15 +51,7 @@ class BackgroundTasks(Cog):
 
     @loop(seconds=60)
     async def save_data(self):
-        hour = str(datetime.now().hour)
-        minute = str(datetime.now().minute)
-        date = str(str(datetime.now().date().month) + "/" + str(datetime.now().date().day) + "/" + str(
-            datetime.now().date().year))
-        if len(hour) == 1:
-            hour = "0" + hour
-        if len(minute) == 1:
-            minute = "0" + minute
-        time = f"{hour}:{minute}, {date}"
+        time = datetime.now().strftime("%H:%M, %m/%d/%Y")
 
         if not (exists(join(getcwd(), "Serialized", "data.pkl")) and
                 exists(join(getcwd(), "Serialized", "bot_config.pkl"))) and \
