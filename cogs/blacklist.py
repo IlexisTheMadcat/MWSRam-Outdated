@@ -63,11 +63,11 @@ class BlacklistCommands(Cog):
                         f"to see how to get channel IDs.\nYou can also #mention the channel."
                     )
                 else:
-                    if ctx.author.id not in self.bot.Blacklists.keys():
-                        self.bot.Blacklists[ctx.author.id] = ([], [])
+                    if ctx.author.id not in self.bot.user_data["Blacklists"].keys():
+                        self.bot.user_data["Blacklists"][ctx.author.id] = ([], [])
 
-                    if item not in self.bot.Blacklists[ctx.author.id][0]:
-                        self.bot.Blacklists[ctx.author.id][0].append(item)
+                    if item not in self.bot.user_data["Blacklists"][ctx.author.id][0]:
+                        self.bot.user_data["Blacklists"][ctx.author.id][0].append(item)
                         
                         if here:
                             await ctx.send(
@@ -115,9 +115,9 @@ class BlacklistCommands(Cog):
                 )
                 return
             else:
-                if ctx.author.id in self.bot.Blacklists.keys():
-                    if item in self.bot.Blacklists[ctx.author.id][0]:
-                        self.bot.Blacklists[ctx.author.id][0].remove(item)
+                if ctx.author.id in self.bot.user_data["Blacklists"].keys():
+                    if item in self.bot.user_data["Blacklists"][ctx.author.id][0]:
+                        self.bot.user_data["Blacklists"][ctx.author.id][0].remove(item)
                         channel = await self.bot.get_channel(item)
                         await ctx.send(
                             f'Channel "{channel.name}" in server "{channel.guild.name}" '
@@ -153,20 +153,20 @@ class BlacklistCommands(Cog):
                 await ctx.send("For protection, you cannot blacklist this bot's prefix.")
                 return
         
-            if ctx.author.id not in self.bot.Blacklists.keys():
-                self.bot.Blacklists[ctx.author.id] = ([], [])
+            if ctx.author.id not in self.bot.user_data["Blacklists"].keys():
+                self.bot.user_data["Blacklists"][ctx.author.id] = ([], [])
 
-            if item not in self.bot.Blacklists[ctx.author.id][1]:
-                self.bot.Blacklists[ctx.author.id][1].append(item)
+            if item not in self.bot.user_data["Blacklists"][ctx.author.id][1]:
+                self.bot.user_data["Blacklists"][ctx.author.id][1].append(item)
                 await ctx.send(f'Added "{item}" to blacklisted prefixes for you.')
                 print(f'+ Added "{item}" to blacklisted prefixes for user \"{ctx.author}\"')
             else:
                 await ctx.send("That prefix is already blacklisted for you.")
 
         elif mode in prefixremove:
-            if ctx.author.id in self.bot.Blacklists.keys():
-                if item in self.bot.Blacklists[ctx.author.id][1]:
-                    self.bot.Blacklists[ctx.author.id][1].remove(item)
+            if ctx.author.id in self.bot.user_data["Blacklists"].keys():
+                if item in self.bot.user_data["Blacklists"][ctx.author.id][1]:
+                    self.bot.user_data["Blacklists"][ctx.author.id][1].remove(item)
                     await ctx.send(f'Removed "{item}" from blacklisted prefixes for you.')
                     print(f'- Removed "{item}" from blacklisted prefixes for user \"{ctx.author}\".')
                 else:
@@ -190,20 +190,20 @@ class BlacklistCommands(Cog):
     @bot_has_permissions(send_messages=True)
     async def see_blacklists(self, ctx: Context):
 
-        if ctx.author.id in self.bot.Blacklists.keys():
+        if ctx.author.id in self.bot.user_data["Blacklists"].keys():
             message_part = []
 
             async def render():
-                if self.bot.Blacklists[ctx.author.id] == ([], []):
+                if self.bot.user_data["Blacklists"][ctx.author.id] == ([], []):
                     await ctx.send("You haven't blacklisted anything yet.")
                 message_part.append("Here are your blacklisted items:\n")
-                if not len(self.bot.Blacklists[ctx.author.id][0]) == 0:
+                if not len(self.bot.user_data["Blacklists"][ctx.author.id][0]) == 0:
                     message_part.append("**Channels:**\n")
-                    for n in self.bot.Blacklists[ctx.author.id][0]:
+                    for n in self.bot.user_data["Blacklists"][ctx.author.id][0]:
                         try:
                             channel = self.bot.get_channel(n)
                         except NotFound:
-                            self.bot.Blacklists[ctx.author.id][0].remove(n)
+                            self.bot.user_data["Blacklists"][ctx.author.id][0].remove(n)
                             return False
                         else:
                             message_part.append(
@@ -221,9 +221,9 @@ class BlacklistCommands(Cog):
                 else:
                     break
 
-            if not len(self.bot.Blacklists[ctx.author.id][1]) == 0:
+            if not len(self.bot.user_data["Blacklists"][ctx.author.id][1]) == 0:
                 message_part.append("**Prefixes:**\n")
-                for i in self.bot.Blacklists[ctx.author.id][1]:
+                for i in self.bot.user_data["Blacklists"][ctx.author.id][1]:
                     message_part.append(f'-- `"{i}"`\n')
 
             message_full = ''.join(message_part)
@@ -235,6 +235,3 @@ class BlacklistCommands(Cog):
 
 def setup(bot: Bot):
     bot.add_cog(BlacklistCommands(bot))
-
-def teardown(bot: Bot):
-    bot.remove_cog(BlacklistCommands(bot))
