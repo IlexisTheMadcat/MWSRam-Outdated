@@ -187,33 +187,13 @@ class Bot(DiscordBot):
 
         self.cwd = getcwd()
 
-        # Load data from pkl
-        try:
-            self.user_data_pkl = PI(f"{self.cwd}/Serialized/data.pkl")
-            self.DisableSaving = False
-
-            self.VanityAvatars = self.user_data_pkl.get("VanityAvatars", VANITY_AVATARS_TEMPLATE)
-            self.Blacklists = self.user_data_pkl.get("Blacklists", BLACKLISTS_TEMPLATE)
-            self.ServerBlacklists = self.user_data_pkl.get("ServerBlacklists", SERVER_BLACKLISTS_TEMPLATE)
-            self.Closets = self.user_data_pkl.get("Closets", CLOSETS_TEMPLATE)
-
-            print("#-------------------------------#\n"
-                  "[DATA LOADED] Loaded data.pkl.\n"
-                  "#-------------------------------#\n")
-
-        except FileNotFoundError:
-            print("[CANNOT LOAD DATA] data.pkl not found. Replace file before shutting down. Saving disabled.")
-            self.DisableSaving = True
-
-            self.VanityAvatars = VANITY_AVATARS_TEMPLATE
-            self.Blacklists = BLACKLISTS_TEMPLATE
-            self.ServerBlacklists = SERVER_BLACKLISTS_TEMPLATE
-            self.Closets = CLOSETS_TEMPLATE
-
         # Capture extra meta from init for cogs, former `global`s
-        self.auto_pull = kwargs.pop("auto_pull", True)
-        self.debug_mode = kwargs.pop("debug_mode", False)
-        self.tz = kwargs.pop("tz", "UTC")
+        self.auto_pull: bool = kwargs.pop("auto_pull", True)
+        self.debug_mode: bool = kwargs.pop("debug_mode", False)
+        self.tz: str = kwargs.pop("tz", "UTC")
+
+        # PI for configs above to be set after instantiation
+        self.bot_config = kwargs.pop("bot_config", None)
 
         # Attribute for accessing tokens from file
         self.auth = PI(f"{self.cwd}/Serialized/tokens.pkl")
@@ -225,6 +205,13 @@ class Bot(DiscordBot):
         self.dbl: DBLClient = kwargs.pop("dbl", None)
 
         super().__init__(*args, **kwargs)
+
+        # Load data from pkl
+        self.user_data = PI(f"Serialized/data.pkl", create_file=True, loop=self.loop)
+
+        print("#-------------------------------#\n"
+              "[DATA LOADED] Loaded data.pkl.\n"
+              "#-------------------------------#\n")
 
     def run(self, *args, **kwargs):
         super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
@@ -247,31 +234,17 @@ class Bot(DiscordBot):
             return True
 
         elif not self.dbl:
-            return False
+            return None
 
         return await self.dbl.get_user_vote(user_id)
 
-    async def logout(self):  # TODO: Clean this up. A lot was copied from 60s sch task
+    async def logout(self):
+        """Overload built-in `logout` to save data first and close DBL"""
+
+        await self.user_data.save()
 
         time = datetime.now().strftime("%H:%M, %m/%d/%Y")
-
-        if not self.user_data_pkl and not self.DisableSaving:
-            self.DisableSaving = True
-            print(f"[Unable to save] data.pkl not found. Replace file before shutting down. Saving disabled.")
-            # return
-    
-        if not self.DisableSaving:
-
-            print("Saving...", end="\r")
-            data = {
-                "VanityAvatars": self.VanityAvatars,
-                "Blacklists": self.Blacklists,
-                "Closets": self.Closets,
-                "ServerBlacklists": self.ServerBlacklists,
-                # "ChangelogCache": self.ChangelogCache
-            }
-            self.user_data_pkl.update(data)
-            print(f"[VPP: {time}] Saved data.")
+        print(f"[VPP: {time}] Saved data.")
 
         if self.dbl:
             await self.dbl.close()
