@@ -18,34 +18,11 @@ from timeit import default_timer
 
 # Local
 from utils.classes import Bot
-
-
-# EngravedID characters
-I = {
-    0:  " ",
-    1:  " ",
-    2:  " ",
-    3:  " ",
-    4:  " ",
-    5:  " ",
-    6:  " ",
-    7:  " ",
-    8:  " ",
-    9:  " ",
-    10: "​"
-}
-C = {
-    " ": 0,
-    " ": 1,
-    " ": 2,
-    " ": 3,
-    " ": 4,
-    " ": 5,
-    " ": 6,
-    " ": 7,
-    " ": 8,
-    " ": 9
-}
+from utils.utils import (
+    EID_FROM_INT,  # I
+    create_engraved_id_from_user,
+    get_engraved_id_from_msg,
+)
 
 
 class Events(Cog):
@@ -117,15 +94,7 @@ class Events(Cog):
 
         try:
             if msg.author.bot and msg.author.discriminator == "0000":
-                EngravedID_decode = list(msg.content[-19:])
-                EngravedID_decode.pop()
-
-                EngravedID_decode_part = []
-                for i in EngravedID_decode:
-                    EngravedID_decode_part.append(str(C[i]))
-
-                EngravedID = ''.join(EngravedID_decode_part)
-                EngravedID = int(EngravedID)
+                EngravedID = get_engraved_id_from_msg(msg.content)
                 if self.bot.get_user(EngravedID):
                     await msg.add_reaction("❌")
                     await sleep(3)
@@ -135,16 +104,12 @@ class Events(Cog):
                     not msg.author.bot and \
                     self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
 
-                EngravedID_encode = list()
-                for i in str(msg.author.id):
-                    EngravedID_encode.append(I[int(i)])
-                EngravedID_encode.append(I[10])
-                EngravedID = ''.join(EngravedID_encode)
+                EngravedID = create_engraved_id_from_user(msg.author.id)
 
                 if msg.content != "":
                     new_content = f"{msg.content}  {EngravedID}"
                 else:
-                    new_content = I[10] + EngravedID
+                    new_content = EID_FROM_INT[10] + EngravedID
 
                 try:
                     await msg.delete()
@@ -240,15 +205,7 @@ class Events(Cog):
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
-                EngravedID_decode = list(reaction.message.content[-19:])
-                EngravedID_decode.pop()
-
-                EngravedID_decode_part = []
-                for i in EngravedID_decode:
-                    EngravedID_decode_part.append(str(C[i]))
-
-                EngravedID = ''.join(EngravedID_decode_part)
-                EngravedID = int(EngravedID)
+                EngravedID = get_engraved_id_from_msg(reaction.message.content)
                 identification = await self.bot.fetch_user(EngravedID)
             except Exception as e:
                 return
@@ -276,15 +233,7 @@ class Events(Cog):
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
-                EngravedID_decode = list(reaction.message.content[-19:])
-                EngravedID_decode.pop()
-
-                EngravedID_decode_part = []
-                for i in EngravedID_decode:
-                    EngravedID_decode_part.append(str(C[i]))
-
-                EngravedID = ''.join(EngravedID_decode_part)
-                EngravedID = int(EngravedID)
+                EngravedID = get_engraved_id_from_msg(reaction.message.content)
                 identification = await self.bot.fetch_user(EngravedID)
             except Exception as e:
                 print("[Error in event \"on_raw_reaction_add\"]", e)
