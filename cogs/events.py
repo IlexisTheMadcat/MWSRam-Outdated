@@ -98,10 +98,11 @@ class Events(Cog):
             if msg.author.bot and msg.author.discriminator == "0000" and msg.author.endswith(f"{'​'*5}"):
                 EngravedID = get_engraved_id_from_msg(msg.content)
                 if self.bot.get_user(EngravedID):
-                    await msg.add_reaction("❌")
-                    await sleep(3)
-                    with suppress(NotFound):
-                        await msg.remove_reaction("❌", msg.guild.me)
+                    with suppress(Forbidden):
+                        await msg.add_reaction("❌")
+                        await sleep(3)
+                        with suppress(NotFound):
+                            await msg.remove_reaction("❌", msg.guild.me)
 
             if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id].keys() and \
                     not msg.author.bot and \
