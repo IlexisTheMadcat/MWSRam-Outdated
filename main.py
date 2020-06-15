@@ -34,7 +34,7 @@ INIT_EXTENSIONS = [
 
 print("...\n\n#-------------------------------#")
 
-config_data = PI("Serialized/bot_config.pkl", create_file=True)
+config_data = PI("Serialized/bot_config.pkl")
 
 bot_config = {
     "debug_mode": config_data.get("debug_mode"),
@@ -86,6 +86,8 @@ bot = Bot(
     # Configurable via :>bot
     **bot_config
 )
+
+bot.bot_config = config_data
 
 # To be replaced by custom help command  # TODO: Move to `help.py` when done
 bot.remove_command("help")
