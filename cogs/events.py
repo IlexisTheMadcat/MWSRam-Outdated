@@ -3,7 +3,9 @@
 from asyncio import sleep
 
 # Site
-from discord.errors import Forbidden
+from contextlib import suppress
+
+from discord.errors import Forbidden, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import (
@@ -93,12 +95,13 @@ class Events(Cog):
                 continue
 
         try:
-            if msg.author.bot and msg.author.discriminator == "0000":
+            if msg.author.bot and msg.author.discriminator == "0000" and msg.author.endswith(f"{'​'*5}"):
                 EngravedID = get_engraved_id_from_msg(msg.content)
                 if self.bot.get_user(EngravedID):
                     await msg.add_reaction("❌")
                     await sleep(3)
-                    await msg.remove_reaction("❌", msg.guild.me)
+                    with suppress(NotFound):
+                        await msg.remove_reaction("❌", msg.guild.me)
 
             if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id].keys() and \
                     not msg.author.bot and \
@@ -128,7 +131,7 @@ class Events(Cog):
                     return
 
                 try:
-                    dummy = await msg.channel.create_webhook(name=msg.author.display_name)
+                    dummy = await msg.channel.create_webhook(name=msg.author.display_name+f"{'​'*5}")
                     await dummy.send(
                         new_content,
                         files=AttachmentFiles,
