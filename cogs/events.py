@@ -3,7 +3,9 @@
 from asyncio import sleep
 
 # Site
-from discord.errors import Forbidden
+from contextlib import suppress
+
+from discord.errors import Forbidden, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import (
@@ -227,7 +229,8 @@ class Events(Cog):
                     await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
             else:
                 if user != self.bot.user:
-                    await user.send("That's not your message.\nThe reaction was left unchanged.")
+                    with suppress(Forbidden):
+                        await user.send("That's not your message.\nThe reaction was left unchanged.")
 
         if str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
