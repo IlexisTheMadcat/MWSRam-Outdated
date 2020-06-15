@@ -2,8 +2,6 @@
 
 # Lib
 from os import popen
-from os.path import exists, join
-from pickle import dump
 from copy import deepcopy
 
 # Site
@@ -340,24 +338,24 @@ class Admin(Cog):
     async def _restart(self, ctx: Context):
         """Restarts the bot"""
 
-        if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
-            await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
-            print("[Unable to save] data.pkl not found. Replace file before shutting down.")
-            return
+        # if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
+        #     await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
+        #     print("[Unable to save] data.pkl not found. Replace file before shutting down.")
+        #     return
 
-        print("Saving files and awaiting logout...")
-        with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
-            try:
-                data = {
-                    "VanityAvatars": self.bot.VanityAvatars,
-                    "Blacklists": self.bot.Blacklists,
-                    "Closets": self.bot.Closets,
-                    "ServerBlacklists": self.bot.ServerBlacklists
-                }
-
-                dump(data, f)
-            except Exception as e:
-                await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
+        # print("Saving files and awaiting logout...")
+        # with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
+        #     try:
+        #         data = {
+        #             "VanityAvatars": self.bot.VanityAvatars,
+        #             "Blacklists": self.bot.Blacklists,
+        #             "Closets": self.bot.Closets,
+        #             "ServerBlacklists": self.bot.ServerBlacklists
+        #         }
+        #
+        #         dump(data, f)
+        #     except Exception as e:
+        #         await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
 
         em = Embed(
             title="Administration: Restart",
@@ -376,10 +374,17 @@ class Admin(Cog):
     @is_owner()
     async def resetallavatars(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
 
-        self.bot.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
+        self.bot.user_data["VanityAvatars"] = {
+            "guildID": {
+                "userID": [
+                    "avatar_url",
+                    "previous",
+                    "is_blocked"
+                ]
+            }
+        }
         await ctx.author.send("Reset all avatars.")
         print("[] Deleted all avatars on owner's request.")
 
@@ -387,10 +392,14 @@ class Admin(Cog):
     @is_owner()
     async def resetallblacklists(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
 
-        self.bot.Blacklists = {"authorID": (["channelID"], ["prefix"])}
+        self.bot.user_data["Blacklists"] = {
+            "authorID": (
+                ["channelID"],
+                ["prefix"]
+            )
+        }
         await ctx.author.send("Reset all blacklists.")
         print("[] Deleted all blacklists on owner's request.")
     
@@ -398,10 +407,13 @@ class Admin(Cog):
     @is_owner()
     async def resetallserverblacklists(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
         
-        self.bot.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
+        self.bot.user_data["ServerBlacklists"] = {
+            "guildID": (
+                ["channelID"],
+                ["prefix"])
+        }
         await ctx.author.send("Reset all server blacklists.")
         print("[] Deleted all server-blacklists on owner's request.")
         
@@ -409,10 +421,12 @@ class Admin(Cog):
     @is_owner()
     async def resetallclosets(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
         
-        self.bot.Closets = {"auhthorID": {"closet_name": "closet_url"}}
+        self.bot.user_data["Closets"] = {
+            "auhthorID":
+                {"closet_name": "closet_url"}
+        }
         await ctx.author.send("Reset all closets.")
         print("[] Deleted all closets on owner's request.")
 

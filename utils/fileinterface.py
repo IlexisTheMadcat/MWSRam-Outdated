@@ -146,6 +146,8 @@ class PickleInterface:
         self._autosave = autosave
         self._autoload = autoload
 
+        self._cache = dict()
+
         if loop:
             # Autosave and autoload cannot be used in async mode
             self._autoload = False
