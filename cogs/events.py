@@ -1,7 +1,6 @@
 
 # Lib
 from asyncio import sleep
-from traceback import print_tb
 
 # Site
 from discord.errors import Forbidden
@@ -81,11 +80,11 @@ class Events(Cog):
 
         # Self-Blacklisted
         try:
-            for i in self.bot.Blacklists[msg.author.id][1]:
+            for i in self.bot.user_data["Blacklists"][msg.author.id][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.Blacklists[msg.author.id][0]:
+            for i in self.bot.user_data["Blacklists"][msg.author.id][0]:
                 if msg.channel.id == i:
                     return
 
@@ -94,11 +93,11 @@ class Events(Cog):
 
         # Server-Blacklisted
         try:
-            for i in self.bot.ServerBlacklists[msg.guild.id][1]:
+            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.ServerBlacklists[msg.guild.id][0]:
+            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][0]:
                 if msg.channel.id == i:
                     return
 
@@ -132,9 +131,9 @@ class Events(Cog):
                     await sleep(3)
                     await msg.remove_reaction("❌", msg.guild.me)
 
-            if msg.author.id in self.bot.VanityAvatars[msg.guild.id].keys() and \
+            if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id].keys() and \
                     not msg.author.bot and \
-                    self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]:
+                    self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
 
                 EngravedID_encode = list()
                 for i in str(msg.author.id):
@@ -151,9 +150,12 @@ class Events(Cog):
                     await msg.delete()
                 except Forbidden:
                     await msg.author.send(
-                        f"Your message couldn't be transformed because it is missing 1 or more permissions listed in "
-                        f"`{self.bot.command_prefix}help permissions`.\nIf you keep getting this error, remove your "
-                        f"vanity avatar or blacklist the channel you are trying to use it in.\nThis error my also be "
+                        f"Your message couldn't be transformed because it is "
+                        f"missing 1 or more permissions listed in "
+                        f"`{self.bot.command_prefix}help permissions`.\n"
+                        f"If you keep getting this error, remove your "
+                        f"vanity avatar or blacklist the channel you are "
+                        f"trying to use it in.\nThis error my also be "
                         f"a false alarm. Just try again."
                     )
 
@@ -165,7 +167,7 @@ class Events(Cog):
                     await dummy.send(
                         new_content,
                         files=AttachmentFiles,
-                        avatar_url=self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]
+                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]
                     )
 
                     stop = default_timer()
@@ -352,7 +354,6 @@ class Events(Cog):
                     print("[Error outside of command]", error)
         else:
             raise error
-
 
 
 def setup(bot: Bot):

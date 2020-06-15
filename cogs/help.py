@@ -67,9 +67,9 @@ Type `{self.bot.command_prefix}help <directory>`, where `directory` is one of th
         elif section.lower() == "details":
             total = 0
             
-            for i in self.bot.VanityAvatars.keys():
-                for x in self.bot.VanityAvatars[i].keys():
-                    if self.bot.VanityAvatars[i][x][0]:
+            for i in self.bot.user_data["VanityAvatars"].keys():
+                for x in self.bot.user_data["VanityAvatars"][i].keys():
+                    if self.bot.user_data["VanityAvatars"][i][x][0]:
                         total = total + 1
 
             owner = self.bot.owner
