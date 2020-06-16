@@ -100,7 +100,7 @@ class Events(Cog):
                 if self.bot.get_user(EngravedID):
                     with suppress(Forbidden):
                         await msg.add_reaction("❌")
-                        await sleep(3)
+                        await sleep(5)
                         with suppress(NotFound):
                             await msg.remove_reaction("❌", msg.guild.me)
 

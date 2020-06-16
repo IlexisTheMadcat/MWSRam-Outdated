@@ -218,7 +218,7 @@ class ModerationCommands(Cog):
                 )
                 for i in self.bot.user_data["VanityAvatars"][ctx.guild.id].keys():
                     user = await self.bot.fetch_user(i)
-                    message.append(f"{user} - URL: {self.bot.user_data['VanityAvatars'][ctx.guild.id][i][1]}\n")
+                    message.append(f"{user} - URL: {self.bot.user_data['VanityAvatars'][ctx.guild.id][i][0]}\n")
 
                 message.append("```")
                 await ctx.send(f"{''.join(message)}")
