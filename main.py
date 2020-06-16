@@ -100,7 +100,7 @@ print("#-------------------------------#\n")
 
 @bot.event
 async def on_ready():
-    bot.connect_dbl(autopost=True)
+    await bot.connect_dbl(autopost=True)
 
     app_info = await bot.application_info()
     bot.owner = bot.get_user(app_info.owner.id)
