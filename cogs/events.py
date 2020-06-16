@@ -1,10 +1,11 @@
 
 # Lib
 from asyncio import sleep
-from traceback import print_tb
 
 # Site
-from discord.errors import Forbidden
+from contextlib import suppress
+
+from discord.errors import Forbidden, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import (
@@ -19,34 +20,11 @@ from timeit import default_timer
 
 # Local
 from utils.classes import Bot
-
-
-# EngravedID characters
-I = {
-    0:  " ",
-    1:  " ",
-    2:  " ",
-    3:  " ",
-    4:  " ",
-    5:  " ",
-    6:  " ",
-    7:  " ",
-    8:  " ",
-    9:  " ",
-    10: "​"
-}
-C = {
-    " ": 0,
-    " ": 1,
-    " ": 2,
-    " ": 3,
-    " ": 4,
-    " ": 5,
-    " ": 6,
-    " ": 7,
-    " ": 8,
-    " ": 9
-}
+from utils.utils import (
+    EID_FROM_INT,  # I
+    create_engraved_id_from_user,
+    get_engraved_id_from_msg,
+)
 
 
 class Events(Cog):
@@ -81,11 +59,11 @@ class Events(Cog):
 
         # Self-Blacklisted
         try:
-            for i in self.bot.Blacklists[msg.author.id][1]:
+            for i in self.bot.user_data["Blacklists"][msg.author.id][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.Blacklists[msg.author.id][0]:
+            for i in self.bot.user_data["Blacklists"][msg.author.id][0]:
                 if msg.channel.id == i:
                     return
 
@@ -94,11 +72,11 @@ class Events(Cog):
 
         # Server-Blacklisted
         try:
-            for i in self.bot.ServerBlacklists[msg.guild.id][1]:
+            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.ServerBlacklists[msg.guild.id][0]:
+            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][0]:
                 if msg.channel.id == i:
                     return
 
@@ -118,42 +96,35 @@ class Events(Cog):
 
         try:
             if msg.author.bot and msg.author.discriminator == "0000":
-                EngravedID_decode = list(msg.content[-19:])
-                EngravedID_decode.pop()
-
-                EngravedID_decode_part = []
-                for i in EngravedID_decode:
-                    EngravedID_decode_part.append(str(C[i]))
-
-                EngravedID = ''.join(EngravedID_decode_part)
-                EngravedID = int(EngravedID)
+                EngravedID = get_engraved_id_from_msg(msg.content)
                 if self.bot.get_user(EngravedID):
-                    await msg.add_reaction("❌")
-                    await sleep(3)
-                    await msg.remove_reaction("❌", msg.guild.me)
+                    with suppress(Forbidden):
+                        await msg.add_reaction("❌")
+                        await sleep(5)
+                        with suppress(NotFound):
+                            await msg.remove_reaction("❌", msg.guild.me)
 
-            if msg.author.id in self.bot.VanityAvatars[msg.guild.id].keys() and \
+            if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id].keys() and \
                     not msg.author.bot and \
-                    self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]:
+                    self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
 
-                EngravedID_encode = list()
-                for i in str(msg.author.id):
-                    EngravedID_encode.append(I[int(i)])
-                EngravedID_encode.append(I[10])
-                EngravedID = ''.join(EngravedID_encode)
+                EngravedID = create_engraved_id_from_user(msg.author.id)
 
                 if msg.content != "":
                     new_content = f"{msg.content}  {EngravedID}"
                 else:
-                    new_content = I[10] + EngravedID
+                    new_content = EID_FROM_INT[10] + EngravedID
 
                 try:
                     await msg.delete()
                 except Forbidden:
                     await msg.author.send(
-                        f"Your message couldn't be transformed because it is missing 1 or more permissions listed in "
-                        f"`{self.bot.command_prefix}help permissions`.\nIf you keep getting this error, remove your "
-                        f"vanity avatar or blacklist the channel you are trying to use it in.\nThis error my also be "
+                        f"Your message couldn't be transformed because it is "
+                        f"missing 1 or more permissions listed in "
+                        f"`{self.bot.command_prefix}help permissions`.\n"
+                        f"If you keep getting this error, remove your "
+                        f"vanity avatar or blacklist the channel you are "
+                        f"trying to use it in.\nThis error my also be "
                         f"a false alarm. Just try again."
                     )
 
@@ -161,11 +132,11 @@ class Events(Cog):
                     return
 
                 try:
-                    dummy = await msg.channel.create_webhook(name=msg.author.display_name)
+                    dummy = await msg.channel.create_webhook(name=msg.author.display_name+f"{'​'*5}")
                     await dummy.send(
                         new_content,
                         files=AttachmentFiles,
-                        avatar_url=self.bot.VanityAvatars[msg.guild.id][msg.author.id][0]
+                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]
                     )
 
                     stop = default_timer()
@@ -238,15 +209,7 @@ class Events(Cog):
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
-                EngravedID_decode = list(reaction.message.content[-19:])
-                EngravedID_decode.pop()
-
-                EngravedID_decode_part = []
-                for i in EngravedID_decode:
-                    EngravedID_decode_part.append(str(C[i]))
-
-                EngravedID = ''.join(EngravedID_decode_part)
-                EngravedID = int(EngravedID)
+                EngravedID = get_engraved_id_from_msg(reaction.message.content)
                 identification = await self.bot.fetch_user(EngravedID)
             except Exception as e:
                 return
@@ -268,21 +231,14 @@ class Events(Cog):
                     await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
             else:
                 if user != self.bot.user:
-                    await user.send("That's not your message.\nThe reaction was left unchanged.")
+                    with suppress(Forbidden):
+                        await user.send("That's not your message.\nThe reaction was left unchanged.")
 
         if str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
-                EngravedID_decode = list(reaction.message.content[-19:])
-                EngravedID_decode.pop()
-
-                EngravedID_decode_part = []
-                for i in EngravedID_decode:
-                    EngravedID_decode_part.append(str(C[i]))
-
-                EngravedID = ''.join(EngravedID_decode_part)
-                EngravedID = int(EngravedID)
+                EngravedID = get_engraved_id_from_msg(reaction.message.content)
                 identification = await self.bot.fetch_user(EngravedID)
             except Exception as e:
                 print("[Error in event \"on_raw_reaction_add\"]", e)
@@ -352,7 +308,6 @@ class Events(Cog):
                     print("[Error outside of command]", error)
         else:
             raise error
-
 
 
 def setup(bot: Bot):

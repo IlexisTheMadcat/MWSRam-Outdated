@@ -34,7 +34,7 @@ INIT_EXTENSIONS = [
 
 print("...\n\n#-------------------------------#")
 
-config_data = PI("Serialized/bot_config.pkl", create_file=True)
+config_data = PI("Serialized/bot_config.pkl")
 
 bot_config = {
     "debug_mode": config_data.get("debug_mode"),
@@ -87,6 +87,8 @@ bot = Bot(
     **bot_config
 )
 
+bot.bot_config = config_data
+
 # To be replaced by custom help command  # TODO: Move to `help.py` when done
 bot.remove_command("help")
 
@@ -98,7 +100,7 @@ print("#-------------------------------#\n")
 
 @bot.event
 async def on_ready():
-    bot.connect_dbl(autopost=True)
+    await bot.connect_dbl(autopost=True)
 
     app_info = await bot.application_info()
     bot.owner = bot.get_user(app_info.owner.id)
@@ -125,7 +127,7 @@ async def on_ready():
     print(f"#-------------------------------#\n"
           f"| Successfully logged in.\n"
           f"#-------------------------------#\n"
-          f"| Usern:     {bot.user}\n"
+          f"| User:      {bot.user}\n"
           f"| User ID:   {bot.user.id}\n"
           f"| Owner:     {bot.owner}\n"
           f"| Guilds:    {len(bot.guilds)}\n"

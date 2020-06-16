@@ -1,31 +1,27 @@
 # -*- coding: utf-8 -*-
 
 # Lib
-from contextlib import suppress
+from asyncio import sleep
 from os import popen
-from os.path import exists, join
-from pickle import dump
 from copy import deepcopy
+
 # Site
-# from discord.abc import Messageable
-# from discord.channel import TextChannel
+from dbl import DBLException
 from discord.embeds import Embed
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.core import command, group, is_owner
 from discord.ext.commands.errors import (
-    # BadArgument,
     ExtensionAlreadyLoaded,
     ExtensionFailed,
     ExtensionNotFound,
     ExtensionNotLoaded,
     NoEntryPointError
 )
-# from discord.permissions import Permissions
-# from discord.utils import oauth_url
 
 # Local
-from utils.classes import Bot  # , GlobalTextChannelConverter
+from utils.classes import Bot
+
 
 class Admin(Cog):
     """Administrative Commands"""
@@ -340,30 +336,57 @@ class Admin(Cog):
         await ctx.send(embed=em)
 
     @is_owner()
-    @group(name='restart', aliases=["kill", "f"], invoke_without_command=True)
+    @group(name='restart', aliases=["kill", "f", "logout"], invoke_without_command=True)
     async def _restart(self, ctx: Context):
         """Restarts the bot"""
+
+        # if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
+        #     await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
+        #     print("[Unable to save] data.pkl not found. Replace file before shutting down.")
+        #     return
+
+        # print("Saving files and awaiting logout...")
+        # with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
+        #     try:
+        #         data = {
+        #             "VanityAvatars": self.bot.VanityAvatars,
+        #             "Blacklists": self.bot.Blacklists,
+        #             "Closets": self.bot.Closets,
+        #             "ServerBlacklists": self.bot.ServerBlacklists
+        #         }
+        #
+        #         dump(data, f)
+        #     except Exception as e:
+        #         await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
 
         em = Embed(
             title="Administration: Restart",
             description=f"{ctx.author.mention} initiated bot restart.",
             color=0x00FF00
         )
-        for x_loop in self.bot.Loops:
-            x_loop.cancel()
 
         await ctx.send(embed=em)
-        with suppress(RuntimeError, RuntimeWarning):
-            await self.bot.logout()
+        await self.bot.logout()
+
+    """ ######################
+         User Data Management
+        ###################### """
     
     @command(aliases=["rs_av"])
     @is_owner()
     async def resetallavatars(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
 
-        self.bot.VanityAvatars = {"guildID": {"userID": ["avatar_url", "previous", "is_blocked"]}}
+        self.bot.user_data["VanityAvatars"] = {
+            "guildID": {
+                "userID": [
+                    "avatar_url",
+                    "previous",
+                    "is_blocked"
+                ]
+            }
+        }
         await ctx.author.send("Reset all avatars.")
         print("[] Deleted all avatars on owner's request.")
 
@@ -371,10 +394,14 @@ class Admin(Cog):
     @is_owner()
     async def resetallblacklists(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
 
-        self.bot.Blacklists = {"authorID": (["channelID"], ["prefix"])}
+        self.bot.user_data["Blacklists"] = {
+            "authorID": (
+                ["channelID"],
+                ["prefix"]
+            )
+        }
         await ctx.author.send("Reset all blacklists.")
         print("[] Deleted all blacklists on owner's request.")
     
@@ -382,10 +409,13 @@ class Admin(Cog):
     @is_owner()
     async def resetallserverblacklists(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
         
-        self.bot.ServerBlacklists = {"guildID": (["channelID"], ["prefix"])}
+        self.bot.user_data["ServerBlacklists"] = {
+            "guildID": (
+                ["channelID"],
+                ["prefix"])
+        }
         await ctx.author.send("Reset all server blacklists.")
         print("[] Deleted all server-blacklists on owner's request.")
         
@@ -393,124 +423,232 @@ class Admin(Cog):
     @is_owner()
     async def resetallclosets(self, ctx: Context):
         if ctx.guild:
-            await ctx.message.delete()
-            return
+            return await ctx.message.delete()
         
-        self.bot.Closets = {"auhthorID": {"closet_name": "closet_url"}}
+        self.bot.user_data["Closets"] = {
+            "auhthorID":
+                {"closet_name": "closet_url"}
+        }
         await ctx.author.send("Reset all closets.")
         print("[] Deleted all closets on owner's request.")
 
+    """ ####################
+         Bot Configurations
+        #################### """
+
     @is_owner()
-    @command(name="config", aliases=["bot"])
-    async def settings(self, ctx, option = None, new_value = None):
-        """Manage Bot settings"""
-        em = Embed(title="Administration: Config", description="Description not set.", color=0x000000)
-        if option:
-            if option == "auto_pull":
-                if new_value in ["True", "False"]:
-                    original = deepcopy(self.bot.auto_pull)
-                    if new_value == "True":
-                        self.bot.auto_pull = True
-                    elif new_value == "False":
-                        self.bot.auto_pull = False
+    @group(name="config", aliases=["bot", "settings"], invoke_without_command=True)
+    async def config(self, ctx: Context):
+        """View Bot settings"""
+        em = Embed(
+            title="Administration: Config",
+            description=f"The options and values are listed below:\n"
+                        f"```debug_mode: {self.bot.debug_mode}\n"
+                        f"auto_pull: {self.bot.auto_pull}\n"
+                        f"tz: {self.bot.tz}\n"
+                        f"prefix: {self.bot.command_prefix}```",
+            color=0x0000FF
+        )
+        return await ctx.send(embed=em)
 
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
+    @is_owner()
+    @config.command(name="prefix", aliases=["command_prefix"])
+    async def prefix(self, ctx: Context, *, val: str = None):
+        """View or set bot prefix"""
 
-                elif new_value:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
-                    em.color = 0xFF0000
+        if val:
+            orig = deepcopy(self.bot.command_prefix)
+            self.bot.command_prefix = val
 
-                elif not new_value:
-                    em.description = f"The current value for {option} is:\n`{self.bot.auto_pull}`"
-                    em.color = 0x0000FF
-            
-            elif option == "debug_mode":
-                if new_value in ["True", "False"]:
-                    original = deepcopy(self.bot.debug_mode)
-                    if new_value == "True":
-                        self.bot.debug_mode = True
-                    elif new_value == "False":
-                        self.bot.debug_mode = False
+            em = Embed(
+                title="Administration: Bot Prefix Config",
+                description=f"New prefix: `{val}`\n"
+                            f"Original prefix: `{orig}`",
+                color=0x00FF00
+            )
 
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
+        else:
+            em = Embed(
+                title="Administration: Bot Prefix Config",
+                description=f"Bot prefix: `{self.bot.command_prefix}`",
+                color=0x0000FF
+            )
 
-                elif new_value:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [True], [False]`"
-                    em.color = 0xFF0000
+        return await ctx.send(embed=em)
 
-                elif not new_value:
-                    em.description = f"The current value for {option} is:\n`{self.bot.debug_mode}`"
-                    em.color = 0x0000FF
-            
-            elif option == "tz":
-                if new_value in ["EST", "CST", "UTC"]:
-                    original = deepcopy(self.bot.tz)
-                    self.bot.tz = new_value
+    @is_owner()
+    @config.command(name="tz", aliases=["timezone"])
+    async def tz(self, ctx: Context, *, val: str = None):
+        """View or set bot time zone"""
 
-                    em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                    em.color = 0x00FF00
-            
-                elif new_value:
-                    em.description = f"An improper value was passed.\n`Valid responses for {option}: [EST], [CST], [UTC]`"
-                    em.color = 0xFF0000
+        if val:
+            if val in ["EST", "CST", "UTC"]:
+                orig = deepcopy(self.bot.tz)
+                self.bot.tz = val
 
-                elif not new_value:
-                    em.description = f"The current value for {option} is:\n`{self.bot.tz}`"
-                    em.color = 0x0000FF
+                em = Embed(
+                    title="Administration: Bot Timezone Config",
+                    description=f"New timezone: `{val}`\n"
+                                f"Original timezone: `{orig}`",
+                    color=0x00FF00
+                )
 
-            elif option == "prefix":
-                original = deepcopy(self.bot.command_prefix)
-                self.bot.command_prefix = new_value
-
-                em.description = f"{ctx.author.mention} updated \"{option}\" to \"{new_value}\".\n`Original value: {original}`"
-                em.color = 0x00FF00
-
-            elif not new_value:
-                em.description = f"The current value for {option} is:\n`{self.bot.command_prefix}`"
-                em.color = 0x0000FF
-            
             else:
-                em.description = f"Bot configuration option not found."
-                em.color = 0x000000
+                em = Embed(
+                    title="Administration: Bot Timezone Config",
+                    description=f"Invalid timezone given: `{val}`\n"
+                                f"Valid values: `EST` `CST` `UTC`",
+                    color=0xFF0000
+                )
 
-        if not option:
-            em.description = f"The options and values are listed below:\n" \
-                             f"```debug_mode: {self.bot.debug_mode}\n" \
-                             f"auto_pull: {self.bot.auto_pull}\n" \
-                             f"tz: {self.bot.tz}\n" \
-                             f"prefix: {self.bot.command_prefix}```"
+        else:
+            em = Embed(
+                title="Administration: Bot Timezone Config",
+                description=f"Bot timezone: `{self.bot.tz}`",
+                color=0x00FF00
+            )
 
-            em.color = 0x0000FF
+        return await ctx.send(embed=em)
 
-        await ctx.send(embed=em)
-            
-    @command(name="logout")
     @is_owner()
-    async def blogout(self, ctx: Context):
-        await ctx.send("Logging out...")
-        if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
-            await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
-            print("[Unable to save] data.pkl not found. Replace file before shutting down.")
-            return
+    @config.command(name="debug", aliases=["debug_mode"])
+    async def debug(self, ctx: Context, *, val: str = None):
+        """View or set bot prefix"""
 
-        print("Saving files and awaiting logout...")
-        with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
+        if val:
+            if val.lower() in ["true", "false"]:
+                val = True if val == "true" else False
+                orig = deepcopy(self.bot.debug_mode)
+                self.bot.debug_mode = val
+
+                em = Embed(
+                    title="Administration: Bot Debug Mode Config",
+                    description=f"New value: `{val}`\n"
+                                f"Original value: `{orig}`",
+                    color=0x00FF00
+                )
+
+            else:
+                em = Embed(
+                    title="Administration: Bot Debug Mode Config",
+                    description=f"Invalid value given: `{val}`\n"
+                                f"Valid values: `True` `False`",
+                    color=0xFF0000
+                )
+
+        else:
+            em = Embed(
+                title="Administration: Bot Debug Mode Config",
+                description=f"Debug Mode: `{self.bot.debug_mode}`",
+                color=0x0000FF
+            )
+
+        return await ctx.send(embed=em)
+
+    @is_owner()
+    @config.command(name="autopull", aliases=["auto_pull"])
+    async def autopull(self, ctx: Context, *, val: str = None):
+        """View or set bot prefix"""
+
+        if val:
+            if val.lower() in ["true", "false"]:
+                val = True if val == "true" else False
+                orig = deepcopy(self.bot.auto_pull)
+                self.bot.auto_pull = val
+
+                em = Embed(
+                    title="Administration: Bot Auto-Pull Config",
+                    description=f"New value: `{val}`\n"
+                                f"Original value: `{orig}`",
+                    color=0x00FF00
+                )
+
+            else:
+                em = Embed(
+                    title="Administration: Bot Auto-Pull Config",
+                    description=f"Invalid value given: `{val}`\n"
+                                f"Valid values: `True` `False`",
+                    color=0xFF0000
+                )
+
+        else:
+            em = Embed(
+                title="Administration: Auto-Pull Config",
+                description=f"Auto-Git Pull Mode: `{self.bot.debug_mode}`",
+                color=0x0000FF
+            )
+
+        return await ctx.send(embed=em)
+
+    """ ##################
+         Discord Bot List
+        ################## """
+
+    @is_owner()
+    @group(name="dbl", invoke_without_command=True)
+    async def dbl(self, ctx: Context):
+        """See current DBL connection status"""
+
+        if self.bot.dbl:
+            dbl_guilds = await self.bot.dbl.get_guild_count(self.bot.user.id)
+            dbl_guilds_count = dbl_guilds["server_count"]
+            bot_url = f"https://discordbots.org/bot/{self.bot.user.id}"
+            em = Embed(
+                title="Administration: DBL Status",
+                description=f"DiscordBotList Client is currently connected.\n"
+                            f"Guilds: `{dbl_guilds_count}`\n"
+                            f"Bot Page: {bot_url}\n"
+                            f"Bot Vote Page: {bot_url}/vote",
+                color=0x0000FF
+            )
+
+        else:
+            em = Embed(
+                title="Administration: DBL Status",
+                description="DiscordBotList Client is not connected.",
+                color=0xFF0000
+            )
+
+        return await ctx.send(embed=em)
+
+    @is_owner()
+    @dbl.command(name="connect", aliases=["reconnect"])
+    async def connect(self, ctx: Context):
+        """Connects (or reconnects) DBL"""
+
+        if self.bot.dbl:
             try:
-                data = {
-                    "VanityAvatars": self.bot.VanityAvatars,
-                    "Blacklists": self.bot.Blacklists,
-                    "Closets": self.bot.Closets,
-                    "ServerBlacklists": self.bot.ServerBlacklists
-                }
+                await self.bot.dbl.close()
+                self.bot.dbl = None
+                await sleep(3)
 
-                dump(data, f)
-            except Exception as e:
-                await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
+            except DBLException as error:
+                em = Embed(
+                    title="Administration: Connect DBL",
+                    description=f"An error prevented disconnecting from DBL\n"
+                                f"**__{error.__class__.__name__}:__** "
+                                f"{error[:1000]}",
+                    color=0xFF0000
+                )
+                return await ctx.send(embed=em)
 
-        with suppress(Exception):  # Comment this out and unindent logout() to disable suppressing
-            await self.bot.logout()
+        await self.bot.connect_dbl(autopost=True)
+
+        if self.bot.dbl:
+            em = Embed(
+                title="Administration: Connect DBL",
+                description="DiscordBotList reconnection successful",
+                color=0x00FF00
+            )
+
+        else:
+            em = Embed(
+                title="Administration: Connect DBL",
+                description="DiscordBotList reconnection failed",
+                color=0xFF0000
+            )
+
+        return await ctx.send(embed=em)
 
 
 def setup(bot: Bot):
