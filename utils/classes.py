@@ -183,7 +183,7 @@ class Bot(DiscordBot):
     def __init__(self, *args, **kwargs):
 
         # Timer to track minutes since responded to a command
-        self.Inactive = 0
+        self.inactive = 0
 
         self.cwd = getcwd()
 
@@ -208,16 +208,23 @@ class Bot(DiscordBot):
 
         # Load data from pkl after super init to ensure loop is available
         self.user_data = PI(f"Serialized/data.pkl", create_file=True, loop=self.loop)
-
-        print("#-------------------------------#\n"
-              "[DATA LOADED] Loaded data.pkl.\n"
-              "#-------------------------------#\n")
+        print("[DATA LOADED] Loaded data.pkl.")
 
     def run(self, *args, **kwargs):
         super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
 
+    @property
+    def dbl_page(self):
+        return f"https://discordbots.org/bot/{self.user.id}"
+
+    @property
+    def dbl_vote(self):
+        return f"{self.dbl_page}/vote"
+
     async def connect_dbl(self, autopost: bool = None):
         try:
+            if self.dbl:
+                await self.dbl.close()
             token = self.auth.get("MWS_DBL_TOKEN")
 
             self.dbl = DBLClient(self, token, autopost=autopost)
@@ -233,7 +240,7 @@ class Bot(DiscordBot):
             print("[DBL ERROR] Login Failed: No token was provided or token provided was invalid.")
 
     async def get_user_vote(self, user_id: int):
-        if user_id == self.owner.id:
+        if user_id == self.owner_ids:
             return True
 
         elif not self.dbl:
