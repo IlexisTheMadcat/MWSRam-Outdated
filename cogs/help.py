@@ -49,6 +49,9 @@ Step 2: To send a transformed version of that message.
 
 "Send Messages"
 To send notifications/messages for warnings, confirmations, etc.
+
+"Add Reactions"
+To provide a temporary button to delete your message quickly.
 ```
 **To see important announcements and command changes, Type and enter `{self.bot.command_prefix}help updates`**
 **Use this if you think a command isn't working the same way it did last time you used it.**
@@ -72,19 +75,22 @@ Type `{self.bot.command_prefix}help <directory>`, where `directory` is one of th
                     if self.bot.user_data["VanityAvatars"][i][x][0]:
                         total = total + 1
 
-            owner = self.bot.owner
+            owners = [self.bot.get_user(uid).mention for uid in self.bot.owner_ids]
+            owners = '\n'.join(owners)
             em.description = f"""
 **Details:**
 Command prefix: `{self.bot.command_prefix}`
-Have a custom profile picture for different servers.
+Create a custom directory to better organize your channels.
 
-This bot was created by: {owner}
+This bot was created by:
+{owners}
+
 Support Server invite: https://discord.gg/j2y7jxQ
 Warning: Support server may contain swearing in open channels.
-*Consider __Direct Messaging__ the developer instead for questions/information *after* joining the server.
+*Consider DMing the developer instead for questions/information.
 
 Number of servers this bot is in now: {len(self.bot.guilds)}
-:asterisk: Number of users having vanities equiped now: {total}
+:asterisk: Number of users having vanities equipped now: {total}
 """
             
         elif section.lower() == "privacy":

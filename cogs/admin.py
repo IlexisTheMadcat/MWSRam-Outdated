@@ -548,7 +548,7 @@ class Admin(Cog):
     @is_owner()
     @config.command(name="autopull", aliases=["auto_pull"])
     async def autopull(self, ctx: Context, *, val: str = None):
-        """View or set bot prefix"""
+        """Whether or not the bot will auto-pull from Github"""
 
         if val:
             if val.lower() in ["true", "false"]:
@@ -573,12 +573,41 @@ class Admin(Cog):
 
         else:
             em = Embed(
-                title="Administration: Auto-Pull Config",
+                title="Administration: Bot Auto-Pull Config",
                 description=f"Auto-Git Pull Mode: `{self.bot.debug_mode}`",
                 color=0x0000FF
             )
 
         return await ctx.send(embed=em)
+
+    @is_owner()
+    @config.command(name="changelog")
+    async def changelog(self, ctx: Context):
+        em = Embed(title="Administration: Bot Changelog", description="No description set.")
+        file = None
+        em.color = 0x00FF00
+        if ctx.message.attachments:
+            for i in ctx.message.attachments:
+                if i.filename == f"changelog.txt":
+                    file = i
+                    break
+
+            if not file:
+                em.description = f"Enter `{self.bot.command_prefix}help updates` to view the changelog.\n" \
+                                 f"**Attach a file named \"changelog.txt\".**"
+                em.color = 0xFF0000
+
+        else:
+            if not file:
+                em.description = f"Enter `{self.bot.command_prefix}help updates` to view the changelog.\n" \
+                                 f"Attach a file named \"changelog.txt\"."
+                em.color = 0x0000FF
+            else:
+                await file.save(f"{self.bot.cwd}/changelog.txt")
+                em.description = f"Changelog file set."
+                em.color = 0x0000FF
+
+        await ctx.send(embed=em)
 
     """ ##################
          Discord Bot List

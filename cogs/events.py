@@ -121,11 +121,10 @@ class Events(Cog):
                     await msg.author.send(
                         f"Your message couldn't be transformed because it is "
                         f"missing 1 or more permissions listed in "
-                        f"`{self.bot.command_prefix}help permissions`.\n"
+                        f"`{self.bot.command_prefix}help` under `Required Permissions`.\n"
                         f"If you keep getting this error, remove your "
                         f"vanity avatar or blacklist the channel you are "
-                        f"trying to use it in.\nThis error my also be "
-                        f"a false alarm. Just try again."
+                        f"trying to use it in."
                     )
 
                     del start
