@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # Lib
+from asyncio import sleep
 from os import popen
 from copy import deepcopy
 
 # Site
+from dbl import DBLException
 from discord.embeds import Embed
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
@@ -574,6 +576,76 @@ class Admin(Cog):
                 title="Administration: Auto-Pull Config",
                 description=f"Auto-Git Pull Mode: `{self.bot.debug_mode}`",
                 color=0x0000FF
+            )
+
+        return await ctx.send(embed=em)
+
+    """ ##################
+         Discord Bot List
+        ################## """
+
+    @is_owner()
+    @group(name="dbl", invoke_without_command=True)
+    async def dbl(self, ctx: Context):
+        """See current DBL connection status"""
+
+        if self.bot.dbl:
+            dbl_guilds = await self.bot.dbl.get_guild_count(self.bot.user.id)
+            dbl_guilds_count = dbl_guilds["server_count"]
+            bot_url = f"https://discordbots.org/bot/{self.bot.user.id}"
+            em = Embed(
+                title="Administration: DBL Status",
+                description=f"DiscordBotList Client is currently connected.\n"
+                            f"Guilds: `{dbl_guilds_count}`\n"
+                            f"Bot Page: {bot_url}\n"
+                            f"Bot Vote Page: {bot_url}/vote",
+                color=0x0000FF
+            )
+
+        else:
+            em = Embed(
+                title="Administration: DBL Status",
+                description="DiscordBotList Client is not connected.",
+                color=0xFF0000
+            )
+
+        return await ctx.send(embed=em)
+
+    @is_owner()
+    @dbl.command(name="connect", aliases=["reconnect"])
+    async def connect(self, ctx: Context):
+        """Connects (or reconnects) DBL"""
+
+        if self.bot.dbl:
+            try:
+                await self.bot.dbl.close()
+                self.bot.dbl = None
+                await sleep(3)
+
+            except DBLException as error:
+                em = Embed(
+                    title="Administration: Connect DBL",
+                    description=f"An error prevented disconnecting from DBL\n"
+                                f"**__{error.__class__.__name__}:__** "
+                                f"{error[:1000]}",
+                    color=0xFF0000
+                )
+                return await ctx.send(embed=em)
+
+        await self.bot.connect_dbl(autopost=True)
+
+        if self.bot.dbl:
+            em = Embed(
+                title="Administration: Connect DBL",
+                description="DiscordBotList reconnection successful",
+                color=0x00FF00
+            )
+
+        else:
+            em = Embed(
+                title="Administration: Connect DBL",
+                description="DiscordBotList reconnection failed",
+                color=0xFF0000
             )
 
         return await ctx.send(embed=em)

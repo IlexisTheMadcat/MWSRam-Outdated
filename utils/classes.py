@@ -206,7 +206,7 @@ class Bot(DiscordBot):
 
         super().__init__(*args, **kwargs)
 
-        # Load data from pkl
+        # Load data from pkl after super init to ensure loop is available
         self.user_data = PI(f"Serialized/data.pkl", create_file=True, loop=self.loop)
 
         print("#-------------------------------#\n"
@@ -216,14 +216,17 @@ class Bot(DiscordBot):
     def run(self, *args, **kwargs):
         super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
 
-    def connect_dbl(self, autopost: bool = None):
+    async def connect_dbl(self, autopost: bool = None):
         try:
             token = self.auth.get("MWS_DBL_TOKEN")
+
             self.dbl = DBLClient(self, token, autopost=autopost)
+            await self.dbl.post_guild_count()
 
             print("[DBL LOGIN] Logged in to DBL with token.")
 
         except DBLException:
+            await self.dbl.close()
             self.auth["MWS_DBL_TOKEN"] = None
             self.dbl = None
 
