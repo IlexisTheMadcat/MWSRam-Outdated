@@ -1,10 +1,10 @@
 
 # Lib
 from asyncio import sleep
+from contextlib import suppress
+from timeit import default_timer
 
 # Site
-from contextlib import suppress
-
 from discord.errors import Forbidden, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
@@ -16,7 +16,6 @@ from discord.ext.commands.errors import (
     NotOwner
 )
 from discord.message import Message
-from timeit import default_timer
 
 # Local
 from utils.classes import Bot
@@ -41,7 +40,7 @@ class Events(Cog):
         # Check if the message is a command. Terminates the event if so, so the command can run.
         verify_command = await self.bot.get_context(msg)
         if verify_command.valid:
-            self.bot.Inactive = 0
+            self.bot.inactive = 0
             return
 
         # React with passion
@@ -85,7 +84,7 @@ class Events(Cog):
 
         # Get attachments
         start = default_timer()
-        AttachmentFiles = []
+        AttachmentFiles = list()
         for i in msg.attachments:
             try:
                 dcfileobj = await i.to_file()
@@ -159,7 +158,7 @@ class Events(Cog):
                 )
 
                 self.bot.LatestRS = comptime
-                self.bot.Inactive = 0
+                self.bot.inactive = 0
 
                 if comptime > 3:
                     if self.bot.owner.id == msg.author.id:
