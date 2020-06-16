@@ -37,6 +37,9 @@ INT_FROM_EID = {
 
 def get_engraved_id_from_msg(content: str) -> Optional[int]:
     try:
+        if not content.endswith(EID_FROM_INT[10]):
+            raise IndexError
+
         msg_id_block = list(content[-19:])
         msg_id_block.pop()
 
