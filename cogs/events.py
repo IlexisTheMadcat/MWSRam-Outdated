@@ -94,7 +94,7 @@ class Events(Cog):
                 continue
 
         try:
-            if msg.author.bot and msg.author.discriminator == "0000" and msg.author.endswith(f"{'​'*5}"):
+            if msg.author.bot and msg.author.discriminator == "0000":
                 EngravedID = get_engraved_id_from_msg(msg.content)
                 if self.bot.get_user(EngravedID):
                     with suppress(Forbidden):
