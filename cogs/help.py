@@ -49,6 +49,9 @@ Step 2: To send a transformed version of that message.
 
 "Send Messages"
 To send notifications/messages for warnings, confirmations, etc.
+
+"Add Reactions"
+To provide a temporary button to delete your message quickly.
 ```
 **To see important announcements and command changes, Type and enter `{self.bot.command_prefix}help updates`**
 **Use this if you think a command isn't working the same way it did last time you used it.**
