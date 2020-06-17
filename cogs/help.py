@@ -364,10 +364,6 @@ Gives you an invite link to invite this bot to any server.
 **Limitations:**
 **(-)** __You cannot edit messages you send.__
 **--** If you have to, consider deleting the target message and type again.
-
-**(-)** __Your messages will not be stacked efficiently__ (There is a plan to fix this).
-**--** Every message you send will have your name over it...
-Unlike\nthe\ndefault\nstacking\nmechanic.
 """
 
         elif section.lower() == "updates":
