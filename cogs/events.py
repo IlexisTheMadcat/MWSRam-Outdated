@@ -4,7 +4,9 @@ from asyncio import sleep
 
 # Site
 from contextlib import suppress
+from typing import List
 
+from discord import Webhook
 from discord.errors import Forbidden, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
@@ -139,16 +141,17 @@ class Events(Cog):
                     if msg.channel.id not in self.bot.user_data["webhooks"]:
                         self.bot.user_data["webhooks"][msg.channel.id] = 0
 
-                    webhooks = await msg.channel.webhooks()
-                    webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
+                    webhooks: List[Webhook] = await msg.channel.webhooks()
+                    webhook: Webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
                     if webhook is None:
-                        webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
+                        webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics", avatar="")
                         self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
 
                     await webhook.send(
                         new_content,
                         files=AttachmentFiles,
-                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]
+                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
+                        username=msg.author.display_name
                     )
 
                     stop = default_timer()
