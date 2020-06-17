@@ -616,7 +616,7 @@ class Admin(Cog):
         if self.bot.dbl:
             dbl_guilds = await self.bot.dbl.get_guild_count(self.bot.user.id)
             dbl_guilds_count = dbl_guilds["server_count"]
-            bot_url = f"https://discordbots.org/bot/{self.bot.user.id}"
+            bot_url = self.bot.dbl_page
             em = Embed(
                 title="Administration: DBL Status",
                 description=f"DiscordBotList Client is currently connected.\n"
