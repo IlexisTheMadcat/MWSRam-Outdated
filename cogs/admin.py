@@ -513,7 +513,7 @@ class Admin(Cog):
     @is_owner()
     @config.command(name="debug", aliases=["debug_mode"])
     async def debug(self, ctx: Context, *, val: str = None):
-        """View or set bot prefix"""
+        """View or set debug mode"""
 
         if val:
             if val.lower() in ["true", "false"]:
@@ -597,15 +597,10 @@ class Admin(Cog):
                                  f"**Attach a file named \"changelog.txt\".**"
                 em.color = 0xFF0000
 
-        else:
-            if not file:
-                em.description = f"Enter `{self.bot.command_prefix}help updates` to view the changelog.\n" \
-                                 f"Attach a file named \"changelog.txt\"."
-                em.color = 0x0000FF
-            else:
+            elif file:
                 await file.save(f"{self.bot.cwd}/changelog.txt")
                 em.description = f"Changelog file set."
-                em.color = 0x0000FF
+                em.color = 0x00FF00
 
         await ctx.send(embed=em)
 

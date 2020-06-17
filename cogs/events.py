@@ -19,6 +19,8 @@ from discord.message import Message
 from timeit import default_timer
 
 # Local
+from discord.utils import get
+
 from utils.classes import Bot
 from utils.utils import (
     EID_FROM_INT,  # I
@@ -131,22 +133,31 @@ class Events(Cog):
                     return
 
                 try:
-                    dummy = await msg.channel.create_webhook(name=msg.author.display_name+f"{'​'*5}")
-                    await dummy.send(
+                    if "webhooks" not in self.bot.user_data.keys():
+                        self.bot.user_data["webhooks"] = {"channelID": "webhookID"}
+
+                    if msg.channel.id not in self.bot.user_data["webhooks"]:
+                        self.bot.user_data["webhooks"][msg.channel.id] = 0
+
+                    webhooks = await msg.channel.webhooks()
+                    webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
+                    if webhook is None:
+                        webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
+                        self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
+
+                    await webhook.send(
                         new_content,
                         files=AttachmentFiles,
                         avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]
                     )
 
                     stop = default_timer()
-                    await dummy.delete()
 
                 except Forbidden:
                     await msg.author.send(
                         f"Your message couldn't be transformed because it is missing 1 or more permissions listed in "
                         f"`{self.bot.command_prefix}help permissions`.\nIf you keep getting this error, remove your "
-                        f"vanity avatar or blacklist the channel you are using it in.\nThis error my also be a false "
-                        f"alarm. Just try again."
+                        f"vanity avatar or blacklist the channel you are using it in."
                     )
 
                     del start
