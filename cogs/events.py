@@ -4,7 +4,9 @@ from asyncio import sleep
 
 # Site
 from contextlib import suppress
+from typing import List
 
+from discord import Webhook
 from discord.errors import Forbidden, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
