@@ -176,6 +176,9 @@ CLOSETS_TEMPLATE = {
         "closet_name": "closet_url"
     }
 }
+WEBHOOKS_TEMPLATE = {
+    "channelID": "webhookID"
+}
 
 
 class Bot(DiscordBot):

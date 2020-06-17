@@ -279,8 +279,6 @@ class ModerationCommands(Cog):
                     "Here are users using vanities in this server; "
                     "The list may contain members who have left:\n```"
                 )
-
-                # TODO: Use guild.get_member instead to get only current members?
                 for u_id in self.vanities[guild.id]:
                     user = self.bot.get_user(u_id)
                     if user:

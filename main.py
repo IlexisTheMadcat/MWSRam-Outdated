@@ -100,7 +100,8 @@ async def on_ready():
     permissions.update(
         send_messages=True,
         manage_messages=True,
-        manage_webhooks=True
+        manage_webhooks=True,
+        add_reactions=True
     )
 
     print(f"\n"
