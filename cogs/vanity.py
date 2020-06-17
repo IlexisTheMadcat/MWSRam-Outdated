@@ -14,148 +14,193 @@ from utils.classes import Bot
 class VanityCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.vanities = bot.user_data["VanityAvatars"]
+        self.closets = bot.user_data["Closets"]
 
     @command(aliases=["set"])
     @bot_has_permissions(manage_webhooks=True)
     async def set_vanity(self, ctx: Context, url: str = None):
-        if not ctx.guild:
-            await ctx.send(
+
+        guild = ctx.guild
+        author = ctx.author
+        chan = ctx.channel
+        msg = ctx.message
+
+        if not guild:
+            return await ctx.send(
                 "This command cannot be used in a DM channel. "
                 "Consider using it in a private channel in one of your servers."
             )
-            return
 
-        if ctx.guild.id in self.bot.user_data["VanityAvatars"] and \
-                ctx.author.id in self.bot.user_data["VanityAvatars"][ctx.guild.id].keys():
-            if self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][2]:
-                await ctx.send(
-                    "You are currently blocked from using vanity avatars in this server. "
-                    "Contact a moderator with the `Manage Messages` permission to unblock you."
-                )
-                return
+        if all((
+                guild.id in self.vanities,
+                author.id in self.vanities[guild.id],
+                self.vanities[guild.id][author.id][2]
+        )):
+            return await ctx.send(
+                "You are currently blocked from using vanity avatars in this "
+                "server. Contact a moderator with the `Manage Messages` "
+                "permission to unblock you."
+            )
         
         try:
-            if url in self.bot.user_data["Closets"][ctx.author.id]:
-                check = await self.bot.get_user_vote(ctx.author.id)
+            if url in self.closets[author.id]:
+                check = await self.bot.get_user_vote(author.id)
 
                 if not check:
-                    await ctx.send(
-                        "Closets are vote-locked. Please go to https://discordbots.org/bot/687427956364279873/vote and "
-                        "click on 'Vote'.\nThen come back and try again. If you just now voted, wait a few moments."
+                    return await ctx.send(
+                        f"Closets are vote-locked. Please go to "
+                        f"{self.bot.dbl_vote} and click on 'Vote'.\nThen come "
+                        f"back and try again. If you just now voted, wait a "
+                        f"few moments."
                     )
-                    return
+
                 elif check:
-                    url = self.bot.user_data["Closets"][ctx.author.id][url]
+                    url = self.closets[author.id][url]
                     await ctx.send("Used closet entry.")
+
         except KeyError or IndexError:
             pass
         
         if url is None:
             try:
-                url = ctx.message.attachments[0].url
+                url = msg.attachments[0].url
                 await ctx.send("Used attachment...")
+
             except IndexError:
                 try:
-                    url = self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][1]
+                    url = self.vanities[guild.id][author.id][1]
+
                     if url is None:
                         raise KeyError
+
                     else:
                         await ctx.send("Used previous avatar...")
+
                 except KeyError:
                     await ctx.send("Not enough parameters!")
                     return
 
         try:
-            dummy = await ctx.channel.create_webhook(name=ctx.author.display_name)
-            await dummy.send("Vanity Profile Pics: Vanity successfully created.‎‎", avatar_url=url)
-            await dummy.delete()
-        except Exception as e:
-            await ctx.author.send(
-                f"An error has occured; Try making sure your url is valid and is a valid resolution.\n"
-                f"128x128 (no compression) or 400x400 is the way to go!\n`Error: {e}`"
+            dummy = await chan.create_webhook(name=author.display_name)
+            await dummy.send(
+                "Vanity Profile Pics: Vanity successfully created.‎‎",
+                avatar_url=url
             )
-            return
+            await dummy.delete()
+
+        except Exception as e:
+            return await author.send(
+                f"An error has occurred; Try making sure your url is valid "
+                f"and is a valid resolution.\n 128x128 (no compression) or "
+                f"400x400 is the way to go!\n`Error: {e}`"
+            )
 
         else:
-            if ctx.guild.id not in self.bot.user_data["VanityAvatars"]:
-                self.bot.user_data["VanityAvatars"].update({ctx.guild.id: dict()})
+            if guild.id not in self.vanities:
+                self.vanities.update({guild.id: dict()})
                 
-            if ctx.author.id not in self.bot.user_data["VanityAvatars"][ctx.guild.id].keys():
-                self.bot.user_data["VanityAvatars"][ctx.guild.id].update({ctx.author.id: [None, None, False]})
+            if author.id not in self.vanities[guild.id]:
+                self.vanities[guild.id].update(
+                    {author.id: [None, None, False]}
+                )
 
-            if self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0] is None:
-                self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id] = [url, url, False]
+            if self.vanities[guild.id][author.id][0] is None:
+                self.vanities[guild.id][author.id] = [url, url, False]
+
             else:
-                self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id] = [
+                self.vanities[guild.id][author.id] = [
                     url,
-                    self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0],
+                    self.vanities[guild.id][author.id][0],
                     False
                 ]
                 
-            print(f'+ SET/CHANGED vanity avatar for user \"{ctx.author}\" in server "{ctx.guild.name}".')
-                
-    # ------------------------------------------------------------------------------------------------------------------
+            print(
+                f'+ SET/CHANGED vanity avatar for user '
+                f'\"{ctx.author}\" in server "{ctx.guild.name}".'
+            )
+
     @command(aliases=["remove"])
     @bot_has_permissions(send_messages=True)
     async def remove_vanity(self, ctx: Context):
-        if not ctx.guild:
-            await ctx.send(
-                "This command cannot be used in a DM channel. "
-                "Consider using it in a private channel in one of your servers."
+
+        guild = ctx.guild
+        author = ctx.author
+
+        if not guild:
+            return await ctx.send(
+                "This command cannot be used in a DM channel. Consider "
+                "using it in a private channel in one of your servers."
             )
-            return
         
-        if ctx.guild.id in self.bot.user_data["VanityAvatars"] and \
-                ctx.author.id in self.bot.user_data["VanityAvatars"][ctx.guild.id] and \
-                self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0]:
-            self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id] = [
+        if all((
+            guild.id in self.vanities,
+            author.id in self.vanities[guild.id],
+            self.vanities[guild.id][author.id][0]
+        )):
+            self.vanities[guild.id][author.id] = [
                 None,
-                self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0],
-                self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][2]
+                self.vanities[guild.id][author.id][0],
+                self.vanities[guild.id][author.id][2]
             ]
 
             await ctx.send("Removed vanity.")
-            print(f'- REMOVED vanity avatar for user \"{ctx.author}\" in server "{ctx.guild.name}".')
+            print(
+                f'- REMOVED vanity avatar for user \"{ctx.author}\" '
+                f'in server "{ctx.guild.name}".'
+            )
 
         else:
             await ctx.send("You don't have a vanity avatar on right now.")
 
-    # ------------------------------------------------------------------------------------------------------------------
     @command()
     @bot_has_permissions(send_messages=True)
-    async def current(self, ctx: Context, user: User, standard: str = None):  # TODO: Maybe `Member`, not `User`?
+    async def current(self, ctx: Context, user: User, standard: str = None):
+
+        guild = ctx.guild
+        author = ctx.author
+
         if standard != "standard":
             standard = None
 
-        if not ctx.guild:
-            await ctx.send(
-                "This command cannot be used in a DM channel. "
-                "Consider using it in a private channel in one of your servers."
+        if not guild:
+            return await ctx.send(
+                "This command cannot be used in a DM channel. Consider "
+                "using it in a private channel in one of your servers."
             )
-            return
         
         if user.id == self.bot.user.id:
-            await ctx.send(f'My avatar is located here:\n{self.bot.user.avatar_url}')
-            print(f'[] Sent bot\'s avatar url to user \"{ctx.author}\".')
-            return
+            print(f'[] Sent bot\'s avatar url to user \"{author}\".')
+            return await ctx.send(
+                f'My avatar is located here:\n{self.bot.user.avatar_url}'
+            )
         
         else:
             async def show_standard():
-                await ctx.send(f"Their current standard avatar is located here:\n{user.avatar_url}")
-                print(f'[] Sent standard avatar url for \"{user}\" to user \"{ctx.author}\".')
-                return
-            
-            if not standard:
-                if ctx.guild.id in self.bot.user_data["VanityAvatars"] and \
-                    user.id in self.bot.user_data["VanityAvatars"][ctx.guild.id] and \
-                        self.bot.user_data["VanityAvatars"][ctx.guild.id][user.id][0]:
+                print(
+                    f'[] Sent standard avatar url for \"{user}\"'
+                    f' to user \"{author}\".'
+                )
+                return await ctx.send(
+                    f"Their current standard avatar is "
+                    f"located here:\n{user.avatar_url}"
+                )
 
-                    await ctx.channel.send(
-                        f"Their current vanity avatar is located here:\n"
-                        f"{self.bot.user_data['VanityAvatars'][ctx.guild.id][user.id][0]}"
+            if not standard:
+                if all((
+                    guild.id in self.vanities,
+                    user.id in self.vanities[guild.id],
+                    self.vanities[guild.id][user.id][0]
+                )):
+
+                    print(
+                        f'[] Sent vanity avatar url for \"{user}\" '
+                        f'to user \"{author}\".'
                     )
-                    print(f'[] Sent vanity avatar url for \"{user}\" to user \"{ctx.author}\".')
-                    return
+                    return await ctx.channel.send(
+                        f"Their current vanity avatar is located here:\n"
+                        f"{self.vanities[guild.id][user.id][0]}"
+                    )
 
                 else:
                     await show_standard()

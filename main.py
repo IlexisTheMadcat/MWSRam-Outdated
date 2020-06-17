@@ -31,8 +31,21 @@ INIT_EXTENSIONS = [
     "vanity",
 ]
 
+LOADING_CHOICES = [  # because why not
+    "Loading Random Access Memory...",
+    '"It appears nothing here will fit except women\'s clothes."',
+    "Booting up the creative but stubborn mind...",
+    "Waking up the older sister...",
+    "Charging RAM...",
+    '"I was only waiting to help Roswaal-sama put on fresh clothes."',
+    '"By the way, do you have plans after this?"',
+    '"I see you really are studying, sir."',
+    '"No, thank you, sir."',
+    '"What can you do by learning anything now?!"',
+    '"I\'m not interested."',
+    "Requesting the one they call Ram..."
+]
 
-print("...\n\n#-------------------------------#")
 
 config_data = PI("Serialized/bot_config.pkl")
 
@@ -49,33 +62,12 @@ for key, val in bot_config.items():
         config_data[key] = CONFIG_DEFAULTS[key]
         bot_config[key] = CONFIG_DEFAULTS[key]
         defaults_used = True
-        print(f"[USING CONFIG DEFAULT] Config '{key}' missing. Inserted default '{CONFIG_DEFAULTS[key]}'")
+        print(f"\n[USING CONFIG DEFAULT] Config '{key}' missing. "
+              f"Inserted default '{CONFIG_DEFAULTS[key]}'")
 if not defaults_used:
-    print("[CONFIG LOADED] Configurations successfully loaded from Serialized/bot_config.pkl")
+    print("\n[CONFIG LOADED] Configurations successfully "
+          "loaded from Serialized/bot_config.pkl")
 
-print("#-------------------------------#\n")
-loading_choices = [  # because why not
-    "Loading Random Access Memory...",
-    '"It appears nothing here will fit except women\'s clothes."',
-    "Booting up the creative but stubbern mind...",
-    "Waking up the older sister...",
-    "Charging RAM...",
-    '"I was only waiting to help Roswaal-sama put on fresh clothes."',
-    '"By the way, do you have plans after this?"',
-    '"I see you really are studying, sir."',
-    '"No, thank you, sir."',
-    '"What can you do by learning anything now?!"',
-    '"I\'m not interested."',
-    "Requesting the one they call Ram..."
-]
-
-print("#-------------------------------#")
-print(f"{choice(loading_choices)}")
-print(f"#-------------------------------#\n")
-
-# Extension "repl" must be loaded manually
-# as it is not automatically available
-# because it is not often needed.
 
 bot = Bot(
     description="Change your profile picture for a specific server.",
@@ -83,7 +75,7 @@ bot = Bot(
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
 
-    # Configurable via :>bot
+    # Configurable via [p]bot
     **bot_config
 )
 
@@ -92,10 +84,9 @@ bot.bot_config = config_data
 # To be replaced by custom help command  # TODO: Move to `help.py` when done
 bot.remove_command("help")
 
-print("#-------------------------------#")
-print(f"[BOT INIT] Running in: {bot.cwd}")
-print(f"[BOT INIT] Discord API version: {__version__}")
-print("#-------------------------------#\n")
+
+print(f"[BOT INIT] Running in: {bot.cwd}\n"
+      f"[BOT INIT] Discord API version: {__version__}")
 
 
 @bot.event
@@ -134,7 +125,9 @@ async def on_ready():
           f"| Guilds:    {len(bot.guilds)}\n"
           f"| Users:     {len(list(bot.get_all_members()))}\n"
           f"| OAuth URL: {oauth_url(app_info.id, permissions)}\n"
-          f"# ------------------------------#")
+          f"# ------------------------------#\n"
+          f"| {choice(LOADING_CHOICES)}\n"
+          f"#-------------------------------#\n")
 
 
 if __name__ == "__main__":
