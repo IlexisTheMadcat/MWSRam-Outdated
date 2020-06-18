@@ -2,6 +2,7 @@
 # Lib
 from asyncio.events import AbstractEventLoop, get_event_loop
 from asyncio.locks import Lock
+from io import BytesIO
 from json import dumps
 from os import getcwd, utime
 from os.path import exists, join, split, splitext, getmtime
@@ -72,12 +73,14 @@ class PickleInterface:
 
     Parameters
     ------------
-    fp: :class:`str`
+    fp: :class:`str` or :class:`BytesIO`
         The file path to the pickle file that will be loaded/created for the
         PickleInterface. Can be a relative path (e.g. 'projsubdir/file.pkl')
         literal path (e.g. 'C:/Projects/Subdir/file.pkl',
         '/home/user/project/file.pkl'). File must have a '.pkl' extension. If
         the file extension is not '.pkl', a `NameError` will be raised.
+        Alternatively, a :class:`BytesIO` object can be used instead, however,
+        `autoload` cannot be enabled.
             Defaults to ``'file.pkl'``
 
     create_file: :class:`bool`
@@ -132,7 +135,7 @@ class PickleInterface:
 
     def __init__(
             self,
-            fp: str = "file.pkl",
+            fp: Union[str, BytesIO] = "file.pkl",
             *,
             create_file: bool = True,
             autosave: bool = True,
@@ -173,6 +176,11 @@ class PickleInterface:
             self._fp = self.filepath(fp)
         except Exception as error:
             raise error
+
+        # Autoload checks file modified time
+        # Not compatible with BytesIO
+        if isinstance(self._fp, BytesIO):
+            self._autoload = False
 
         # Load initial data from file into cache
         if self._loop:
@@ -291,20 +299,32 @@ class PickleInterface:
     def __write(self, mapping: dict) -> None:
         """Writes the current contents of cache to pickle file."""
 
-        with open(self.filepath(), "wb") as fp:
-            dump(mapping, fp)
+        file = self.filepath()
+
+        if isinstance(file, BytesIO):
+            dump(mapping, file)
+
+        else:
+            with open(file, "wb") as fp:
+                dump(mapping, fp)
 
     def __read(self) -> dict:
         """Read contents of pickle file.
         If pickle file is empty, an empty dict is returned."""
 
-        with open(self.filepath(), "rb") as fp:
-            try:
-                payload = dict(load(fp))
+        file = self.filepath()
 
-            # Empty 0-byte pickle files raise this error
-            except EOFError:
-                payload = dict()
+        try:
+            if isinstance(file, BytesIO):
+                payload = dict(load(file))
+
+            else:
+                with open(file, "rb") as fp:
+                    payload = dict(load(fp))
+
+        # Empty 0-byte pickle files raise this error
+        except EOFError:
+            payload = dict()
 
         return payload
 
@@ -370,12 +390,17 @@ class PickleInterface:
             return self._async_load()
         self._load()
 
-    def filepath(self, fp: str = None) -> str:
+    def filepath(self, fp: str = None) -> Union[str, BytesIO]:
         """Get the file path of the pickle file being used while allowing
         for the file to be altered."""
 
         if fp:
             self._fp = fp
+
+        # Bypass dir-parsing if using BytesIO
+        if isinstance(self._fp, BytesIO):
+            self._fp.seek(0)
+            return self._fp
 
         # Split file path and name to test each independently
         dir_path, file_name = split(self._fp)
@@ -422,9 +447,10 @@ class PickleInterface:
         return self._fp
 
     @property
-    def modified_ts(self) -> float:
+    def modified_ts(self) -> Optional[float]:
         """Get the last modified timestamp of the pickle file"""
-        return getmtime(self.filepath())
+        if not isinstance(self._fp, BytesIO):
+            return getmtime(self.filepath())
 
     """ ##########################
          Public Dict-Like Methods
