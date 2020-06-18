@@ -1,10 +1,12 @@
 
 # Lib
 from asyncio import sleep
-from contextlib import suppress
-from timeit import default_timer
 
 # Site
+from contextlib import suppress
+from typing import List
+
+from discord import Webhook
 from discord.errors import Forbidden, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
@@ -16,6 +18,7 @@ from discord.ext.commands.errors import (
     NotOwner
 )
 from discord.message import Message
+from timeit import default_timer
 
 # Local
 from discord.utils import get
@@ -42,7 +45,7 @@ class Events(Cog):
         # Check if the message is a command. Terminates the event if so, so the command can run.
         verify_command = await self.bot.get_context(msg)
         if verify_command.valid:
-            self.bot.inactive = 0
+            self.bot.Inactive = 0
             return
 
         # React with passion
@@ -86,7 +89,7 @@ class Events(Cog):
 
         # Get attachments
         start = default_timer()
-        AttachmentFiles = list()
+        AttachmentFiles = []
         for i in msg.attachments:
             try:
                 dcfileobj = await i.to_file()
@@ -138,16 +141,17 @@ class Events(Cog):
                     if msg.channel.id not in self.bot.user_data["webhooks"]:
                         self.bot.user_data["webhooks"][msg.channel.id] = 0
 
-                    webhooks = await msg.channel.webhooks()
-                    webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
+                    webhooks: List[Webhook] = await msg.channel.webhooks()
+                    webhook: Webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
                     if webhook is None:
-                        webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
+                        webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics", avatar="")
                         self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
 
                     await webhook.send(
                         new_content,
                         files=AttachmentFiles,
-                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]
+                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
+                        username=msg.author.display_name
                     )
 
                     stop = default_timer()
@@ -168,7 +172,7 @@ class Events(Cog):
                 )
 
                 self.bot.LatestRS = comptime
-                self.bot.inactive = 0
+                self.bot.Inactive = 0
 
                 if comptime > 3:
                     if self.bot.owner.id == msg.author.id:
