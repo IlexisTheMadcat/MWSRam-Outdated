@@ -186,12 +186,8 @@ class VanityCommands(Cog):
                     f"located here:\n{user.avatar_url}"
                 )
 
-            if not standard:
-                if all((
-                    guild.id in self.vanities,
-                    user.id in self.vanities[guild.id],
-                    self.vanities[guild.id][user.id][0]
-                )):
+            if not standard:  # Reverted to "and" because it must be a procedural if statement
+                if guild.id in self.vanities and user.id in self.vanities[guild.id] and self.vanities[guild.id][user.id][0]:
 
                     print(
                         f'[] Sent vanity avatar url for \"{user}\" '
