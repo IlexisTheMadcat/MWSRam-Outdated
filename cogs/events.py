@@ -197,6 +197,7 @@ class Events(Cog):
             return
 
     # Deleting/Inquiring a message
+    # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
         class Reaction:
@@ -265,7 +266,7 @@ class Events(Cog):
             return
 
     @Cog.listener()
-    async def on_dbl_vote(self, data):
+    async def on_dbl_vote(self, data):  # TODO: Verify operation
         user = self.bot.get_user(data["user"])
         await user.send("Thanks for voting! You will now have access to the following commands shortly for 12 hours:\n"
                         f"{self.bot.command_prefix}add_to_closet\n"
