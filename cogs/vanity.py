@@ -43,7 +43,7 @@ class VanityCommands(Cog):
             if url in self.closets[author.id]:
                 check = await self.bot.get_user_vote(author.id)
 
-                if not check:
+                if not check or ctx.author.id in self.bot.owner_ids:
                     return await ctx.send(
                         f"Closets are vote-locked. Please go to "
                         f"{self.bot.dbl_vote} and click on 'Vote'.\nThen come "

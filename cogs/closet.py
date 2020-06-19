@@ -20,7 +20,7 @@ class ClosetCommands(Cog):
     async def add_to_closet(self, ctx: Context, name: str):
         check = await self.bot.get_user_vote(ctx.author.id)
     
-        if not check:
+        if not check or ctx.author.id in self.bot.owner_ids:
             return await ctx.send(
                 "Closets are vote-locked. Please go to "
                 "https://discordbots.org/bot/687427956364279873/vote "
@@ -88,7 +88,7 @@ class ClosetCommands(Cog):
     async def remove_from_closet(self, ctx: Context, name: str):
         check = await self.bot.get_user_vote(ctx.author.id)
 
-        if not check:
+        if not check or ctx.author.id in self.bot.owner_ids:
             return await ctx.send(
                 "Closets are vote-locked. Please go to "
                 "https://discordbots.org/bot/687427956364279873/vote and "
@@ -124,8 +124,8 @@ class ClosetCommands(Cog):
     @bot_has_permissions(send_messages=True)
     async def rename_closet_entry(self, ctx: Context, name: str, rename: str):
         check = await self.bot.get_user_vote(ctx.author.id)
-    
-        if not check:
+
+        if not check or ctx.author.id in self.bot.owner_ids:
             return await ctx.send(
                 "Closets are vote-locked. Please go to "
                 "https://discordbots.org/bot/687427956364279873/vote and "
@@ -178,9 +178,9 @@ class ClosetCommands(Cog):
             if name.id not in self.bot.user_data["Closets"].keys():
                 self.bot.user_data["Closets"][name.id] = {}
 
-            check = await self.bot.get_user_vote(ctx.author.id)
+            check = await self.bot.get_user_vote(name.id)
                 
-            if not check:
+            if not check or name.id in self.bot.owner_ids:
                 return await ctx.send(
                     "Closets are vote-locked. Please go to "
                     "https://discordbots.org/bot/687427956364279873/vote and "
@@ -213,7 +213,7 @@ class ClosetCommands(Cog):
     
             check = await self.bot.get_user_vote(name.id)
 
-            if not check:
+            if not check or name.id in self.bot.owner_ids:
                 return await ctx.send(
                     f"Closets are vote-locked. Tell {name.name} to go to "
                     f"https://discordbots.org/bot/687427956364279873/vote "
