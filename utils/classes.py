@@ -243,7 +243,7 @@ class Bot(DiscordBot):
             print("[DBL ERROR] Login Failed: No token was provided or token provided was invalid.")
 
     async def get_user_vote(self, user_id: int):
-        if user_id == self.owner_ids:
+        if user_id in self.owner_ids:
             return True
 
         elif not self.dbl:
