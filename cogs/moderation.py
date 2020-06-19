@@ -314,12 +314,7 @@ class ModerationCommands(Cog):
                 "You cannot use this command on yourself."
             )
 
-        if all((
-            author.id != guild.owner.id,
-            guild.id in self.vanities,
-            author.id in self.vanities[guild.id],
-            self.vanities[guild.id][author.id][2]
-        )):
+        if author.id != guild.owner.id and guild.id in self.vanities and author.id in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
             return await ctx.send(
                 "You cannot use this command because you were blocked "
                 "from using vanity avatars by another user."
