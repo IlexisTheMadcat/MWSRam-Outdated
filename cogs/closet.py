@@ -124,7 +124,7 @@ class ClosetCommands(Cog):
     @bot_has_permissions(send_messages=True)
     async def rename_closet_entry(self, ctx: Context, name: str, rename: str):
         check = await self.bot.get_user_vote(ctx.author.id)
-    
+
         if not check:
             return await ctx.send(
                 "Closets are vote-locked. Please go to "
@@ -178,7 +178,7 @@ class ClosetCommands(Cog):
             if name.id not in self.bot.user_data["Closets"].keys():
                 self.bot.user_data["Closets"][name.id] = {}
 
-            check = await self.bot.get_user_vote(ctx.author.id)
+            check = await self.bot.get_user_vote(name.id)
                 
             if not check:
                 return await ctx.send(

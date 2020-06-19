@@ -118,7 +118,7 @@ class BlacklistCommands(Cog):
                 if ctx.author.id in self.bot.user_data["Blacklists"].keys():
                     if item in self.bot.user_data["Blacklists"][ctx.author.id][0]:
                         self.bot.user_data["Blacklists"][ctx.author.id][0].remove(item)
-                        channel = await self.bot.get_channel(item)
+                        channel = self.bot.get_channel(item)
                         await ctx.send(
                             f'Channel "{channel.name}" in server "{channel.guild.name}" '
                             f'was removed from your blacklist.'
