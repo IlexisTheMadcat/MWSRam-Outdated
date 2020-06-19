@@ -144,7 +144,7 @@ class Events(Cog):
                     webhooks: List[Webhook] = await msg.channel.webhooks()
                     webhook: Webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
                     if webhook is None:
-                        webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics", avatar="")
+                        webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
                         self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
 
                     await webhook.send(
