@@ -51,7 +51,7 @@ class Events(Cog):
         # React with passion
         if self.bot.user.mentioned_in(msg):
             try:
-                if msg.author.id == self.bot.owner.id:
+                if msg.author.id in self.bot.owner_ids:
                     await msg.add_reaction("💕")
                 else:
                     await msg.add_reaction("👋")
@@ -196,7 +196,7 @@ class Events(Cog):
         except KeyError:
             return
 
-    # Deleting/Enquring a message
+    # Deleting/Inquiring a message
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -264,6 +264,16 @@ class Events(Cog):
             )
         else:
             return
+
+    @Cog.listener()
+    async def on_dbl_vote(self, data):  # TODO: Verify operation
+        user = self.bot.get_user(data["user"])
+        await user.send("Thanks for voting! You will now have access to the following commands shortly for 12 hours:\n"
+                        f"{self.bot.command_prefix}add_to_closet\n"
+                        f"{self.bot.command_prefix}remove_from_closet\n"
+                        f"{self.bot.command_prefix}rename_closet_entry\n"
+                        f"{self.bot.command_prefix}see_closet\n"
+                        f"{self.bot.command_prefix}preview_closet_entry")
 
     # Guild Count change notifications
     # --------------------------------------------------------------------------------------------------------------------------
