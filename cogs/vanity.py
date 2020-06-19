@@ -32,11 +32,7 @@ class VanityCommands(Cog):
                 "Consider using it in a private channel in one of your servers."
             )
 
-        if all((
-                guild.id in self.vanities,
-                author.id in self.vanities[guild.id],
-                self.vanities[guild.id][author.id][2]
-        )):
+        if guild.id in self.vanities and author.id in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
             return await ctx.send(
                 "You are currently blocked from using vanity avatars in this "
                 "server. Contact a moderator with the `Manage Messages` "
@@ -84,16 +80,16 @@ class VanityCommands(Cog):
         try:
             dummy = await chan.create_webhook(name=author.display_name)
             await dummy.send(
-                "Vanity Profile Pics: Vanity successfully created.‎‎",
+                f"{self.bot.user.display_name}: Vanity successfully created.\nSend a message in an unblocked channel to test it out!‎‎",
                 avatar_url=url
             )
             await dummy.delete()
 
         except Exception as e:
             return await author.send(
-                f"An error has occurred; Try making sure your url is valid "
-                f"and is a valid resolution.\n 128x128 (no compression) or "
-                f"400x400 is the way to go!\n`Error: {e}`"
+                f"An error has occurred;\n"
+                f"Try making sure your url is valid and/or the image is a valid resolution.\n"
+                f"Your channel may also have to many webhooks. Read the error below. `Error: {e}`"
             )
 
         else:
@@ -133,11 +129,7 @@ class VanityCommands(Cog):
                 "using it in a private channel in one of your servers."
             )
         
-        if all((
-            guild.id in self.vanities,
-            author.id in self.vanities[guild.id],
-            self.vanities[guild.id][author.id][0]
-        )):
+        if guild.id in self.vanities and author.id in self.vanities[guild.id] and self.vanities[guild.id][author.id][0]:
             self.vanities[guild.id][author.id] = [
                 None,
                 self.vanities[guild.id][author.id][0],
