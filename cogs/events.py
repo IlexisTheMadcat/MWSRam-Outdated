@@ -281,11 +281,15 @@ class Events(Cog):
     async def on_guild_join(self, guild):
         await self.bot.owner.send(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
         print(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
+        if guild.id in self.bot.user_data["VanityAvatars"]:
+            self.bot.user_data["VanityAvatars"][guild.id]: {}
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
         await self.bot.owner.send(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
         print(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
+        if self.bot.user_data["VanityAvatars"][guild.id]:
+            self.bot.user_data["VanityAvatars"].pop(guild.id)
 
     # Errors
     # --------------------------------------------------------------------------------------------------------------------------
