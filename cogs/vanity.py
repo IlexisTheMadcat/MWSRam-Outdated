@@ -1,11 +1,15 @@
 
 # Lib
+from os import remove
 
 # Site
+from discord import File
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.core import bot_has_permissions, command
 from discord.user import User
+from requests import get
+from PIL import Image
 
 # Local
 from utils.classes import Bot
@@ -152,7 +156,7 @@ class VanityCommands(Cog):
         guild = ctx.guild
         author = ctx.author
 
-        if standard != "standard":
+        if standard not in ["standard", "standard_url"]:
             standard = None
 
         if not guild:
@@ -169,22 +173,52 @@ class VanityCommands(Cog):
         
         else:
             async def show_standard():
-                print(
-                    f'[] Sent standard avatar url for \"{user}\"'
-                    f' to user \"{author}\".'
-                )
-                return await ctx.send(
-                    f"Their current standard avatar is "
-                    f"located here:\n{user.avatar_url}"
-                )
+                if (str(user.avatar_url).endswith(".webp") or str(user.avatar_url).endswith(".webp?size=1024")) and standard != "standard_url":
+                    r = get(user.avatar_url, allow_redirects=True)         # Compatibility for mobile devices unable
+                    with open(f"{self.bot.cwd}/avatar.webp", "wb") as f:   # to render .webp files, especially iOS
+                        f.write(r.content)
+
+                    im = Image.open(f"{self.bot.cwd}/avatar.webp")
+                    im.save(f"{self.bot.cwd}/avatar.png", format="PNG")
+                    file = File(f"{self.bot.cwd}/avatar.png")
+                    im.close()
+
+                    print(
+                        f'[] Sent standard avatar url for \"{user}\"'
+                        f' to user \"{author}\".'
+                    )
+
+                    await ctx.send(
+                        f"Their current standard avatar is here:",
+                        file=file
+                    )
+
+                    remove(f"{self.bot.cwd}/avatar.webp")
+                    remove(f"{self.bot.cwd}/avatar.png")
+
+                    return
+
+                else:
+                    print(
+                        f'[] Sent standard avatar url for \"{user}\"'
+                        f' to user \"{author}\".'
+                    )
+
+                    await ctx.send(
+                        f"Their current standard avatar url is located here:\n"
+                        f"{user.avatar_url}",
+                    )
+
+                    return
 
             if not standard:  # Reverted to "and" because it must be a procedural if statement
                 if guild.id in self.vanities and user.id in self.vanities[guild.id] and self.vanities[guild.id][user.id][0]:
 
                     print(
-                        f'[] Sent vanity avatar url for \"{user}\" '
-                        f'to user \"{author}\".'
+                        f'[] Sent vanity avatar url for \"{user}\"'
+                        f' to user \"{author}\".'
                     )
+
                     return await ctx.channel.send(
                         f"Their current vanity avatar is located here:\n"
                         f"{self.vanities[guild.id][user.id][0]}"
@@ -193,7 +227,7 @@ class VanityCommands(Cog):
                 else:
                     await show_standard()
 
-            elif standard == "standard":
+            elif standard in ["standard", "standard_url"]:
                 await show_standard()
 
 
