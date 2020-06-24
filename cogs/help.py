@@ -177,13 +177,18 @@ Use this command if you frequently use bot commands because of how this bot work
             elif subsection.lower() == "current":
                 em.description = f"""
 **CURRENT**
-`{self.bot.command_prefix}current <user> ["standard"]`
+`{self.bot.command_prefix}current <user> ["standard"| "standard_url"]`
 --------------------------------------------------
-Returns you a link to 'user's avatar.
-**--** If they have a vanity equiped, this will return their vanity avatar's url.
-**----** To get their standard avatar at any time, add "standard" to your command.
+Returns a link to 'user's avatar.
+**--** Passing "standard" will return a file instead if it's not *animated.* 
+**----** These will not render on iOS because the link is a `.webp` image. 
+**----** \\*Attempting to follow said link will be tedious for you on iOS. 
+**----** Uploading the file is for the sake of compatibility on iOS.
 
-**--** If they don't have a vanity avatar equiped, their standard avatar will be returned, even if "standard" is not provided.
+**--** If the avatar is *animated,* the link will be returned instead as this is viewable on all platforms.
+
+**--** Vanity avatars always return links. 
+**--** If they don't have a vanity avatar equipped, their standard avatar will be returned.
 """
                 
             elif subsection.lower() == "blacklist":
