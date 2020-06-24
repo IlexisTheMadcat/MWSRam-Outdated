@@ -280,13 +280,12 @@ class ModerationCommands(Cog):
                     "The list may contain members who have left:\n```"
                 )
 
-                # TODO: Use guild.get_member instead to get only current members?
                 for u_id in self.vanities[guild.id]:
                     user = self.bot.get_user(u_id)
                     if user:
                         message.append(
-                            f"{user} - URL: "
-                            f"{self.vanities[guild.id][u_id][1]}\n"
+                            f"▛▚ {user} - URL: \n"
+                            f"▙▞ {self.vanities[guild.id][u_id][0]}\n"
                         )
 
                 message.append("```")
@@ -298,7 +297,7 @@ class ModerationCommands(Cog):
     @bot_has_permissions(send_messages=True)
     @has_permissions(manage_messages=True)
     @command(aliases=["manage", "user"])
-    async def manage_user(self, ctx: Context, mode: str, user: Member = None):
+    async def manage_user(self, ctx: Context, mode: str, user: Member):
 
         guild = ctx.guild
         author = ctx.author
@@ -322,7 +321,7 @@ class ModerationCommands(Cog):
 
         if user is None:
             return await ctx.send(
-                "That user is not a part of this server."
+                "That user is not a part of this server or does not exist."
             )
 
         if author != guild.owner and author_role < user.top_role:
