@@ -152,7 +152,6 @@ Genral -- General commands:
 Sets your server specific profile picture.
 Uses the url provided if available, or a file attachment provided.
 **--** If multiple file attachments are added, the first one is used.
-**--** Discord recommends 256x256 pictures for best preformance.
 
 __Priorities__:
 `url` can be an entry from your closet. (used first)
@@ -161,6 +160,8 @@ __Priorities__:
 `url` can be nothing altogether if you have used a vanity before and it will use the avatar you last had on.
 
 Any messages sent that are not in blacklisted channels and don't start with blacklisted prefixes will be transformed.
+Messages you send as a vanity will have a temporary :x: button to conveniently allow you to delete your message.
+You can react with :x: to delete it any time.
 """
                 
             elif subsection.lower() == "remove_vanity":
@@ -170,8 +171,7 @@ Any messages sent that are not in blacklisted channels and don't start with blac
 --------------------------------------------------
 Turns server specific profile picture off.
 Use this command if you frequently use bot commands because of how this bot works.
-**--** A bot could detect your original message, operate, and then detect the transformed version, and operate again. Also consider blacklisting the bot's prefix.
-**----** This depends entirely on how the bot works. It may or may not filter out bot messages.
+**--** Also consider blacklisting the bot's prefix.
 """
                 
             elif subsection.lower() == "current":
@@ -256,7 +256,7 @@ Renames closet entry `name` to `rename`.
 **SEE_CLOSET**; Aliases: "cl"
 `{self.bot.command_prefix}see_closet [user]`
 --------------------------------------------------
-See all the items in your closet along with a `name` and its associated `url`.
+See all the items in your closet with a name and its associated url.
 **--** Closets can only hold up to 10 avatars.
 **--** If `user` is provided, it will return that user's closet.
 **----** Note that this will not work if `user` hasn't voted yet.
@@ -312,7 +312,7 @@ See all items that are blacklisted for the server the command is invoked in. The
 **LIST**
 `{self.bot.command_prefix}list`
 --------------------------------------------------
-Returns a list of all users in the server with vanities equiped.
+Returns a list of all users in the server with vanities equipped.
 **--** This list may contain members that have left. To remove them, use the `{self.bot.command_prefix}manage_user` below.
 """
 
@@ -390,13 +390,19 @@ Last updated: {lastmodified}
             em.description = f"Not a valid section name. This bot shows all commands with the `commands` section.\n" \
                              f"Type `{self.bot.command_prefix}help` for all sections."
             em.color = 0x000000
-
-        try:
-            print(f'[] Sent "{section}" help message to server "{ctx.guild.name}".')
-        except AttributeError:
-            pass
+            return
 
         await ctx.send(embed=em)
+        if not subsection:
+            if ctx.guild:
+                print(f'[] Sent "{section}" help message to server "{ctx.guild.name}".')
+            else:
+                print(f'[] Sent "{section}" help message to user "{str(ctx.author)}".')
+        elif subsection:
+            if ctx.guild:
+                print(f'[] Sent "{section}.{subsection}" help message to server "{ctx.guild.name}".')
+            else:
+                print(f'[] Sent "{section}.{subsection}" help message to user "{str(ctx.author)}".')
 
 
 def setup(bot: Bot):

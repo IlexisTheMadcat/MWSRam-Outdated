@@ -84,7 +84,8 @@ class VanityCommands(Cog):
         try:
             dummy = await chan.create_webhook(name=author.display_name)
             await dummy.send(
-                f"{self.bot.user.display_name}: Vanity successfully created.\nSend a message in an unblocked channel to test it out!‎‎",
+                f"{self.bot.user.display_name}: Vanity successfully created.\n"
+                f"Send a message in an unblocked channel to test it out!‎‎\n",
                 avatar_url=url
             )
             await dummy.delete()
@@ -211,7 +212,7 @@ class VanityCommands(Cog):
 
                     return
 
-            if not standard:  # Reverted to "and" because it must be a procedural if statement
+            if not standard:
                 if guild.id in self.vanities and user.id in self.vanities[guild.id] and self.vanities[guild.id][user.id][0]:
 
                     print(

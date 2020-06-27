@@ -224,7 +224,7 @@ class Events(Cog):
             try:
                 EngravedID = get_engraved_id_from_msg(reaction.message.content)
                 identification = await self.bot.fetch_user(EngravedID)
-            except Exception as e:
+            except Exception:
                 return
 
             if identification == user:
@@ -245,7 +245,7 @@ class Events(Cog):
             else:
                 if user != self.bot.user:
                     with suppress(Forbidden):
-                        await user.send("That's not your message.\nThe reaction was left unchanged.")
+                        await user.send(f"That's not your message to delete. Ask {str(user)} to delete it.\nThe reaction was left unchanged.")
 
         if str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
@@ -258,9 +258,8 @@ class Events(Cog):
                 return
 
             await user.send(
-                f'Unsure who that was?\nTheir username is \"'
-                f'{identification.name}#{identification.discriminator}\"'
-                f'.\nThe reaction was left unchanged.'
+                f'Unsure who that was?\nTheir username is \"{str(identification)}\".\n'
+                f'The reaction was left unchanged.'
             )
         else:
             return
@@ -288,7 +287,7 @@ class Events(Cog):
     async def on_guild_remove(self, guild):
         await self.bot.owner.send(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
         print(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        if self.bot.user_data["VanityAvatars"][guild.id]:
+        if guild.id in self.bot.user_data["VanityAvatars"] and self.bot.user_data["VanityAvatars"][guild.id]:
             self.bot.user_data["VanityAvatars"].pop(guild.id)
 
     # Errors
