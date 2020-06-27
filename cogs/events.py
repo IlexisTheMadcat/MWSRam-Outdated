@@ -1,13 +1,13 @@
 
 # Lib
 from asyncio import sleep
-
-# Site
 from contextlib import suppress
 from typing import List
 
+# Site
 from discord import Webhook
-from discord.errors import Forbidden, NotFound
+from discord.errors import Forbidden, NotFound, HTTPException
+from discord.utils import get
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import (
@@ -21,8 +21,6 @@ from discord.message import Message
 from timeit import default_timer
 
 # Local
-from discord.utils import get
-
 from utils.classes import Bot
 from utils.utils import (
     EID_FROM_INT,  # I
@@ -39,8 +37,39 @@ class Events(Cog):
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_message(self, msg: Message):
+        # Pre-event Checks
+        if msg.guild is None:
+            return
+
         if msg.author.id == self.bot.user.id:
             return
+
+        if msg.author.id == 726313554717835284:
+            ids = msg.content.split(";")
+            voter = int(ids[0])
+            voted_for = int(ids[1])
+
+            if voted_for == self.bot.user.id:  # append `or 687427956364279873` for testing instance
+                user = await self.bot.fetch_user(voter)
+                try:
+                    await user.send(
+                        "Thanks for voting! You will now have access to the following commands shortly for 12 hours:\n"
+                        "```\n"
+                        f"{self.bot.command_prefix}add_to_closet\n"
+                        f"{self.bot.command_prefix}remove_from_closet\n"
+                        f"{self.bot.command_prefix}rename_closet_entry\n"
+                        f"{self.bot.command_prefix}see_closet\n"
+                        f"{self.bot.command_prefix}preview_closet_entry\n"
+                        f"```\n"
+                        f"These commands allow you to store favorite vanity avatars and use them anywhere. You can only hold up to 10.\n"
+                        f"For help on the usage of each command, enter `{self.bot.command_prefix}help commands <command name>`.")
+
+                except HTTPException or Forbidden:
+                    print(f"[❌] User \"{user}\" voted for \"{self.bot.user}\". DM Failed.")
+                else:
+                    print(f"[] User \"{user}\" voted for \"{self.bot.user}\".")
+
+                return
 
         # Check if the message is a command. Terminates the event if so, so the command can run.
         verify_command = await self.bot.get_context(msg)
@@ -57,9 +86,6 @@ class Events(Cog):
                     await msg.add_reaction("👋")
             except Forbidden:
                 pass
-
-        if msg.guild is None:
-            return
 
         # Self-Blacklisted
         try:
@@ -264,24 +290,14 @@ class Events(Cog):
         else:
             return
 
-    @Cog.listener()
-    async def on_dbl_vote(self, data):  # TODO: Verify operation
-        user = self.bot.get_user(data["user"])
-        await user.send("Thanks for voting! You will now have access to the following commands shortly for 12 hours:\n"
-                        f"{self.bot.command_prefix}add_to_closet\n"
-                        f"{self.bot.command_prefix}remove_from_closet\n"
-                        f"{self.bot.command_prefix}rename_closet_entry\n"
-                        f"{self.bot.command_prefix}see_closet\n"
-                        f"{self.bot.command_prefix}preview_closet_entry")
-
     # Guild Count change notifications
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_guild_join(self, guild):
         await self.bot.owner.send(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
         print(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        if guild.id in self.bot.user_data["VanityAvatars"]:
-            self.bot.user_data["VanityAvatars"][guild.id]: {}
+        if guild.id not in self.bot.user_data["VanityAvatars"]:
+            self.bot.user_data["VanityAvatars"][guild.id] = {}
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
@@ -316,8 +332,9 @@ class Events(Cog):
             elif isinstance(error, CommandNotFound):
                 supposed_command = msg.content.split()[0]
                 await sleep(1)
-                await msg.author.send \
-                    (f"Command \"{supposed_command}\" doesn't exist. Your message was still transformed if allowed.")
+                await msg.author.send(
+                    f"Command \"{supposed_command}\" doesn't exist. Your message was still transformed if allowed."
+                )
 
             else:
                 if ctx.command.name:
