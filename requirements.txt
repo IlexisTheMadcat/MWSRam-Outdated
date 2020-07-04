@@ -1,3 +1,4 @@
 discord~=1.0.1
 requests~=2.24.0
 Pillow~=7.1.2
+dblpy~=0.3.4

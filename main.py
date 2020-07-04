@@ -125,7 +125,7 @@ async def on_ready():
           f"| Guilds:    {len(bot.guilds)}\n"
           f"| Users:     {len(list(bot.get_all_members()))}\n"
           f"| OAuth URL: {oauth_url(app_info.id, permissions)}\n"
-          f"# ------------------------------#\n"
+          f"#------------------------------#\n"
           f"| {choice(LOADING_CHOICES)}\n"
           f"#-------------------------------#\n")
 

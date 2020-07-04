@@ -4,10 +4,11 @@ from datetime import datetime
 from os import stat
 
 # Site
-from discord import Embed
+from discord import Embed, AppInfo, Permissions
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.core import bot_has_permissions, command
+from discord.utils import oauth_url
 
 # Local
 from utils.classes import Bot
@@ -21,12 +22,25 @@ class MiscCommands(Cog):
     @command()
     @bot_has_permissions(send_messages=True)
     async def invite(self, ctx: Context):
-        """"""
+        """Sends an OAuth bot invite URL"""
 
-        await ctx.send(
-            f"Here: https://discordapp.com/api/oauth2/authorize?client_id=687427956364279873&permissions=536881152&scope=bot"
+        app_info: AppInfo = await self.bot.application_info()
+        permissions = Permissions()
+        permissions.update(
+            send_messages=True,
+            manage_messages=True,
+            manage_webhooks=True,
+            add_reactions=True
         )
-        print(f'[] Sent invite link to user "{ctx.author}"')
+
+        em = Embed(
+            title=f'OAuth URL for {self.bot.user.name}',
+            description=f'[Click Here]'
+                        f'({oauth_url(app_info.id, permissions)}) '
+                        f'to invite me to your server.',
+            color=0xff87a3
+        )
+        await ctx.send(embed=em)
 
     @command(name="help")
     @bot_has_permissions(send_messages=True)
