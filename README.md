@@ -27,7 +27,7 @@ With a vanity equiped, send a message anywhere in a specific server to transform
 
 **Required Permissions:**
 ```
-"Read Messages"       - To read commands.
+"Read Messages"       - To read commands. This is a default permission.
 "Manage Messages"     - Step 1: To delete a message.
 "Manage Webhooks"     - Step 2: To send a transformed version of that message.
 "Send Messages"       - To send notifications/messages for warnings, confirmations, etc.

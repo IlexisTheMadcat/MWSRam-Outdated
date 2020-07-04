@@ -186,7 +186,7 @@ class Bot(DiscordBot):
     def __init__(self, *args, **kwargs):
 
         # Timer to track minutes since responded to a command
-        self.Inactive = 0
+        self.inactive = 0
 
         self.cwd = getcwd()
 
