@@ -145,9 +145,11 @@ class Events(Cog):
                 else:
                     new_content = EID_FROM_INT[10] + EngravedID
 
-                try:
-                    await msg.delete()
-                except Forbidden:
+                bot_perms = msg.channel.permissions_for(msg.guild.me)
+                if not all((
+                    bot_perms.manage_messages,
+                    bot_perms.manage_webhooks
+                )):
                     await msg.author.send(
                         f"Your message couldn't be transformed because it is "
                         f"missing 1 or more permissions listed in "
@@ -159,6 +161,8 @@ class Events(Cog):
 
                     del start
                     return
+                else:
+                    await msg.delete()
 
                 try:
                     if "webhooks" not in self.bot.user_data.keys():
@@ -179,7 +183,7 @@ class Events(Cog):
                         avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
                         username=msg.author.display_name
                     )
-
+                    self.bot.Inactive = 0
                     stop = default_timer()
 
                 except Forbidden:
