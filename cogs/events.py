@@ -74,7 +74,7 @@ class Events(Cog):
         # Check if the message is a command. Terminates the event if so, so the command can run.
         verify_command = await self.bot.get_context(msg)
         if verify_command.valid:
-            self.bot.Inactive = 0
+            self.bot.inactive = 0
             return
 
         # React with passion
@@ -164,7 +164,6 @@ class Events(Cog):
                 else:
                     await msg.delete()
 
-                try:
                     if "webhooks" not in self.bot.user_data.keys():
                         self.bot.user_data["webhooks"] = {"channelID": "webhookID"}
 
@@ -183,18 +182,8 @@ class Events(Cog):
                         avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
                         username=msg.author.display_name
                     )
-                    self.bot.Inactive = 0
+                    self.bot.inactive = 0
                     stop = default_timer()
-
-                except Forbidden:
-                    await msg.author.send(
-                        f"Your message couldn't be transformed because it is missing 1 or more permissions listed in "
-                        f"`{self.bot.command_prefix}help permissions`.\nIf you keep getting this error, remove your "
-                        f"vanity avatar or blacklist the channel you are using it in."
-                    )
-
-                    del start
-                    return
 
                 comptime = round(stop - start, 3)
                 print(
@@ -202,7 +191,7 @@ class Events(Cog):
                 )
 
                 self.bot.LatestRS = comptime
-                self.bot.Inactive = 0
+                self.bot.inactive = 0
 
                 if comptime > 3:
                     if self.bot.owner.id == msg.author.id:
