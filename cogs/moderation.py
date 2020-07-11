@@ -313,7 +313,8 @@ class ModerationCommands(Cog):
                 "You cannot use this command on yourself."
             )
 
-        if author.id != guild.owner.id and guild.id in self.vanities and author.id in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
+        if author.id != guild.owner.id and guild.id in self.vanities and author.id \
+                in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
             return await ctx.send(
                 "You cannot use this command because you were blocked "
                 "from using vanity avatars by another user."
@@ -324,10 +325,10 @@ class ModerationCommands(Cog):
                 "That user is not a part of this server or does not exist."
             )
 
-        if author != guild.owner and author_role < user.top_role:
+        if author != guild.owner and author_role <= user.top_role:
             return await ctx.send(
-                "You cannot block this user because they have a "
-                "higher role than you."
+                "You cannot manage this user because they have an "
+                "equal or higher role than you."
             )
 
         if mode == "block":
