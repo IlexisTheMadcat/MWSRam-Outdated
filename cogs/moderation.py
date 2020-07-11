@@ -274,22 +274,26 @@ class ModerationCommands(Cog):
         guild = ctx.guild
         message = list()
         if guild.id in self.vanities and self.vanities[guild.id] != dict():
-            async with ctx.typing():
-                message.append(
-                    "Here are users using vanities in this server; "
-                    "The list may contain members who have left:\n```"
-                )
+            message.append(
+                "Here are users using vanities in this server; "
+                "The list may contain members who have left:\n```"
+            )
 
-                for u_id in self.vanities[guild.id]:
-                    user = self.bot.get_user(u_id)
-                    if user:
-                        message.append(
-                            f"▛▚ {user} - URL: \n"
-                            f"▙▞ {self.vanities[guild.id][u_id][0]}\n"
-                        )
+            show_list = False
+            for u_id in self.vanities[guild.id]:
+                user = self.bot.get_user(u_id)
+                if user and self.vanities[guild.id][u_id][0]:
+                    message.append(
+                        f"▛▚ {user} - URL: \n"
+                        f"▙▞ {self.vanities[guild.id][u_id][0]}\n"
+                    )
+                    show_list = True
 
-                message.append("```")
-                await ctx.send(''.join(message))
+            if not show_list:
+                return await ctx.send("This server has no users with equipped vanities.")
+
+            message.append("```")
+            await ctx.send(''.join(message))
 
         else:
             await ctx.send("This server has no users with equipped vanities.")
