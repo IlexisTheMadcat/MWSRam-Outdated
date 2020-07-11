@@ -274,22 +274,26 @@ class ModerationCommands(Cog):
         guild = ctx.guild
         message = list()
         if guild.id in self.vanities and self.vanities[guild.id] != dict():
-            async with ctx.typing():
-                message.append(
-                    "Here are users using vanities in this server; "
-                    "The list may contain members who have left:\n```"
-                )
+            message.append(
+                "Here are users using vanities in this server; "
+                "The list may contain members who have left:\n```"
+            )
 
-                for u_id in self.vanities[guild.id]:
-                    user = self.bot.get_user(u_id)
-                    if user:
-                        message.append(
-                            f"▛▚ {user} - URL: \n"
-                            f"▙▞ {self.vanities[guild.id][u_id][0]}\n"
-                        )
+            show_list = False
+            for u_id in self.vanities[guild.id]:
+                user = self.bot.get_user(u_id)
+                if user and self.vanities[guild.id][u_id][0]:
+                    message.append(
+                        f"▛▚ {user} - URL: \n"
+                        f"▙▞ {self.vanities[guild.id][u_id][0]}\n"
+                    )
+                    show_list = True
 
-                message.append("```")
-                await ctx.send(''.join(message))
+            if not show_list:
+                return await ctx.send("This server has no users with equipped vanities.")
+
+            message.append("```")
+            await ctx.send(''.join(message))
 
         else:
             await ctx.send("This server has no users with equipped vanities.")
@@ -313,7 +317,8 @@ class ModerationCommands(Cog):
                 "You cannot use this command on yourself."
             )
 
-        if author.id != guild.owner.id and guild.id in self.vanities and author.id in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
+        if author.id != guild.owner.id and guild.id in self.vanities and author.id \
+                in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
             return await ctx.send(
                 "You cannot use this command because you were blocked "
                 "from using vanity avatars by another user."
@@ -324,10 +329,10 @@ class ModerationCommands(Cog):
                 "That user is not a part of this server or does not exist."
             )
 
-        if author != guild.owner and author_role < user.top_role:
+        if author != guild.owner and author_role <= user.top_role:
             return await ctx.send(
-                "You cannot block this user because they have a "
-                "higher role than you."
+                "You cannot manage this user because they have an "
+                "equal or higher role than you."
             )
 
         if mode == "block":

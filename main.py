@@ -17,7 +17,8 @@ CONFIG_DEFAULTS = {
     "debug_mode": False,  # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
     "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
     "tz": "UTC",          # Triggers python to get real UTC time for Rams's status.
-    "command_prefix": ":>",
+    "muted_dms": list(),   # List of user IDs to block support DMs from. Y'know, in case of the abusers.
+    "command_prefix": ":>"
 }
 
 INIT_EXTENSIONS = [
@@ -28,7 +29,7 @@ INIT_EXTENSIONS = [
     "events",
     "help",
     "moderation",
-    "vanity",
+    "vanity"
 ]
 
 LOADING_CHOICES = [  # because why not
@@ -53,6 +54,7 @@ bot_config = {
     "debug_mode": config_data.get("debug_mode"),
     "auto_pull": config_data.get("auto_pull"),
     "tz": config_data.get("tz"),
+    "muted_dms": config_data.get("muted_dms"),
     "command_prefix": config_data.get("prefix"),
 }
 
@@ -71,7 +73,7 @@ if not defaults_used:
 
 bot = Bot(
     description="Change your profile picture for a specific server.",
-    owner_ids=[331551368789622784, 125435062127820800],
+    owner_ids=[331551368789622784, 125435062127820800],  # DocterBotnikM500, SirThane
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
 
@@ -81,9 +83,9 @@ bot = Bot(
 
 bot.bot_config = config_data
 
-# To be replaced by custom help command  # TODO: Move to `help.py` when done
+# To be replaced by custom help command
+# TODO: Move to `help.py` when done
 bot.remove_command("help")
-
 
 print(f"[BOT INIT] Running in: {bot.cwd}\n"
       f"[BOT INIT] Discord API version: {__version__}")

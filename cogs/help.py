@@ -50,8 +50,11 @@ class MiscCommands(Cog):
             em.description = f"""
 Simple commands:
 ```
-{self.bot.command_prefix}set_vanity <url or file_attachment>   - Set your server-specific avatar. More info: {self.bot.command_prefix}help commands _set
-{self.bot.command_prefix}remove_vanity                         - Remove your server-specific avatar.
+{self.bot.command_prefix}set_vanity <url or file_attachment>
+Set your server-specific avatar. More info: {self.bot.command_prefix}help commands set_vanity
+
+{self.bot.command_prefix}remove_vanity
+Remove your server-specific avatar.
 ```
 Required Permissions:
 ```
@@ -134,11 +137,11 @@ Vanity -- Change your avatar for different servers:
     remove_vanity
     current
     
-Blasklisting -- Disable your avatar for different places:
+Blacklisting -- Disable your avatar for different places:
     blacklist
     see_blacklists
 
-Closets -- Save your avatars in your personal cloest:
+Closets -- Save your avatars in your personal closet:
     add_to_closet
     remove_from_closet
     rename_closet_entry
@@ -146,12 +149,12 @@ Closets -- Save your avatars in your personal cloest:
     preview_closet_entry
 
 Moderation -- Enforce some actions:
-    list                  - No limits
-    manage_user           - You require "Manage Messages" permission
+    list - No limits
+    manage_user - "M/Messages" required
     see_server_blacklists - No limits
-    server_blacklist      - You require "Manage Channels" permission
+    server_blacklist - "M/Channels" required
 
-Genral -- General commands:
+General -- General commands:
     help
     invite
 ```
@@ -160,7 +163,7 @@ Genral -- General commands:
                 
             elif subsection.lower() == "set_vanity":
                 em.description = f"""
-**SET VANITY**; Aliases: "_set"
+**SET VANITY**; Aliases: "set"
 `{self.bot.command_prefix}set_vanity <url>`
 --------------------------------------------------
 Sets your server specific profile picture.
@@ -211,16 +214,16 @@ Returns a link to `user`'s vanity avatar.
 `{self.bot.command_prefix}blacklist <mode> [item]`
 --------------------------------------------------
 You have the option to blacklist channels from transforming your messages.
-**--** "mode" can be one of the following:
-**----** `channal-add` or `ch-a` - add a channel to turn vanity avatars off for that channel.
-**----** `channal-remove` or `ch-r` - remove a channel to turn vanity avatars back on for that channel.
+**--** "mode" must be one of the following:
+**----** `channel-add` or `ch-a` - add a channel to turn vanity avatars off for that channel.
+**----** `channel-remove` or `ch-r` - remove a channel to turn vanity avatars back on for that channel.
 **----** `prefix-add` or `pf-a` - add a prefix to prevent vanity messaages from appearing for messages starting with said prefix.
 **----** `prefix-remove` or `pf-a` - remove a prefix to allow vanity messages to appear for messages starting with said prefix.
 
-**--** `item` can be a channel ID `[channal-add, channal-remove]`, or a prefix string `[prefix-add, prefix-remove]`.
-**----** `item` is required when using the modes `prefix-add` or `prefix-remove`.
-**----** To get a channel ID, turn Developer Mode on in Discord, then right-click on the target channel and click "Copy ID".
-**----** Or instead, you can mention the channel.
+**--** `item` can be a mentioned channel (or ID) `[channel-add, channel-remove]`, or must a prefix string `[prefix-add, prefix-remove]`.
+**----** For `pf-a` or `pf-r`, `item` must be a string of up to five characters representing a prefix to block.
+**----** For `ch-a` or `ch-r`, leaving `item` blank will block the current channel.
+**------** You can mention a channel to block it remotely.
 
 *Sending a message in a channel that is in your blacklist will not transform it.*
 *Sending a message starting with a prefix in your blacklist will not transform it.*
@@ -297,14 +300,15 @@ The only few differences:
 --------------------------------------------------
 Members with the `Manage Server` permission can blacklist channels from transforming your messages for that server.
 **--** "mode" can be one of the following:
-**----** `channal-add` or `ch-a` - add a channel to turn vanity avatars off for that channel.
-**----** `channal-remove` or `ch-r` - remove a channel to turn vanity avatars back on for that channel.
+**----** `channel-add` or `ch-a` - add a channel to turn vanity avatars off for that channel.
+**----** `channel-remove` or `ch-r` - remove a channel to turn vanity avatars back on for that channel.
 **----** `prefix-add` or `pf-a` - add a prefix to prevent vanity messaages from appearing for messages starting with said prefix.
 **----** `prefix-remove` or `pf-a` - remove a prefix to allow vanity messages to appear for messages starting with said prefix.
 
-**--** `item` can be a channel ID `[channal-add, channal-remove]`, or a prefix string `[prefix-add, prefix-remove]`.
-**----** `item` is required when using the modes `prefix-add` or `prefix-remove`.
-**----** To get a channel ID, turn Developer Mode on in Discord, then right-click on the target channel and click "Copy ID".
+**--** `item` can be a mentioned channel (or ID) `[channel-add, channel-remove]`, or must a prefix string `[prefix-add, prefix-remove]`.
+**----** For `pf-a` or `pf-r`, `item` must be a string of up to five characters representing a prefix to block.
+**----** For `ch-a` or `ch-r`, leaving `item` blank will block the current channel.
+**------** You can mention a channel to block it remotely.
 
 Sending a message in a channel that is in the server blacklist will not transform it.
 Sending a message starting with a prefix in the server blacklist will not transform it.
@@ -318,7 +322,8 @@ It shows the blacklisted items for the *server,* which apply to everyone.
 **SEE_BLACKLISTS**; Aliases: "see_s_bl"
 `{self.bot.command_prefix}see_server_blacklists`
 --------------------------------------------------
-See all items that are blacklisted for the server the command is invoked in. These can be managed by members with the `Manage Server` permission.
+See all items that are blacklisted for the server the command is invoked in. 
+These can be managed by members with the `Manage Server` permission.
 """
                 
             elif subsection.lower() == "list":
@@ -327,7 +332,8 @@ See all items that are blacklisted for the server the command is invoked in. The
 `{self.bot.command_prefix}list`
 --------------------------------------------------
 Returns a list of all users in the server with vanities equipped.
-**--** This list may contain members that have left. To remove them, use the `{self.bot.command_prefix}manage_user` below.
+**--** This list may contain members that have left. 
+**----** To remove them, use the `{self.bot.command_prefix}manage_user` below.
 """
 
             elif subsection.lower() == "manage_user":
