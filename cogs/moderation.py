@@ -19,8 +19,6 @@ from utils.classes import Bot
 class ModerationCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.serv_bl = bot.user_data["ServerBlacklists"]
-        self.vanities = bot.user_data["VanityAvatars"]
 
     @command(aliases=["s_bl"])
     @bot_has_permissions(send_messages=True)
@@ -82,11 +80,11 @@ class ModerationCommands(Cog):
                             "another server."
                         )
                     
-                    if guild.id not in self.serv_bl:
-                        self.serv_bl[guild.id] = (list(), list())
+                    if guild.id not in self.bot.user_data["ServerBlacklists"]:
+                        self.bot.user_data["ServerBlacklists"][guild.id] = (list(), list())
 
-                    if item not in self.serv_bl[guild.id][0]:
-                        self.serv_bl[guild.id][0].append(item)
+                    if item not in self.bot.user_data["ServerBlacklists"][guild.id][0]:
+                        self.bot.user_data["ServerBlacklists"][guild.id][0].append(item)
                         print(
                             f'+ Channel "{channel.name}" in server '
                             f'"{channel.guild.name}" was server-blacklisted.'
@@ -119,9 +117,9 @@ class ModerationCommands(Cog):
                     f"from that list.\nYou can also \\#mention the channel."
                 )
 
-            if guild.id in self.serv_bl:
-                if item in self.serv_bl[guild.id][0]:
-                    self.serv_bl[guild.id][0].remove(item)
+            if guild.id in self.bot.user_data["ServerBlacklists"]:
+                if item in self.bot.user_data["ServerBlacklists"][guild.id][0]:
+                    self.bot.user_data["ServerBlacklists"][guild.id][0].remove(item)
                     channel = await self.bot.fetch_channel(item)
                     print(
                         f'- Channel "{channel.name}" in server '
@@ -137,8 +135,8 @@ class ModerationCommands(Cog):
                 else:
                     return await ctx.send(
                         f"That channel isn't in your server's blacklist.\n"
-                        f"Type `{self.bot.command_prefix}see_server_"
-                        f"blacklists` to see your blacklisted channels "
+                        f"Type `{self.bot.command_prefix}see_server_blacklists` "
+                        f"to see your blacklisted channels "
                         f"and prefixes."
                     )
 
@@ -159,11 +157,11 @@ class ModerationCommands(Cog):
                     "For protection, you cannot blacklist this bot's prefix."
                 )
         
-            if guild.id not in self.serv_bl:
-                self.serv_bl[guild.id] = (list(), list())
+            if guild.id not in self.bot.user_data["ServerBlacklists"]:
+                self.bot.user_data["ServerBlacklists"][guild.id] = (list(), list())
 
-            if item not in self.serv_bl[guild.id][1]:
-                self.serv_bl[guild.id][1].append(item)
+            if item not in self.bot.user_data["ServerBlacklists"][guild.id][1]:
+                self.bot.user_data["ServerBlacklists"][guild.id][1].append(item)
                 print(
                     f'+ Added \"{item}\" to blacklisted prefixes for user '
                     f'"{author}"'
@@ -178,9 +176,9 @@ class ModerationCommands(Cog):
                 )
 
         elif mode in prefixremove:
-            if guild.id in self.serv_bl:
-                if item in self.serv_bl[guild.id][1]:
-                    self.serv_bl[guild.id][1].remove(item)
+            if guild.id in self.bot.user_data["ServerBlacklists"]:
+                if item in self.bot.user_data["ServerBlacklists"][guild.id][1]:
+                    self.bot.user_data["ServerBlacklists"][guild.id][1].remove(item)
                     print(
                         f'- Removed "{item}" from blacklisted prefixes for '
                         f'user "{ctx.author}".'
@@ -214,7 +212,7 @@ class ModerationCommands(Cog):
 
         guild = ctx.guild
 
-        if guild.id not in self.serv_bl:
+        if guild.id not in self.bot.user_data["ServerBlacklists"]:
             return await ctx.send(
                 "You haven't blacklisted anything for this server yet."
             )
@@ -222,7 +220,7 @@ class ModerationCommands(Cog):
         message_part = list()
 
         def render():
-            if self.serv_bl[guild.id] == (list(), list()):
+            if self.bot.user_data["ServerBlacklists"][guild.id] == (list(), list()):
                 message_part.append(
                     "You haven't blacklisted anything for this server yet."
                 )
@@ -231,9 +229,9 @@ class ModerationCommands(Cog):
             message_part.append(
                 "Here are this server's blacklisted items:"
             )
-            if len(self.serv_bl[guild.id][0]) != 0:
+            if len(self.bot.user_data["ServerBlacklists"][guild.id][0]) != 0:
                 message_part.append("**Channels:**")
-                for c_id in self.serv_bl[guild.id][0]:
+                for c_id in self.bot.user_data["ServerBlacklists"][guild.id][0]:
                     channel = guild.get_channel(c_id)
                     if channel:
                         message_part.append(
@@ -241,7 +239,7 @@ class ModerationCommands(Cog):
                             f" ID: {channel.id}"
                         )
                     else:
-                        self.serv_bl[guild.id][0].remove(i)
+                        self.bot.user_data["ServerBlacklists"][guild.id][0].remove(i)
                         return False
 
                 return True
@@ -255,9 +253,9 @@ class ModerationCommands(Cog):
             else:
                 break
 
-        if len(self.serv_bl[guild.id][1]) != 0:
+        if len(self.bot.user_data["ServerBlacklists"][guild.id][1]) != 0:
             message_part.append("**Prefixes:**")
-            for i in self.serv_bl[guild.id][1]:
+            for i in self.bot.user_data["ServerBlacklists"][guild.id][1]:
                 message_part.append(f'-- `"{i}"`')
 
         message_full = "\n".join(message_part)
@@ -273,19 +271,20 @@ class ModerationCommands(Cog):
     async def list(self, ctx: Context):
         guild = ctx.guild
         message = list()
-        if guild.id in self.vanities and self.vanities[guild.id] != dict():
+        if guild.id in self.bot.user_data["VanitiesAvatars"] and \
+                self.bot.user_data["VanitiesAvatars"][guild.id] != dict():
             message.append(
                 "Here are users using vanities in this server; "
                 "The list may contain members who have left:\n```"
             )
 
             show_list = False
-            for u_id in self.vanities[guild.id]:
+            for u_id in self.bot.user_data["VanitiesAvatars"][guild.id]:
                 user = self.bot.get_user(u_id)
-                if user and self.vanities[guild.id][u_id][0]:
+                if user and self.bot.user_data["VanitiesAvatars"][guild.id][u_id][0]:
                     message.append(
-                        f"▛▚ {user} - URL: \n"
-                        f"▙▞ {self.vanities[guild.id][u_id][0]}\n"
+                        f"{user} - URL: \n"
+                        f"{self.bot.user_data['VanitiesAvatars'][guild.id][u_id][0]}\n\n"
                     )
                     show_list = True
 
@@ -307,7 +306,8 @@ class ModerationCommands(Cog):
         author = ctx.author
         author_role = author.top_role
         
-        if not (guild.id in self.vanities and user.id in self.vanities[guild.id]):
+        if not (guild.id in self.bot.user_data["VanitiesAvatars"] and
+                user.id in self.bot.user_data["VanitiesAvatars"][guild.id]):
             return await ctx.send(
                 "That user has no information linked with this server."
             )
@@ -317,8 +317,9 @@ class ModerationCommands(Cog):
                 "You cannot use this command on yourself."
             )
 
-        if author.id != guild.owner.id and guild.id in self.vanities and author.id \
-                in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
+        if author.id != guild.owner.id and guild.id in self.bot.user_data["VanitiesAvatars"] and author.id \
+                in self.bot.user_data["VanitiesAvatars"][guild.id] and \
+                self.bot.user_data["VanitiesAvatars"][guild.id][author.id][2]:
             return await ctx.send(
                 "You cannot use this command because you were blocked "
                 "from using vanity avatars by another user."
@@ -336,30 +337,30 @@ class ModerationCommands(Cog):
             )
 
         if mode == "block":
-            if self.vanities[guild.id][user.id][2]:
+            if self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2]:
                 return await ctx.send("That user is already blocked.")
 
             else:
-                self.vanities[guild.id][user.id][0] = None
-                self.vanities[guild.id][user.id][2] = True
+                self.bot.user_data["VanitiesAvatars"][guild.id][user.id][0] = None
+                self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2] = True
                 return await ctx.send(
                     "User avatar removed and blocked for this server."
                 )
 
         elif mode == "unblock":
-            if not self.vanities[guild.id][user.id][2]:
+            if not self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2]:
                 return await ctx.send("That user is already unblocked.")
 
             else:
-                self.vanities[guild.id][user.id][2] = False
+                self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2] = False
                 return await ctx.send("User unblocked for this server.")
 
         elif mode == "get_info":
             return await ctx.send(
                 f"**Vanity status for user {str(user)}:**\n"
-                f"Vanity url: {self.vanities[guild.id][user.id][0]}\n"
-                f"Previous url: {self.vanities[guild.id][user.id][1]}\n"
-                f"Is blocked:  {self.vanities[guild.id][user.id][2]}"
+                f"Vanity url: {self.bot.user_data['VanitiesAvatars'][guild.id][user.id][0]}\n"
+                f"Previous url: {self.bot.user_data['VanitiesAvatars'][guild.id][user.id][1]}\n"
+                f"Is blocked:  {self.bot.user_data['VanitiesAvatars'][guild.id][user.id][2]}"
             )
 
 
