@@ -16,7 +16,7 @@ from discord.ext.commands.errors import (
     CommandNotFound,
     MissingPermissions,
     MissingRequiredArgument,
-    NotOwner
+    NotOwner, BadArgument
 )
 from discord.message import Message
 from timeit import default_timer
@@ -411,9 +411,13 @@ class Events(Cog):
             elif isinstance(error, MissingRequiredArgument):
                 await msg.author.send(f"\"{error.param.name}\" is a required argument that is missing.")
 
+            elif isinstance(error, BadArgument):
+                await msg.author.send(
+                    f"You didn't type something correctly. Details below:\n"
+                    f"{error}"
+                )
             elif isinstance(error, CommandNotFound):
                 supposed_command = msg.content.split()[0]
-                await sleep(1)
                 await msg.author.send(
                     f"Command \"{supposed_command}\" doesn't exist. Your message was still transformed if allowed."
                 )
@@ -421,16 +425,16 @@ class Events(Cog):
             else:
                 if ctx.command.name:
                     await ctx.author.send(
-                        f"[Error in command \"{ctx.command.name}\"]  {error}\n"
+                        f"[Error in command \"{ctx.command.name}\"]  {type(error).__name__}: {error}\n"
                         f"If you keep getting this error, let the developer know!"
                     )
-                    print(f"[Error in command \"{ctx.command.name}\"] ", error)
+                    print(f"[Error in command \"{ctx.command.name}\"] {type(error).__name__}: {error}")
                 else:
                     await ctx.author.send(
-                        f"[Error outside of command] {error}\n"
+                        f"[Error outside of command] {type(error).__name__}: {error}\n"
                         f"If you keep getting this error, let the developer know!"
                     )
-                    print("[Error outside of command]", error)
+                    print(f"[Error outside of command] {type(error).__name__}: {error}")
         else:
             raise error
 
