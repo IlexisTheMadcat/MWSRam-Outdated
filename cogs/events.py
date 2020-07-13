@@ -377,7 +377,7 @@ class Events(Cog):
             permissions = member.permissions_in(reaction.channel)
 
             # Check if the message belongs to the reaction user, or if they have `Manage Messages` permission.
-            if identification == user or permissions.manage_messages:
+            if (identification == user or permissions.manage_messages) and user.id != self.bot.user.id:
                 try:
                     await self.bot.http.delete_message(
                         reaction.channel.id,
