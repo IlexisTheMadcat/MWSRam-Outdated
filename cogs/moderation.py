@@ -271,20 +271,20 @@ class ModerationCommands(Cog):
     async def list(self, ctx: Context):
         guild = ctx.guild
         message = list()
-        if guild.id in self.bot.user_data["VanitiesAvatars"] and \
-                self.bot.user_data["VanitiesAvatars"][guild.id] != dict():
+        if guild.id in self.bot.user_data["VanityAvatars"] and \
+                self.bot.user_data["VanityAvatars"][guild.id] != dict():
             message.append(
                 "Here are users using vanities in this server; "
                 "The list may contain members who have left:\n```"
             )
 
             show_list = False
-            for u_id in self.bot.user_data["VanitiesAvatars"][guild.id]:
+            for u_id in self.bot.user_data["VanityAvatars"][guild.id]:
                 user = self.bot.get_user(u_id)
-                if user and self.bot.user_data["VanitiesAvatars"][guild.id][u_id][0]:
+                if user and self.bot.user_data["VanityAvatars"][guild.id][u_id][0]:
                     message.append(
                         f"{user} - URL: \n"
-                        f"{self.bot.user_data['VanitiesAvatars'][guild.id][u_id][0]}\n\n"
+                        f"{self.bot.user_data['VanityAvatars'][guild.id][u_id][0]}\n\n"
                     )
                     show_list = True
 
@@ -306,8 +306,8 @@ class ModerationCommands(Cog):
         author = ctx.author
         author_role = author.top_role
         
-        if not (guild.id in self.bot.user_data["VanitiesAvatars"] and
-                user.id in self.bot.user_data["VanitiesAvatars"][guild.id]):
+        if not (guild.id in self.bot.user_data["VanityAvatars"] and
+                user.id in self.bot.user_data["VanityAvatars"][guild.id]):
             return await ctx.send(
                 "That user has no information linked with this server."
             )
@@ -317,9 +317,9 @@ class ModerationCommands(Cog):
                 "You cannot use this command on yourself."
             )
 
-        if author.id != guild.owner.id and guild.id in self.bot.user_data["VanitiesAvatars"] and author.id \
-                in self.bot.user_data["VanitiesAvatars"][guild.id] and \
-                self.bot.user_data["VanitiesAvatars"][guild.id][author.id][2]:
+        if author.id != guild.owner.id and guild.id in self.bot.user_data["VanityAvatars"] and author.id \
+                in self.bot.user_data["VanityAvatars"][guild.id] and \
+                self.bot.user_data["VanityAvatars"][guild.id][author.id][2]:
             return await ctx.send(
                 "You cannot use this command because you were blocked "
                 "from using vanity avatars by another user."
@@ -337,30 +337,30 @@ class ModerationCommands(Cog):
             )
 
         if mode == "block":
-            if self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2]:
+            if self.bot.user_data["VanityAvatars"][guild.id][user.id][2]:
                 return await ctx.send("That user is already blocked.")
 
             else:
-                self.bot.user_data["VanitiesAvatars"][guild.id][user.id][0] = None
-                self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2] = True
+                self.bot.user_data["VanityAvatars"][guild.id][user.id][0] = None
+                self.bot.user_data["VanityAvatars"][guild.id][user.id][2] = True
                 return await ctx.send(
                     "User avatar removed and blocked for this server."
                 )
 
         elif mode == "unblock":
-            if not self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2]:
+            if not self.bot.user_data["VanityAvatars"][guild.id][user.id][2]:
                 return await ctx.send("That user is already unblocked.")
 
             else:
-                self.bot.user_data["VanitiesAvatars"][guild.id][user.id][2] = False
+                self.bot.user_data["VanityAvatars"][guild.id][user.id][2] = False
                 return await ctx.send("User unblocked for this server.")
 
         elif mode == "get_info":
             return await ctx.send(
                 f"**Vanity status for user {str(user)}:**\n"
-                f"Vanity url: {self.bot.user_data['VanitiesAvatars'][guild.id][user.id][0]}\n"
-                f"Previous url: {self.bot.user_data['VanitiesAvatars'][guild.id][user.id][1]}\n"
-                f"Is blocked:  {self.bot.user_data['VanitiesAvatars'][guild.id][user.id][2]}"
+                f"Vanity url: {self.bot.user_data['VanityAvatars'][guild.id][user.id][0]}\n"
+                f"Previous url: {self.bot.user_data['VanityAvatars'][guild.id][user.id][1]}\n"
+                f"Is blocked:  {self.bot.user_data['VanityAvatars'][guild.id][user.id][2]}"
             )
 
 
