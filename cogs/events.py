@@ -16,7 +16,7 @@ from discord.ext.commands.errors import (
     CommandNotFound,
     MissingPermissions,
     MissingRequiredArgument,
-    NotOwner
+    NotOwner, BadArgument
 )
 from discord.message import Message
 from timeit import default_timer
@@ -309,12 +309,13 @@ class Events(Cog):
         try:
             reaction = Reaction()
             reaction.emoji = payload.emoji
-            reaction.channel = await self.bot.fetch_channel(payload.channel_id)
+            reaction.channel = self.bot.get_channel(payload.channel_id)
             reaction.message = await reaction.channel.fetch_message(payload.message_id)
-            reaction.guild = await self.bot.fetch_guild(payload.guild_id)
-            reaction.member = await reaction.guild.fetch_member(payload.user_id)
-            user = await self.bot.fetch_user(payload.user_id)
-        except Exception:
+            reaction.guild = self.bot.get_guild(payload.guild_id)
+            reaction.member = reaction.guild.get_member(payload.user_id)
+            user = self.bot.get_user(payload.user_id)
+        except Exception as e:
+            print(f"[Error in \"on_raw_reaction_add\"] {e}")
             return
 
         if reaction.guild is None:
@@ -325,8 +326,9 @@ class Events(Cog):
                 reaction.message.author.discriminator == "0000":
             try:
                 EngravedID = get_engraved_id_from_msg(reaction.message.content)
-                identification = await self.bot.fetch_user(EngravedID)
+                identification = self.bot.get_user(EngravedID)
             except Exception:
+                print(f"[Error in \"on_raw_reaction_add\"] {e}")
                 return
 
             if identification == user:
@@ -337,32 +339,36 @@ class Events(Cog):
                         reason="Deleted on user request."
                     )
                 except Forbidden:
-                    await self.bot.http.remove_reaction(
-                        reaction.channel.id,
-                        reaction.message.id,
-                        reaction.emoji,
-                        reaction.member.id
-                    )
-                    await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
+                    with suppress(HTTPException, Forbidden):
+                        await self.bot.http.remove_reaction(
+                            reaction.channel.id,
+                            reaction.message.id,
+                            reaction.emoji,
+                            reaction.member.id
+                        )
+                        await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
             else:
                 if user != self.bot.user:
                     with suppress(Forbidden):
-                        await user.send(f"That's not your message to delete. Ask {str(user)} to delete it.\nThe reaction was left unchanged.")
+                        await user.send(f"That's not your message to delete. "
+                                        f"Ask {str(user)} to delete it.\n"
+                                        f"The reaction was left unchanged.")
 
-        if str(reaction.emoji) == "❓" and \
+        elif str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
                 EngravedID = get_engraved_id_from_msg(reaction.message.content)
                 identification = await self.bot.fetch_user(EngravedID)
             except Exception as e:
-                print("[Error in event \"on_raw_reaction_add\"]", e)
+                print(f"[Error in event \"on_raw_reaction_add\"] {e}")
                 return
 
-            await user.send(
-                f'Unsure who that was?\nTheir username is \"{str(identification)}\".\n'
-                f'The reaction was left unchanged.'
-            )
+            with suppress(Forbidden):
+                await user.send(
+                    f'Unsure who that was?\nTheir username is \"{str(identification)}\".\n'
+                    f'The reaction was left unchanged.'
+                )
         else:
             return
 
@@ -405,9 +411,13 @@ class Events(Cog):
             elif isinstance(error, MissingRequiredArgument):
                 await msg.author.send(f"\"{error.param.name}\" is a required argument that is missing.")
 
+            elif isinstance(error, BadArgument):
+                await msg.author.send(
+                    f"You didn't type something correctly. Details below:\n"
+                    f"{error}"
+                )
             elif isinstance(error, CommandNotFound):
                 supposed_command = msg.content.split()[0]
-                await sleep(1)
                 await msg.author.send(
                     f"Command \"{supposed_command}\" doesn't exist. Your message was still transformed if allowed."
                 )
@@ -415,16 +425,16 @@ class Events(Cog):
             else:
                 if ctx.command.name:
                     await ctx.author.send(
-                        f"[Error in command \"{ctx.command.name}\"]  {error}\n"
+                        f"[Error in command \"{ctx.command.name}\"]  {type(error).__name__}: {error}\n"
                         f"If you keep getting this error, let the developer know!"
                     )
-                    print(f"[Error in command \"{ctx.command.name}\"] ", error)
+                    print(f"[Error in command \"{ctx.command.name}\"] {type(error).__name__}: {error}")
                 else:
                     await ctx.author.send(
-                        f"[Error outside of command] {error}\n"
+                        f"[Error outside of command] {type(error).__name__}: {error}\n"
                         f"If you keep getting this error, let the developer know!"
                     )
-                    print("[Error outside of command]", error)
+                    print(f"[Error outside of command] {type(error).__name__}: {error}")
         else:
             raise error
 
