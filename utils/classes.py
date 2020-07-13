@@ -190,6 +190,10 @@ class Bot(DiscordBot):
         self.waiting: List[int] = list()  # Users waiting for a response from developer
         self.cwd = getcwd()  # Global bot directory
 
+        # Namespace variable to indicate if a support thread is open or not.
+        # If true, the developer cannot accept a support message if another is already active.
+        self.thread_active = False
+
         # Capture extra meta from init for cogs, former `global`s
         self.auto_pull: bool = kwargs.pop("auto_pull", True)
         self.debug_mode: bool = kwargs.pop("debug_mode", False)

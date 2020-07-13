@@ -85,7 +85,7 @@ class Events(Cog):
                 if msg.content.startswith("> "):
                     if msg.author.id not in self.bot.muted_dms:
                         if msg.author.id in self.bot.waiting:
-                            await msg.channel.send(":clock9: Please wait, my master may be typing...\n"
+                            await msg.channel.send(":clock9: Please wait, you already have a question open.\n"
                                                    "You'll get a response from me soon.")
 
                             return
@@ -97,19 +97,56 @@ class Events(Cog):
                                                    "Do Not Disturb on. Please try again later.")
                             return
 
+                        status_msg = await msg.channel.send(":clock9: "
+                                                            "I sent your message to the developer.\n"
+                                                            "Please stand by for a response or "
+                                                            "until **this message is edited**...\n")
+
                         self.bot.waiting.append(msg.author.id)
 
                         embed = Embed(color=0xff87a3)
                         embed.title = f"Message from user {msg.author} (ID: {msg.author.id}):"
                         embed.description = f"{msg.content}\n\n" \
-                                            f"Replying to this DM within 120 seconds will " \
-                                            f"relay the message back to the user."
+                                            f"Replying to this DM **within 120 seconds** " \
+                                            f"after accepting **within 10 minutes** " \
+                                            f"will relay the message back to the user."
 
-                        dm = await user.send(embed=embed)
+                        dm = await user.send(content="**PENDING**", embed=embed)
+                        await dm.add_reaction("✅")
+                        await dm.add_reaction("❎")
+
+                        def check(sreaction, suser):
+                            if self.bot.thread_active:
+                                self.bot.loop.create_task(
+                                    reaction.channel.send("There is already an active thread running...\n "
+                                                          "Please finish the **`ACTIVE`** one first."))
+                                return False
+                            else:
+                                return sreaction.message.id == dm.id and \
+                                    str(sreaction.emoji) in ["✅", "❎"] and \
+                                    suser == user
+                        try:
+                            reaction, user = await self.bot.wait_for("reaction_add", timeout=600, check=check)
+                        except TimeoutError:
+                            await dm.edit(content="**TIMED OUT**")
+                            await status_msg.edit(content=":x: "
+                                                          "The developer is unavailable right now. Try again later.")
+                            return
+                        else:
+                            if str(reaction.emoji) == "❎":
+                                await dm.edit(content="**DENIED**")
+                                await status_msg.edit(content=":information_source: The developer denied your message. "
+                                                              "Please make sure you are as detailed as possible.")
+                                return
+                            elif str(reaction.emoji) == "✅":
+                                await dm.edit(content="**ACTIVE**")
+                                await status_msg.edit(content=":information_source: "
+                                                              "The developer is typing a message back...")
+                                self.bot.thread_active = True
+                                pass
 
                         def check(message):
                             return message.author == user and message.channel == dm.channel
-
                         while True:
 
                             try:
@@ -126,21 +163,27 @@ class Events(Cog):
                                     await self.bot.wait_for("reaction_add", timeout=10, check=conf_button)
                                 except TimeoutError:
                                     await conf.delete()
+                                    await dm.edit(content="**TIMED OUT**")
                                     await dm.channel.send("You timed out. "
                                                           "The user was notified that you are not available right now.")
 
                                     self.bot.waiting.remove(msg.author.id)
-                                    await msg.channel.send("The developer failed to respond. "
-                                                           "Please ask at a later time.\n"
-                                                           "You may also join the support server here: "
-                                                           "https://discord.gg/j2y7jxQ")
+                                    self.bot.thread_active = False
+                                    await status_msg.edit(content=":information_source: "
+                                                                  "The developer timed out on typing a response. "
+                                                                  "Please ask at a later time.\n"
+                                                                  "You may also join the support server here: "
+                                                                  "https://discord.gg/j2y7jxQ")
                                     return
                                 else:
                                     await conf.delete()
                                     continue
                             else:
                                 self.bot.waiting.remove(msg.author.id)
+                                self.bot.thread_active = False
+                                await dm.edit(content="**Answered**")
                                 await dm.channel.send(":white_check_mark: Okay, message sent.")
+                                await status_msg.edit(content=":white_check_mark: The developer has responded.")
                                 await msg.channel.send(f":newspaper: Response from the developer:\n{response.content}")
                                 return
                     else:
@@ -198,19 +241,19 @@ class Events(Cog):
 
         # Get attachments
         start = default_timer()
-        AttachmentFiles = []
+        attachment_files = []
         for i in msg.attachments:
             try:
                 dcfileobj = await i.to_file()
-                AttachmentFiles.append(dcfileobj)
+                attachment_files.append(dcfileobj)
             except Exception as e:
                 print("[Error while getting attachment]", e)
                 continue
 
         try:
             if msg.author.bot and msg.author.discriminator == "0000":
-                EngravedID = get_engraved_id_from_msg(msg.content)
-                if self.bot.get_user(EngravedID):
+                engravedid = get_engraved_id_from_msg(msg.content)
+                if self.bot.get_user(engravedid):
                     with suppress(Forbidden):
                         await msg.add_reaction("❌")
                         await sleep(5)
@@ -221,12 +264,12 @@ class Events(Cog):
                     not msg.author.bot and \
                     self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
 
-                EngravedID = create_engraved_id_from_user(msg.author.id)
+                engravedid = create_engraved_id_from_user(msg.author.id)
 
                 if msg.content != "":
-                    new_content = f"{msg.content}  {EngravedID}"
+                    new_content = f"{msg.content}  {engravedid}"
                 else:
-                    new_content = EID_FROM_INT[10] + EngravedID
+                    new_content = EID_FROM_INT[10] + engravedid
 
                 bot_perms = msg.channel.permissions_for(msg.guild.me)
                 if not all((
@@ -261,7 +304,7 @@ class Events(Cog):
 
                     await webhook.send(
                         new_content,
-                        files=AttachmentFiles,
+                        files=attachment_files,
                         avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
                         username=msg.author.display_name
                     )
@@ -312,7 +355,6 @@ class Events(Cog):
             reaction.channel = self.bot.get_channel(payload.channel_id)
             reaction.message = await reaction.channel.fetch_message(payload.message_id)
             reaction.guild = self.bot.get_guild(payload.guild_id)
-            reaction.member = reaction.guild.get_member(payload.user_id)
             user = self.bot.get_user(payload.user_id)
         except Exception as e:
             print(f"[Error in \"on_raw_reaction_add\"] {e}")
@@ -325,13 +367,17 @@ class Events(Cog):
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
-                EngravedID = get_engraved_id_from_msg(reaction.message.content)
-                identification = self.bot.get_user(EngravedID)
-            except Exception:
+                engravedid = get_engraved_id_from_msg(reaction.message.content)
+                identification = self.bot.get_user(engravedid)
+            except Exception as e:
                 print(f"[Error in \"on_raw_reaction_add\"] {e}")
                 return
 
-            if identification == user:
+            member = reaction.guild.get_member(user.id)
+            permissions = member.permissions_in(reaction.channel)
+
+            # Check if the message belongs to the reaction user, or if they have `Manage Messages` permission.
+            if identification == user or permissions.manage_messages:
                 try:
                     await self.bot.http.delete_message(
                         reaction.channel.id,
@@ -351,15 +397,15 @@ class Events(Cog):
                 if user != self.bot.user:
                     with suppress(Forbidden):
                         await user.send(f"That's not your message to delete. "
-                                        f"Ask {str(user)} to delete it.\n"
+                                        f"Ask {str(identification)} to delete it.\n"
                                         f"The reaction was left unchanged.")
 
         elif str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
-                EngravedID = get_engraved_id_from_msg(reaction.message.content)
-                identification = await self.bot.fetch_user(EngravedID)
+                engravedid = get_engraved_id_from_msg(reaction.message.content)
+                identification = await self.bot.fetch_user(engravedid)
             except Exception as e:
                 print(f"[Error in event \"on_raw_reaction_add\"] {e}")
                 return
