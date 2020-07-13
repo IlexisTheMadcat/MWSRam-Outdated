@@ -309,12 +309,13 @@ class Events(Cog):
         try:
             reaction = Reaction()
             reaction.emoji = payload.emoji
-            reaction.channel = await self.bot.fetch_channel(payload.channel_id)
+            reaction.channel = self.bot.get_channel(payload.channel_id)
             reaction.message = await reaction.channel.fetch_message(payload.message_id)
-            reaction.guild = await self.bot.fetch_guild(payload.guild_id)
-            reaction.member = await reaction.guild.fetch_member(payload.user_id)
-            user = await self.bot.fetch_user(payload.user_id)
-        except Exception:
+            reaction.guild = self.bot.get_guild(payload.guild_id)
+            reaction.member = reaction.guild.get_member(payload.user_id)
+            user = self.bot.get_user(payload.user_id)
+        except Exception as e:
+            print(f"[Error in \"on_raw_reaction_add\"] {e}")
             return
 
         if reaction.guild is None:
@@ -325,8 +326,9 @@ class Events(Cog):
                 reaction.message.author.discriminator == "0000":
             try:
                 EngravedID = get_engraved_id_from_msg(reaction.message.content)
-                identification = await self.bot.fetch_user(EngravedID)
+                identification = self.bot.get_user(EngravedID)
             except Exception:
+                print(f"[Error in \"on_raw_reaction_add\"] {e}")
                 return
 
             if identification == user:
@@ -337,32 +339,36 @@ class Events(Cog):
                         reason="Deleted on user request."
                     )
                 except Forbidden:
-                    await self.bot.http.remove_reaction(
-                        reaction.channel.id,
-                        reaction.message.id,
-                        reaction.emoji,
-                        reaction.member.id
-                    )
-                    await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
+                    with suppress(HTTPException, Forbidden):
+                        await self.bot.http.remove_reaction(
+                            reaction.channel.id,
+                            reaction.message.id,
+                            reaction.emoji,
+                            reaction.member.id
+                        )
+                        await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
             else:
                 if user != self.bot.user:
                     with suppress(Forbidden):
-                        await user.send(f"That's not your message to delete. Ask {str(user)} to delete it.\nThe reaction was left unchanged.")
+                        await user.send(f"That's not your message to delete. "
+                                        f"Ask {str(user)} to delete it.\n"
+                                        f"The reaction was left unchanged.")
 
-        if str(reaction.emoji) == "❓" and \
+        elif str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             try:
                 EngravedID = get_engraved_id_from_msg(reaction.message.content)
                 identification = await self.bot.fetch_user(EngravedID)
             except Exception as e:
-                print("[Error in event \"on_raw_reaction_add\"]", e)
+                print(f"[Error in event \"on_raw_reaction_add\"] {e}")
                 return
 
-            await user.send(
-                f'Unsure who that was?\nTheir username is \"{str(identification)}\".\n'
-                f'The reaction was left unchanged.'
-            )
+            with suppress(Forbidden):
+                await user.send(
+                    f'Unsure who that was?\nTheir username is \"{str(identification)}\".\n'
+                    f'The reaction was left unchanged.'
+                )
         else:
             return
 
