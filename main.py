@@ -16,7 +16,6 @@ from utils.fileinterface import PickleInterface as PI
 CONFIG_DEFAULTS = {
     "debug_mode": False,  # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
     "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
-    "tz": "UTC",          # Triggers python to get real UTC time for Rams's status.
     "muted_dms": list(),   # List of user IDs to block support DMs from. Y'know, in case of the abusers.
     "command_prefix": ":>"
 }
@@ -53,7 +52,6 @@ config_data = PI("Serialized/bot_config.pkl")
 bot_config = {
     "debug_mode": config_data.get("debug_mode"),
     "auto_pull": config_data.get("auto_pull"),
-    "tz": config_data.get("tz"),
     "muted_dms": config_data.get("muted_dms"),
     "command_prefix": config_data.get("prefix"),
 }

@@ -24,10 +24,7 @@ class BackgroundTasks(Cog):
 
     @loop(seconds=60)
     async def status_change(self):
-        if self.bot.tz != "UTC":
-            time = datetime.now().strftime("%H:%M")  # TODO: tz localize
-        else:
-            time = datetime.utcnow().strftime("%H:%M")
+        time = datetime.utcnow().strftime("%H:%M")
 
         if self.bot.inactive >= 5:
             status = Status.idle
@@ -43,7 +40,7 @@ class BackgroundTasks(Cog):
         else:
             activity = Activity(
                 type=ActivityType.watching,
-                name=f"{self.bot.command_prefix}help | {self.bot.tz}: {time}"
+                name=f"{self.bot.text_status} | UTC: {time}"
             )
 
         await self.bot.change_presence(status=status, activity=activity)
