@@ -340,25 +340,7 @@ class Admin(Cog):
     @group(name='restart', aliases=["kill", "f", "logout"], invoke_without_command=True)
     async def _restart(self, ctx: Context):
         """Restarts the bot"""
-
-        # if not exists(join(self.bot.cwd, "Serialized", "data.pkl")):
-        #     await ctx.send("[Unable to save] data.pkl not found. Replace file before shutting down.")
-        #     print("[Unable to save] data.pkl not found. Replace file before shutting down.")
-        #     return
-
-        # print("Saving files and awaiting logout...")
-        # with open(join(self.bot.cwd, "Serialized", "data.pkl"), "wb") as f:
-        #     try:
-        #         data = {
-        #             "VanityAvatars": self.bot.VanityAvatars,
-        #             "Blacklists": self.bot.Blacklists,
-        #             "Closets": self.bot.Closets,
-        #             "ServerBlacklists": self.bot.ServerBlacklists
-        #         }
-        #
-        #         dump(data, f)
-        #     except Exception as e:
-        #         await ctx.send(f"[Unable to save; Data Reset] Pickle dumping Error: {e}")
+        await self.bot.user_data.save()
 
         em = Embed(
             title="Administration: Restart",
@@ -372,13 +354,19 @@ class Admin(Cog):
     """ ######################
          User Data Management
         ###################### """
-    
-    @command(aliases=["rs_av"])
-    @is_owner()
-    async def resetallavatars(self, ctx: Context):
-        if ctx.guild:
-            return await ctx.message.delete()
 
+    @is_owner()
+    @group(name="reset", aliases=["rs"], invoke_without_command=True)
+    async def rs(self, ctx):
+        em = Embed(title="Administration: Reset Data", description="No description set.", color=000000)
+        em.description = f"Chose a reset variable and append it to the end of your command.\n" \
+                         f"`avatars, blacklists, serverblacklists, closets`"
+        await ctx.send(embed=em)
+
+    @is_owner()
+    @rs.command(aliases=["avatars", "av"])
+    async def r_avatars(self, ctx: Context):
+        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00FF00)
         self.bot.user_data["VanityAvatars"] = {
             "guildID": {
                 "userID": [
@@ -388,50 +376,77 @@ class Admin(Cog):
                 ]
             }
         }
-        await ctx.author.send("Reset all avatars.")
+        await ctx.send("Reset all avatars.")
         print("[] Deleted all avatars on owner's request.")
 
-    @command(aliases=["rs_bl"])
     @is_owner()
-    async def resetallblacklists(self, ctx: Context):
-        if ctx.guild:
-            return await ctx.message.delete()
-
+    @rs.command(aliases=["blacklists", "bl"])
+    async def r_blacklists(self, ctx: Context):
+        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00FF00)
         self.bot.user_data["Blacklists"] = {
             "authorID": (
                 ["channelID"],
                 ["prefix"]
             )
         }
-        await ctx.author.send("Reset all blacklists.")
+        em.description = "Reset all blacklists."
+        await ctx.send(embed=em)
         print("[] Deleted all blacklists on owner's request.")
-    
-    @command(aliases=["rs_sbl"])
+
     @is_owner()
-    async def resetallserverblacklists(self, ctx: Context):
-        if ctx.guild:
-            return await ctx.message.delete()
-        
+    @rs.command(aliases=["serverblacklists", "sbl"])
+    async def r_serverblacklists(self, ctx: Context):
+        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00FF00)
         self.bot.user_data["ServerBlacklists"] = {
             "guildID": (
                 ["channelID"],
                 ["prefix"])
         }
-        await ctx.author.send("Reset all server blacklists.")
+        em.description = "Reset all server blacklists."
+        await ctx.send(embed=em)
         print("[] Deleted all server-blacklists on owner's request.")
-        
-    @command(aliases=["rs_cl"])
+
     @is_owner()
-    async def resetallclosets(self, ctx: Context):
-        if ctx.guild:
-            return await ctx.message.delete()
-        
+    @rs.command(aliases=["closets", "cl"])
+    async def r_closets(self, ctx: Context):
+        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00FF00)
         self.bot.user_data["Closets"] = {
-            "auhthorID":
+            "authorID":
                 {"closet_name": "closet_url"}
         }
-        await ctx.author.send("Reset all closets.")
+        em.description = "Reset all closets."
+        await ctx.send(embed=em)
         print("[] Deleted all closets on owner's request.")
+
+    @is_owner()
+    @rs.command(name="all")
+    async def r_all(self, ctx: Context):
+        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00FF00)
+        self.bot.user_data["VanityAvatars"] = {
+            "guildID": {
+                "userID": [
+                    "avatar_url",
+                    "previous",
+                    "is_blocked"
+                ]
+            }
+        }
+        self.bot.user_data["Blacklists"] = {
+            "authorID": (
+                ["channelID"],
+                ["prefix"]
+            )
+        }
+        self.bot.user_data["ServerBlacklists"] = {
+            "guildID": (
+                ["channelID"],
+                ["prefix"])
+        }
+        self.bot.user_data["Closets"] = {
+            "authorID":
+                {"closet_name": "closet_url"}
+        }
+        await ctx.send(embed=em)
 
     """ ####################
          Bot Configurations
@@ -444,10 +459,12 @@ class Admin(Cog):
         em = Embed(
             title="Administration: Config",
             description=f"The options and values are listed below:\n"
-                        f"```debug_mode: {self.bot.debug_mode}\n"
+                        f"```"
+                        f"debug_mode: {self.bot.debug_mode}\n"
                         f"auto_pull: {self.bot.auto_pull}\n"
-                        f"tz: {self.bot.tz}\n"
-                        f"prefix: {self.bot.command_prefix}```",
+                        f"text_status: \"{self.bot.text_status}\" (namespace only)\n"
+                        f"prefix: {self.bot.command_prefix}"
+                        f"```",
             color=0x0000FF
         )
         return await ctx.send(embed=em)
@@ -478,47 +495,13 @@ class Admin(Cog):
         return await ctx.send(embed=em)
 
     @is_owner()
-    @config.command(name="tz", aliases=["timezone"])
-    async def tz(self, ctx: Context, *, val: str = None):
-        """View or set bot time zone"""
-
-        if val:
-            if val in ["EST", "CST", "UTC"]:
-                orig = deepcopy(self.bot.tz)
-                self.bot.tz = val
-
-                em = Embed(
-                    title="Administration: Bot Timezone Config",
-                    description=f"New timezone: `{val}`\n"
-                                f"Original timezone: `{orig}`",
-                    color=0x00FF00
-                )
-
-            else:
-                em = Embed(
-                    title="Administration: Bot Timezone Config",
-                    description=f"Invalid timezone given: `{val}`\n"
-                                f"Valid values: `EST` `CST` `UTC`",
-                    color=0xFF0000
-                )
-
-        else:
-            em = Embed(
-                title="Administration: Bot Timezone Config",
-                description=f"Bot timezone: `{self.bot.tz}`",
-                color=0x00FF00
-            )
-
-        return await ctx.send(embed=em)
-
-    @is_owner()
     @config.command(name="debug", aliases=["debug_mode"])
     async def debug(self, ctx: Context, *, val: str = None):
         """View or set debug mode"""
 
         if val:
-            if val.lower() in ["true", "false"]:
-                val = True if val == "true" else False
+            if val in ["True", "False"]:
+                val = True if val == "True" else False
                 orig = deepcopy(self.bot.debug_mode)
                 self.bot.debug_mode = val
 
@@ -547,13 +530,13 @@ class Admin(Cog):
         return await ctx.send(embed=em)
 
     @is_owner()
-    @config.command(name="autopull", aliases=["auto_pull"])
-    async def autopull(self, ctx: Context, *, val: str = None):
+    @config.command(name="auto_pull", aliases=["autopull"])
+    async def auto_pull(self, ctx: Context, *, val: str = None):
         """Whether or not the bot will auto-pull from Github"""
 
         if val:
-            if val.lower() in ["true", "false"]:
-                val = True if val == "true" else False
+            if val in ["True", "False"]:
+                val = True if val == "True" else False
                 orig = deepcopy(self.bot.auto_pull)
                 self.bot.auto_pull = val
 
@@ -568,7 +551,7 @@ class Admin(Cog):
                 em = Embed(
                     title="Administration: Bot Auto-Pull Config",
                     description=f"Invalid value given: `{val}`\n"
-                                f"Valid values: `True` `False`",
+                                f"Valid values: `True, False`",
                     color=0xFF0000
                 )
 
@@ -582,11 +565,36 @@ class Admin(Cog):
         return await ctx.send(embed=em)
 
     @is_owner()
+    @config.command(name="text_status", aliases=["status"])
+    async def text_status(self, ctx, *, val: str = None):
+        """View or set bot prefix"""
+
+        if val:
+            orig = deepcopy(self.bot.text_status)
+            self.bot.text_status = val
+
+            em = Embed(
+                title="Administration: Text Status Config",
+                description=f"New status: `{val}`\n"
+                            f"Original status: `{orig}`",
+                color=0x00FF00
+            )
+
+        else:
+            em = Embed(
+                title="Administration: Text Status Config",
+                description=f"Current status: `{self.bot.text_status}`",
+                color=0x0000FF
+            )
+
+        return await ctx.send(embed=em)
+
+    @is_owner()
     @config.command(name="changelog")
     async def changelog(self, ctx: Context):
         em = Embed(title="Administration: Bot Changelog", description="No description set.")
         file = None
-        em.color = 0x00FF00
+        em.colour = 0x00FF00
         if ctx.message.attachments:
             for i in ctx.message.attachments:
                 if i.filename == f"changelog.txt":
@@ -596,12 +604,12 @@ class Admin(Cog):
             if not file:
                 em.description = f"Enter `{self.bot.command_prefix}help updates` to view the changelog.\n" \
                                  f"**Attach a file named \"changelog.txt\".**"
-                em.color = 0xFF0000
+                em.colour = 0xFF0000
 
             elif file:
                 await file.save(f"{self.bot.cwd}/changelog.txt")
                 em.description = f"Changelog file set."
-                em.color = 0x00FF00
+                em.colour = 0x00FF00
 
         await ctx.send(embed=em)
 
