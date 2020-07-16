@@ -172,7 +172,7 @@ SERVER_BLACKLISTS_TEMPLATE = {
     "guildID": (["channelID"], ["prefix"])
 }
 CLOSETS_TEMPLATE = {
-    "auhthorID": {
+    "authorID": {
         "closet_name": "closet_url"
     }
 }
@@ -189,6 +189,7 @@ class Bot(DiscordBot):
         self.inactive = 0  # Timer to track minutes since responded to a command
         self.waiting: List[int] = list()  # Users waiting for a response from developer
         self.cwd = getcwd()  # Global bot directory
+        self.text_status = f"{kwargs.get('command_prefix')}help"  # Change first half of text status
 
         # Namespace variable to indicate if a support thread is open or not.
         # If true, the developer cannot accept a support message if another is already active.
@@ -197,7 +198,6 @@ class Bot(DiscordBot):
         # Capture extra meta from init for cogs, former `global`s
         self.auto_pull: bool = kwargs.pop("auto_pull", True)
         self.debug_mode: bool = kwargs.pop("debug_mode", False)
-        self.tz: str = kwargs.pop("tz", "UTC")
         self.muted_dms: List[int] = kwargs.pop("muted_dms", list())
 
         # PI for configs above to be set after instantiation
