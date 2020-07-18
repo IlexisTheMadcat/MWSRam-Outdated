@@ -18,8 +18,6 @@ from utils.classes import Bot
 class VanityCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.vanities = bot.user_data["VanityAvatars"]
-        self.closets = bot.user_data["Closets"]
 
     @command(aliases=["set"])
     @bot_has_permissions(manage_webhooks=True)
@@ -30,13 +28,17 @@ class VanityCommands(Cog):
         chan = ctx.channel
         msg = ctx.message
 
+        user_perms = ctx.author.permissions_in(ctx.channel)
+
         if not guild:
             return await ctx.send(
                 "This command cannot be used in a DM channel. "
                 "Consider using it in a private channel in one of your servers."
             )
 
-        if guild.id in self.vanities and author.id in self.vanities[guild.id] and self.vanities[guild.id][author.id][2]:
+        if guild.id in self.bot.user_data["VanityAvatars"] and \
+                author.id in self.bot.user_data["VanityAvatars"][guild.id] and \
+                self.bot.user_data["VanityAvatars"][guild.id][author.id][2]:
             return await ctx.send(
                 "You are currently blocked from using vanity avatars in this "
                 "server. Contact a moderator with the `Manage Messages` "
@@ -44,7 +46,7 @@ class VanityCommands(Cog):
             )
         
         try:
-            if url in self.closets[author.id]:
+            if url in self.bot.user_data["Closets"][author.id]:
                 check = await self.bot.get_user_vote(author.id)
 
                 if not check:
@@ -56,7 +58,7 @@ class VanityCommands(Cog):
                     )
 
                 elif check:
-                    url = self.closets[author.id][url]
+                    url = self.bot.user_data["Closets"][author.id][url]
                     await ctx.send("Used closet entry.")
 
         except KeyError or IndexError:
@@ -69,7 +71,7 @@ class VanityCommands(Cog):
 
             except IndexError:
                 try:
-                    url = self.vanities[guild.id][author.id][1]
+                    url = self.bot.user_data["VanityAvatars"][guild.id][author.id][1]
 
                     if url is None:
                         raise KeyError
@@ -98,22 +100,25 @@ class VanityCommands(Cog):
             )
 
         else:
-            if guild.id not in self.vanities:
-                self.vanities.update({guild.id: dict()})
-                
-            if author.id not in self.vanities[guild.id]:
-                self.vanities[guild.id].update(
-                    {author.id: [None, None, False]}
+            if guild.id not in self.bot.user_data["VanityAvatars"]:
+                self.bot.user_data["VanityAvatars"].update({guild.id: dict()})
+
+            if author.id not in self.bot.user_data["VanityAvatars"][guild.id]:
+                self.bot.user_data["VanityAvatars"][guild.id].update(
+                    {author.id: [None, None, False, True]}
                 )
 
-            if self.vanities[guild.id][author.id][0] is None:
-                self.vanities[guild.id][author.id] = [url, url, False]
+            if self.bot.user_data["VanityAvatars"][guild.id][author.id][0] is None:
+                self.bot.user_data["VanityAvatars"][guild.id][author.id] = [url, url,
+                                                                            self.bot.user_data["VanityAvatars"][guild.id][author.id][2],
+                                                                            self.bot.user_data["VanityAvatars"][guild.id][author.id][3]]
 
             else:
-                self.vanities[guild.id][author.id] = [
+                self.bot.user_data["VanityAvatars"][guild.id][author.id] = [
                     url,
-                    self.vanities[guild.id][author.id][0],
-                    False
+                    self.bot.user_data["VanityAvatars"][guild.id][author.id][0],
+                    self.bot.user_data["VanityAvatars"][guild.id][author.id][2],
+                    self.bot.user_data["VanityAvatars"][guild.id][author.id][3]
                 ]
                 
             print(
@@ -134,11 +139,12 @@ class VanityCommands(Cog):
                 "using it in a private channel in one of your servers."
             )
         
-        if guild.id in self.vanities and author.id in self.vanities[guild.id] and self.vanities[guild.id][author.id][0]:
-            self.vanities[guild.id][author.id] = [
+        if guild.id in self.bot.user_data["VanityAvatars"] and author.id in self.bot.user_data["VanityAvatars"][guild.id] and self.bot.user_data["VanityAvatars"][guild.id][author.id][0]:
+            self.bot.user_data["VanityAvatars"][guild.id][author.id] = [
                 None,
-                self.vanities[guild.id][author.id][0],
-                self.vanities[guild.id][author.id][2]
+                self.bot.user_data["VanityAvatars"][guild.id][author.id][0],
+                self.bot.user_data["VanityAvatars"][guild.id][author.id][2],
+                self.bot.user_data["VanityAvatars"][guild.id][author.id][3]
             ]
 
             await ctx.send("Removed vanity.")
@@ -213,7 +219,7 @@ class VanityCommands(Cog):
                     return
 
             if not standard:
-                if guild.id in self.vanities and user.id in self.vanities[guild.id] and self.vanities[guild.id][user.id][0]:
+                if guild.id in self.bot.user_data["VanityAvatars"] and user.id in self.bot.user_data["VanityAvatars"][guild.id] and self.bot.user_data["VanityAvatars"][guild.id][user.id][0]:
 
                     print(
                         f'[] Sent vanity avatar url for \"{user}\"'
@@ -222,7 +228,7 @@ class VanityCommands(Cog):
 
                     return await ctx.channel.send(
                         f"Their current vanity avatar is located here:\n"
-                        f"{self.vanities[guild.id][user.id][0]}"
+                        f"{self.bot.user_data['VanityAvatars'][guild.id][user.id][0]}"
                     )
 
                 else:
@@ -230,6 +236,18 @@ class VanityCommands(Cog):
 
             elif standard in ["standard", "standard_url"]:
                 await show_standard()
+
+    @command(aliases=["toggle_x", "quick_del"])
+    @bot_has_permissions(send_messages=True)
+    async def toggle_quick_delete(self, ctx):
+        guild = ctx.guild
+        author = ctx.author
+        if guild.id in self.bot.user_data["VanityAvatars"] and author.id in self.bot.user_data["VanityAvatars"][guild.id]:
+            self.bot.user_data["VanityAvatars"][guild.id][author.id][3] = not self.bot.user_data["VanityAvatars"][guild.id][author.id][3]
+            await ctx.send(f"Quick delete toggled.\n"
+                           f"Use quick delete: {self.bot.user_data['VanityAvatars'][guild.id][author.id][3]}")
+        else:
+            await ctx.send("You can't use this feature until you have created your vanity for the first time here.")
 
 
 def setup(bot: Bot):

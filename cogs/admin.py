@@ -372,7 +372,8 @@ class Admin(Cog):
                 "userID": [
                     "avatar_url",
                     "previous",
-                    "is_blocked"
+                    "is_blocked",
+                    "quick_delete_on"
                 ]
             }
         }

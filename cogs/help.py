@@ -75,7 +75,7 @@ To provide a temporary button to delete your message quickly.
 
 --------------------------------------------------
 
-Type `{self.bot.command_prefix}help <directory>`, where `directory` is one of the following:
+Type `{self.bot.command_prefix}help <directory>`, where `<directory>` is one of the following:
 **Details**
 **Privacy**
 **Commands**
@@ -130,12 +130,14 @@ Prefixes can also be added to the blacklist. Make sure your messages don't start
             if not subsection:
                 em.description = f"""
 **Commands**
-Type `{self.bot.command_prefix}help commands <command>`, where `command` is one of the following:
+Note: Do NOT include angle- or square- brackets in your command arguments.
+Type `{self.bot.command_prefix}help commands <command>`, where `<command>` is one of the following:
 ```
 Vanity -- Change your avatar for different servers:
     set_vanity
     remove_vanity
     current
+    toggle_quick_delete
     
 Blacklisting -- Disable your avatar for different places:
     blacklist
@@ -179,6 +181,7 @@ __Priorities__:
 Any messages sent that are not in blacklisted channels and don't start with blacklisted prefixes will be transformed.
 Messages you send as a vanity will have a temporary :x: button to conveniently allow you to delete your message.
 You can react with :x: to delete it any time.
+:warning: For mods: Using this bot will fill your audit log with message deletions. 
 """
                 
             elif subsection.lower() == "remove_vanity":
@@ -206,6 +209,16 @@ Returns a link to `user`'s vanity avatar.
 
 **--** If the standard avatar is *animated,* the link will be returned instead as this is viewable on all platforms.
 **-- Vanities always return links.**
+"""
+
+            elif subsection.lower() == "toggle_quick_delete":
+                em.description = f"""
+**TOGGLE_QUICK_DELETE**; Aliases: "toggle_x", "quick_del"
+`vpr:toggle_quick_delete`
+**--------------------------------------------------**
+Toggle the quick delete reaction that appears under message by default.
+-- This "quick_delete" feature allows user who find it difficult to react to delete their message provides them a shortcut for 5 seconds.
+-- Use this command to turn said feature off. It does bother some users.
 """
                 
             elif subsection.lower() == "blacklist":
