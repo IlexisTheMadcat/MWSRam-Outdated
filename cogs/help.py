@@ -136,6 +136,7 @@ Vanity -- Change your avatar for different servers:
     set_vanity
     remove_vanity
     current
+    toggle_quick_delete
     
 Blacklisting -- Disable your avatar for different places:
     blacklist

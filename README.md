@@ -46,10 +46,12 @@ Vanity -- Change your avatar for different servers:
     set_vanity
     remove_vanity
     current
+    toggle_quick_delete
     
 Blasklisting -- Disable your avatar for different places:
     blacklist
     see_blacklists
+
 Closets -- Save your avatars in your personal cloest:
     add_to_closet
     remove_from_closet
