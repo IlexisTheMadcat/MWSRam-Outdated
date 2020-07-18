@@ -75,7 +75,7 @@ To provide a temporary button to delete your message quickly.
 
 --------------------------------------------------
 
-Type `{self.bot.command_prefix}help <directory>`, where `directory` is one of the following:
+Type `{self.bot.command_prefix}help <directory>`, where `<directory>` is one of the following:
 **Details**
 **Privacy**
 **Commands**
@@ -130,7 +130,8 @@ Prefixes can also be added to the blacklist. Make sure your messages don't start
             if not subsection:
                 em.description = f"""
 **Commands**
-Type `{self.bot.command_prefix}help commands <command>`, where `command` is one of the following:
+Note: Do NOT include angle- or square- brackets in your command arguments.
+Type `{self.bot.command_prefix}help commands <command>`, where `<command>` is one of the following:
 ```
 Vanity -- Change your avatar for different servers:
     set_vanity
@@ -180,6 +181,7 @@ __Priorities__:
 Any messages sent that are not in blacklisted channels and don't start with blacklisted prefixes will be transformed.
 Messages you send as a vanity will have a temporary :x: button to conveniently allow you to delete your message.
 You can react with :x: to delete it any time.
+:warning: For mods: Using this bot will fill your audit log with message deletions. 
 """
                 
             elif subsection.lower() == "remove_vanity":
