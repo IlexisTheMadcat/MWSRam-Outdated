@@ -9,14 +9,14 @@ You can change your avatar with one line of a command and your future messages w
 
 **Starter Commands**
 ```
-:>set_vanity <image_url (or file attachment)>
+vpr:set_vanity <image_url (or file attachment)>
 Sets the image for your new server specific avatar.
 Can support link argument and file attachment.
 -- URL argument is used if both are given for some reason.
 -- If multiple attachments are provided for some reason, the first one is used.
 -- If you remove your vanity, you can set your previous vanity without any parameters.
 
-:>remove_vanity
+vpr:remove_vanity
 Removes your vanity avatar
 ```
 **Actions:**\
@@ -67,16 +67,16 @@ Genral -- General commands:
 ```
 
 ## **Vanity Commands**
-### SET VANITY; Aliases: "set"
-`:>set_vanity <url>`\
+### SET_VANITY; Aliases: "set"
+`vpr:set_vanity <url>`\
 **--------------------------------------------------**\
 Sets your server specific profile picture.\
 Uses the url provided if available, or a file attachment provided.\
 **--** If multiple file attachments are added, the first one is used.\
 **--** Discord recommends 256x256 pictures for best preformance.
 
-### REMOVE VANITY; Aliases: "remove"
-`:>remove_vanity`\
+### REMOVE_VANITY; Aliases: "remove"
+`vpr:remove_vanity`\
 **--------------------------------------------------**\
 Turns server specific profile picture off.\
 Use this command if you frequently use bot commands because of how this bot works.\
@@ -84,18 +84,25 @@ Use this command if you frequently use bot commands because of how this bot work
 **----** This depends entirely on how the bot works. It may or may not filter out bot messages.
 
 ### CURRENT
-`:>current <user> ["standard"]`\
+`vpr:current <user> ["standard"]`\
 **--------------------------------------------------**\
 Returns you a link to `user`s avatar.\
-**--** If they have a vanity equiped, this will return their vanity avatar's url.\
+**--** If they have a vanity equipped, this will return their vanity avatar's url.\
 **----** To get their standard avatar at any time, add "standard" to your command.\
-**--** If they don't have a vanity avatar equiped, their standard avatar will be returned, even if "standard" is not provided.\
+**--** If they don't have a vanity avatar equipped, their standard avatar will be returned, even if "standard" is not provided.\
+
+### TOGGLE_QUICK_DELETE; Aliases: "toggle_x", "quick_del"
+`vpr:toggle_quick_delete`\
+**--------------------------------------------------**\
+Toggle the quick delete reaction that appears under message by default.\
+-- This "quick_delete" feature allows user who find it difficult to react to delete their message provides them a shortcut for 5 seconds.\
+-- Use this command to turn said feature off. It does bother some users.
 
 ## **Blacklisting**
 This feature-set allows you to block Ram from transforming your message if it is in a certain channel or starts with a certain prefix.
 
 ### BLACKLIST; Aliases: "bl"
-`:>blacklist <mode> [item]`\
+`vpr:blacklist <mode> [item]`\
 **--------------------------------------------------**\
 You have the option to blacklist channels from transforming your messages.\
 **--** "mode" can be one of the following:\
@@ -112,18 +119,18 @@ You have the option to blacklist channels from transforming your messages.\
 *Sending a message starting with a prefix in your blacklist will not transform it.*
 
 ### SEE_BLACKLISTS; Aliases: "see_bl"
-`:>see_blacklists`\
+`vpr:see_blacklists`\
 **--------------------------------------------------**\
 See all items that you blacklisted. These can be managed cross-server because they are tied to your user id.
 
 ## Closets - These commands require you to vote the bot at [Top.gg](https://top.gg/bot/687427956364279873).
 This feature-set allows you to store your favorite vanities into a Key:Value dictionary.\
-To set a closet entry as your vanity, enter the `:>set` command followed by the closet entry's name.\
-Remember, `:>set` takes `url` as an argument, and will almost always treat it as a URL. \
+To set a closet entry as your vanity, enter the `vpr:set` command followed by the closet entry's name.\
+Remember, `vpr:set` takes `url` as an argument, and will almost always treat it as a URL. \
 However, if `url` is a closet entry name, it will use that. If not, you may get an error response.
 
 ### ADD_TO_CLOSET; Aliases: "cl_add"
-`:>add_to_closet <name>`\
+`vpr:add_to_closet <name>`\
 **--------------------------------------------------**\
 Adds your current vanity avatar with a name to a closet that can hold up to 10 vanity avatars.\
 **--** `name` is required to distinguish between closet entries.\
@@ -132,20 +139,20 @@ Adds your current vanity avatar with a name to a closet that can hold up to 10 v
 **----** A URL cannot be provided to substitute this.
 
 ### REMOVE_FROM_CLOSET; Aliases: "cl_remove"
-`:>remove_from_closet <name>`\
+`vpr:remove_from_closet <name>`\
 **--------------------------------------------------**\
 Remove `name` from your closet.\
 **--** This won't work if `name` doesn't exist in your closet.
 
 ### RENAME_CLOSET_ENTRY; Aliases: "cl_rn"
 **--------------------------------------------------**\
-`:>rename_closet_entry <name> <rename>`\
+`vpr:rename_closet_entry <name> <rename>`\
 Renames closet entry `name` to `rename`.\
 **--** This won't work if `name` doesn't exist in your closet.\
 **--** This won't work if `rename` is already in your closet.
 
 ### SEE_CLOSET; Aliases: "cl"
-`:>see_closet [user]`\
+`vpr:see_closet [user]`\
 **--------------------------------------------------**\
 See all the items in your closet along with a `name` and its associated `url`.
 **--** Closets can only hold up to 10 avatars.
@@ -153,7 +160,7 @@ See all the items in your closet along with a `name` and its associated `url`.
 **----** Note that this will not work if `user` hasn't voted yet.
 
 ### PREVIEW_CLOSET_ENTRY; Aliases: "cl_preview"
-`:>preview_closet_entry <name>`\
+`vpr:preview_closet_entry <name>`\
 **--------------------------------------------------**\
 Sends a message with the vanity avatar of closet entry `name`.\
 **--** This won't work if `name` doesn't exist in your closet.
@@ -162,12 +169,12 @@ Sends a message with the vanity avatar of closet entry `name`.\
 Check the full list above to see what permission you need for a command.
 
 ### SERVER_BLACKLIST; Aliases: "s_bl"
-Note: This command functions very similar to the `:>blacklist` command.\
+Note: This command functions very similar to the `vpr:blacklist` command.\
 The only few differences:\
 1) You require the `Manage Server` permission to use it.\
 2) Items blacklisted are added for everyone, so it is a great tool for enforcing it. \
 These are tied to your server's id.
-`:>server_blacklist <mode> [item]`\
+`vpr:server_blacklist <mode> [item]`\
 **--------------------------------------------------**\
 Members with the `Manage Server` permission can blacklist channels from transforming your messages for that server.\
 **--** "mode" can be one of the following:\
@@ -180,19 +187,19 @@ Members with the `Manage Server` permission can blacklist channels from transfor
 **----** To get a channel ID, turn Developer Mode on in Discord, then right-click on the target channel and click "Copy ID".
 
 ### SEE_BLACKLISTS; Aliases: "see_s_bl"
-This command functions very similar to the `:>see_blacklists` command.\
+This command functions very similar to the `vpr:see_blacklists` command.\
 It shows the blacklisted items for the *server,* which apply to everyone.
-`:>see_server_blacklists`\
+`vpr:see_server_blacklists`\
 **--------------------------------------------------**\
 See all items that are blacklisted for the server the command is invoked in. These can be managed by members with the `Manage Server` permission.
 
 ### **LIST**
-`:>list`\
+`vpr:list`\
 **--------------------------------------------------**\
 Returns a list of all users in the server with vanities equiped.
 
 ### MANAGE_USER; Aliases: "manage", "user"
-`:>manage_user <mode> <user>`\
+`vpr:manage_user <mode> <user>`\
 **--------------------------------------------------**\
 Manage a user's ability to use the bot. This applies only in this server.\
 **--** `mode` must be one of 3 things:\
@@ -206,12 +213,12 @@ Manage a user's ability to use the bot. This applies only in this server.\
 **------** This is the bot developer's YouTube alias. The username could be different.
 
 ### **HELP**; Aliases: "h"
-`:>help [section] [command if <section> is "commands"]`\
+`vpr:help [section] [command if <section> is "commands"]`\
 **--------------------------------------------------**\
 Shows a directory including the different sections of the help message.
 
 ### **INVITE**
-`:>invite`\
+`vpr:invite`\
 **--------------------------------------------------**\
 Gives you an invite link to invite this bot to any server.\
 **--** You require the "Manage Server" permission in the target server to do this. This is a discord limitation.

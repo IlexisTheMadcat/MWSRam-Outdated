@@ -253,12 +253,14 @@ class Events(Cog):
         try:
             if msg.author.bot and msg.author.discriminator == "0000":
                 engravedid = get_engraved_id_from_msg(msg.content)
-                if self.bot.get_user(engravedid):
-                    with suppress(Forbidden):
-                        await msg.add_reaction("❌")
-                        await sleep(5)
-                        with suppress(NotFound):
-                            await msg.remove_reaction("❌", msg.guild.me)
+                eid_user = self.bot.get_user(engravedid)
+                if eid_user:
+                    if self.bot.user_data["VanityAvatars"][msg.guild.id][eid_user.id][3]:
+                        with suppress(Forbidden):
+                            await msg.add_reaction("❌")
+                            await sleep(5)
+                            with suppress(NotFound):
+                                await msg.remove_reaction("❌", msg.guild.me)
 
             if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id].keys() and \
                     not msg.author.bot and \
@@ -390,7 +392,7 @@ class Events(Cog):
                             reaction.channel.id,
                             reaction.message.id,
                             reaction.emoji,
-                            reaction.member.id
+                            user.id
                         )
                         await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
             else:
