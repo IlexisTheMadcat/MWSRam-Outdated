@@ -199,6 +199,7 @@ class Bot(DiscordBot):
         self.auto_pull: bool = kwargs.pop("auto_pull", True)
         self.debug_mode: bool = kwargs.pop("debug_mode", False)
         self.muted_dms: List[int] = kwargs.pop("muted_dms", list())
+        self.error_log_channel: int = kwargs.pop("error_log_channel", None)
 
         # PI for configs above to be set after instantiation
         self.bot_config = kwargs.pop("bot_config", None)
@@ -216,7 +217,7 @@ class Bot(DiscordBot):
 
         # Load data from pkl after super init to ensure loop is available
         self.user_data = PI(f"Serialized/data.pkl", create_file=True, loop=self.loop)
-        print("[DATA LOADED] Loaded data.pkl.")
+        print("[] Loaded data.pkl.")
 
     def run(self, *args, **kwargs):
         super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)

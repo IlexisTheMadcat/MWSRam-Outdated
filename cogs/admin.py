@@ -614,6 +614,39 @@ class Admin(Cog):
 
         await ctx.send(embed=em)
 
+    @is_owner()
+    @config.command(name="error_channel")
+    async def error_log_channel(self, ctx, val):
+        try:
+            val = int(val)
+        except ValueError:
+            em = Embed(
+                title="Administration: Error Log Channel Config",
+                description=f"`ValueError`: `val` must be an integer.",
+                color=0xFF0000
+            )
+            return await ctx.send(embed=em)
+
+        if val:
+            orig = deepcopy(self.bot.error_log_channel)
+            self.bot.error_log_channel = val
+
+            em = Embed(
+                title="Administration: Error Log Channel Config",
+                description=f"New error channel id: `{val}`\n"
+                            f"Original error original channel id: `{orig}`",
+                color=0x00FF00
+            )
+
+        else:
+            em = Embed(
+                title="Administration: Error Log Channel Config",
+                description=f"Current error channel id: `{self.bot.error_log_channel}`",
+                color=0x0000FF
+            )
+
+        return await ctx.send(embed=em)
+
     """ ##################
          Discord Bot List
         ################## """

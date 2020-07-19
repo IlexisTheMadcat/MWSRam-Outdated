@@ -17,7 +17,8 @@ CONFIG_DEFAULTS = {
     "debug_mode": False,  # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
     "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
     "muted_dms": list(),   # List of user IDs to block support DMs from. Y'know, in case of the abusers.
-    "command_prefix": ":>"
+    "command_prefix": "[:>",  # Default prefix for the testing instances.
+    "error_log_channel": None
 }
 
 INIT_EXTENSIONS = [
@@ -54,6 +55,7 @@ bot_config = {
     "auto_pull": config_data.get("auto_pull"),
     "muted_dms": config_data.get("muted_dms"),
     "command_prefix": config_data.get("prefix"),
+    "error_log_channel": config_data.get("error_log_channel")
 }
 
 defaults_used = False
@@ -62,10 +64,10 @@ for key, val in bot_config.items():
         config_data[key] = CONFIG_DEFAULTS[key]
         bot_config[key] = CONFIG_DEFAULTS[key]
         defaults_used = True
-        print(f"\n[USING CONFIG DEFAULT] Config '{key}' missing. "
+        print(f"[USING CONFIG DEFAULT] Config '{key}' missing. "
               f"Inserted default '{CONFIG_DEFAULTS[key]}'")
 if not defaults_used:
-    print("\n[CONFIG LOADED] Configurations successfully "
+    print("\n[] Configurations successfully "
           "loaded from Serialized/bot_config.pkl")
 
 

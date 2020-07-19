@@ -457,7 +457,7 @@ class Events(Cog):
                 )
 
             elif isinstance(error, MissingRequiredArgument):
-                await msg.author.send(f"\"{error.param.name}\" is a required argument that is missing.")
+                await msg.author.send(f"\"{error.param.name}\" is a required argument for command \"{ctx.command.name}\" that is missing.")
 
             elif isinstance(error, BadArgument):
                 await msg.author.send(
@@ -473,16 +473,26 @@ class Events(Cog):
             else:
                 if ctx.command.name:
                     await ctx.author.send(
-                        f"[Error in command \"{ctx.command.name}\"]  {type(error).__name__}: {error}\n"
-                        f"If you keep getting this error, let the developer know!"
+                        f"`[Error in command \"{ctx.command.name}\"]  {type(error).__name__}: {error}`\n"
+                        f"If you keep getting this error, let the developer know by sending a DM here with a quoted message. Don't hesitate, he's open for DMs right now!\n"
+                        f"For example:\n"
+                        f"> {type(error).__name__}: {error}\n"
+                        f"However, this isn't enough information. Please detail your message with what you were trying to do, or the message will likely be declined or ignored."
                     )
-                    print(f"[Error in command \"{ctx.command.name}\"] {type(error).__name__}: {error}")
+                    if self.bot.error_log_channel is None:
+                        print(f"[Error in command \"{ctx.command.name}\"] {type(error).__name__}: {error}")
+                    else:
+                        error_channel = self.bot.get_channel(self.bot.error_log_channel)
+                        if error_channel:
+                            await error_channel.send(f"`[Error in command \"{ctx.command.name}\"]  {type(error).__name__}: {error}`")
                 else:
-                    await ctx.author.send(
-                        f"[Error outside of command] {type(error).__name__}: {error}\n"
-                        f"If you keep getting this error, let the developer know!"
-                    )
-                    print(f"[Error outside of command] {type(error).__name__}: {error}")
+                    if self.bot.error_log_channel is None:
+                        print(f"[Error outside of command] {type(error).__name__}: {error}")
+                    else:
+                        error_channel = self.bot.get_channel(self.bot.error_log_channel)
+                        if error_channel:
+                            await error_channel.send(f"`[Error outside of command] {type(error).__name__}: {error}`")
+
         else:
             raise error
 
