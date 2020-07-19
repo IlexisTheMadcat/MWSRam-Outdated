@@ -35,8 +35,10 @@ class ClosetCommands(Cog):
                 "in one of your servers."
             )
 
-        if ctx.message.attachments == list():
-            return await ctx.send("You don't have a vanity equiped.")
+        if ctx.message.attachments == list() and \
+                not self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0]:
+            return await ctx.send("You don't have a vanity equipped.\n"
+                                  "You can attach a file to add without a vanity.")
 
         else:
             try:
@@ -45,14 +47,16 @@ class ClosetCommands(Cog):
 
                 if name in self.bot.user_data["Closets"][ctx.author.id].keys():
                     return await ctx.send(
-                        f"A closet entry with that name already exists. "
-                        f"Refer to `{self.bot.command_prefix}see_closet`."
+                        f"A closet entry with that name already exists.\n"
+                        f"See your closet entries with this command: "
+                        f"`{self.bot.command_prefix}see_closet`."
                     )
 
                 if len(self.bot.user_data["Closets"][ctx.author.id].keys()) >= 10:
                     return await ctx.send(
-                        "You've reached your max number of avatars in your "
-                        "closet. Consider removing one of them."
+                        "You've reached (or somehow exceeded) the max "
+                        "number of vanities allowed in your closet.\n"
+                        "Consider removing one of them."
                     )
 
                 if len(name) > 20:
@@ -91,8 +95,9 @@ class ClosetCommands(Cog):
         if not check:
             return await ctx.send(
                 "Closets are vote-locked. Please go to "
-                "https://discordbots.org/bot/687427956364279873/vote and "
-                "click on 'Vote'.\nThen come back and try again.\n"
+                "https://discordbots.org/bot/687427956364279873/vote "
+                "and click on 'Vote'.\n"
+                "Then come back and try again.\n"
                 "If you just now voted, wait a few moments."
             )
         
@@ -102,19 +107,19 @@ class ClosetCommands(Cog):
         try:
             if name not in self.bot.user_data["Closets"][ctx.author.id].keys():
                 return await ctx.send(
-                    f"A closet entry with that name doesn't exist. See your "
-                    f"closet entries with this command: "
+                    f"A closet entry with the name `{name}` doesn't exist.\n"
+                    f"See your closet entries with this command: "
                     f"`{self.bot.command_prefix}see_closet`."
                 )
 
             else:
                 self.bot.user_data["Closets"][ctx.author.id].pop(name)
 
-        except KeyError or IndexError:
+        except KeyError:
             self.bot.user_data["Closets"][ctx.author.id] = dict()
-            await ctx.send(
-                f"A closet entry with that name doesn't exist. See your "
-                f"closet entries with this command: "
+            return await ctx.send(
+                f"A closet entry with the name `{name}` doesn't exist.\n"
+                f"See your closet entries with this command: "
                 f"`{self.bot.command_prefix}see_closet`."
             )
         else:
@@ -140,16 +145,19 @@ class ClosetCommands(Cog):
             if len(rename) > 20:
                 return await ctx.send("Your name can't be longer than 20 characters.")
 
+            if name == rename:
+                return await ctx.send("Both names are the same.")
+
             elif name not in self.bot.user_data["Closets"][ctx.author.id].keys():
                 return await ctx.send(
-                    f"A closet entry with that name doesn't exist. "
+                    f"A closet entry with the name `{name}` doesn't exist.\n"
                     f"See your closet entries with this command: "
                     f"`{self.bot.command_prefix}see_closet`."
                 )
 
             elif rename in self.bot.user_data["Closets"][ctx.author.id].keys():
                 return await ctx.send(
-                    f"A closet entry with that name already exists. "
+                    f"A closet entry with the name `{rename}` already exists.\n"
                     f"See your closet entries with this command: "
                     f"`{self.bot.command_prefix}see_closet`."
                 )
@@ -160,8 +168,8 @@ class ClosetCommands(Cog):
 
         except KeyError:
             self.bot.user_data["Closets"][ctx.author.id] = dict()
-            await ctx.send(
-                f"A closet entry with that name doesn't exist. "
+            return await ctx.send(
+                f"A closet entry with with the name `{name}` doesn't exist.\n"
                 f"See your closet entries with this command: "
                 f"`{self.bot.command_prefix}see_closet`."
             )
@@ -171,8 +179,6 @@ class ClosetCommands(Cog):
     @command(aliases=["cl"])
     @bot_has_permissions(send_messages=True)
     async def see_closet(self, ctx: Context, name: User = None):
-        """"""
-
         if not name:
             name = ctx.author
             if name.id not in self.bot.user_data["Closets"].keys():
@@ -198,8 +204,9 @@ class ClosetCommands(Cog):
                 if self.bot.user_data["Closets"][name.id] != dict():
                     for i in self.bot.user_data["Closets"][name.id].keys():
                         message_part.append(
-                            f"▛▚ Name: {i}\n▙▞ URL: ("
-                            f"{self.bot.user_data['Closets'][name.id][i]})\n\n"
+                            f"▛▚ Name: {i}\n"
+                            f"▙▞ URL: ({self.bot.user_data['Closets'][name.id][i]})\n"
+                            f"\n"
                         )
                 else:
                     raise KeyError
@@ -250,8 +257,6 @@ class ClosetCommands(Cog):
     @command(aliases=["cl_preview"])
     @bot_has_permissions(send_messages=True, manage_webhooks=True)
     async def preview_closet_entry(self, ctx, name):
-        """"""
-
         check = await self.bot.get_user_vote(ctx.author.id)
 
         if not check:
