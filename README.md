@@ -23,7 +23,7 @@ Removes your vanity avatar
 React to a message with "❌" to delete a vanity message.\
 React to a message with "❓" to recieve a DM telling you the real user who sent it.
 
-With a vanity equiped, send a message anywhere in a specific server to transform your message into your new avatar.
+With a vanity equipped, send a message anywhere in a specific server to transform your message into your new avatar.
 
 **Required Permissions:**
 ```
@@ -31,6 +31,8 @@ With a vanity equiped, send a message anywhere in a specific server to transform
 "Manage Messages"     - Step 1: To delete a message.
 "Manage Webhooks"     - Step 2: To send a transformed version of that message.
 "Send Messages"       - To send notifications/messages for warnings, confirmations, etc.
+"Embed Links"         - To stylize messages using beautiful embeds with my hair color!
+"Attach Files"        - To attach files for iOS viewability in the "vpr:current <user>" command
 ```
 
 A vanity is your avatar specific to a server.\
@@ -198,7 +200,7 @@ See all items that are blacklisted for the server the command is invoked in. The
 ### **LIST**
 `vpr:list`\
 **--------------------------------------------------**\
-Returns a list of all users in the server with vanities equiped.
+Returns a list of all users in the server with vanities equipped.
 
 ### MANAGE_USER; Aliases: "manage", "user"
 `vpr:manage_user <mode> <user>`\

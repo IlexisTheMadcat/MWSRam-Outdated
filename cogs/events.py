@@ -83,7 +83,7 @@ class Events(Cog):
         if msg.guild is None:
             if msg.author.id != self.bot.owner_ids[0]:
                 if msg.content.startswith("> "):
-                    if msg.author.id not in self.bot.muted_dms:
+                    if msg.author.id not in self.bot.config['muted_dms']:
                         if msg.author.id in self.bot.waiting:
                             await msg.channel.send(":clock9: Please wait, you already have a question open.\n"
                                                    "You'll get a response from me soon.")
@@ -440,49 +440,62 @@ class Events(Cog):
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error: Exception):
-        if not self.bot.debug_mode:
+        if not self.bot.config['debug_mode']:
             msg = ctx.message
+            em = Embed(title="Error", color=0xff0000)
             if isinstance(error, BotMissingPermissions):
-                await msg.author.send(
-                    f"This bot is missing one or more permissions listed in "
-                    f"`{self.bot.command_prefix}help permissions`."
-                )
+                em.description = f"This bot is missing one or more permissions listed in {self.bot.command_prefix}help`" \
+                                 f"under `Required Permissions`, " \
+                                 f"or you are trying to use the command in a DM channel."
 
             elif isinstance(error, MissingPermissions):
-                await msg.author.send(f"You are missing a required permission!")
+                em.description = f"You are missing a required permission, or you are trying to use the command in a DM channel.\n" \
+                                 f"Check `{self.bot.command_prefix}help commands` and look by the command you tried to use, " \
 
             elif isinstance(error, NotOwner):
-                await msg.author.send(
-                    "That command is not listed in the help menu and is to be used by the owner only."
-                )
+                em.description = "That command is not listed in the help menu and is to be used by the owner only."
 
             elif isinstance(error, MissingRequiredArgument):
-                await msg.author.send(f"\"{error.param.name}\" is a required argument that is missing.")
+                em.description = f"\"{error.param.name}\" is a required argument for command " \
+                                 f"\"{ctx.command.name}\" that is missing."
 
             elif isinstance(error, BadArgument):
-                await msg.author.send(
-                    f"You didn't type something correctly. Details below:\n"
-                    f"{error}"
-                )
+                em.description = f"You didn't type something correctly. Details below:\n" \
+                                 f"{error}"
+
             elif isinstance(error, CommandNotFound):
                 supposed_command = msg.content.split()[0]
-                await msg.author.send(
-                    f"Command \"{supposed_command}\" doesn't exist. Your message was still transformed if allowed."
-                )
+                em.description = f"Command \"{supposed_command}\" doesn't exist. Your message was still transformed if allowed."
 
             else:
                 if ctx.command.name:
-                    await ctx.author.send(
-                        f"[Error in command \"{ctx.command.name}\"]  {type(error).__name__}: {error}\n"
-                        f"If you keep getting this error, let the developer know!"
-                    )
-                    print(f"[Error in command \"{ctx.command.name}\"] {type(error).__name__}: {error}")
+                    em.description = f"`[Error in command \"{ctx.command.name}\"] {error}`\n" \
+                                     f"If you keep getting this error, let the developer know by " \
+                                     f"sending a DM here with a quoted message. " \
+                                     f"Don't hesitate, he's open for DMs right now!\n\n" \
+                                     f"For example:\n" \
+                                     f"> An error occurred and I need help! <explain what happened please>\n" \
+                                     f"Please detail your message with what you were trying to do, " \
+                                     f"or the message will likely be declined or ignored."
+
+                    if self.bot.config['error_log_channel'] is None:
+                        print(f"[Error in command \"{ctx.command.name}\"] {error}")
+                    else:
+                        print(f"[Error in command \"{ctx.command.name}\"] {error}")
+                        error_channel = self.bot.get_channel(self.bot.config['error_log_channel'])
+                        if error_channel:
+                            await error_channel.send(embed=Embed(title="Error", description=f"`[Error in command \"{ctx.command.name}\"] {error}`", color=0xff0000))
                 else:
-                    await ctx.author.send(
-                        f"[Error outside of command] {type(error).__name__}: {error}\n"
-                        f"If you keep getting this error, let the developer know!"
-                    )
-                    print(f"[Error outside of command] {type(error).__name__}: {error}")
+                    if self.bot.config['error_log_channel'] is None:
+                        print(f"[Error outside of command] {error}")
+                    else:
+                        print(f"[Error outside of command] {error}")
+                        error_channel = self.bot.get_channel(self.bot.config['error_log_channel'])
+                        if error_channel:
+                            await error_channel.send(embed=Embed(title="Error (likely critical)", description=f"`[Error outside of command] {error}`", color=0xff0000))
+
+            await ctx.author.send(embed=em)
+
         else:
             raise error
 

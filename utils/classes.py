@@ -195,13 +195,8 @@ class Bot(DiscordBot):
         # If true, the developer cannot accept a support message if another is already active.
         self.thread_active = False
 
-        # Capture extra meta from init for cogs, former `global`s
-        self.auto_pull: bool = kwargs.pop("auto_pull", True)
-        self.debug_mode: bool = kwargs.pop("debug_mode", False)
-        self.muted_dms: List[int] = kwargs.pop("muted_dms", list())
-
-        # PI for configs above to be set after instantiation
-        self.bot_config = kwargs.pop("bot_config", None)
+        # PI to capture extra meta from init for cogs, former `global`s
+        self.config = kwargs.pop("config")
 
         # Attribute for accessing tokens from file
         self.auth = PI(f"{self.cwd}/Serialized/tokens.pkl")
@@ -216,7 +211,7 @@ class Bot(DiscordBot):
 
         # Load data from pkl after super init to ensure loop is available
         self.user_data = PI(f"Serialized/data.pkl", create_file=True, loop=self.loop)
-        print("[DATA LOADED] Loaded data.pkl.")
+        print("[] Loaded data.pkl.")
 
     def run(self, *args, **kwargs):
         super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
