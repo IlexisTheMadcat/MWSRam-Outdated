@@ -230,7 +230,8 @@ class VanityCommands(Cog):
 
                     await ctx.send(embed=Embed(
                         title=f"{user}'s Standard Avatar",
-                        description=f"Their current standard avatar is here:"
+                        description=f"Their current standard avatar is here:",
+                        color=0xff87a3
                     ))
                     await ctx.send(file=file)
 
@@ -247,7 +248,8 @@ class VanityCommands(Cog):
 
                     await ctx.send(embed=Embed(
                         title=f"{user}'s Standard Avatar",
-                        description=f"Their current standard avatar url is located here:"
+                        description=f"Their current standard avatar url is located here:",
+                        color=0xff87a3
                     ).set_image(url=user.avatar_url))
 
                     return
