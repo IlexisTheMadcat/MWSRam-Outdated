@@ -233,7 +233,7 @@ class BlacklistCommands(Cog):
 
         else:
             await ctx.send(embed=Embed(
-                title="Error",
+                title="Argument Error",
                 description=f'Invalid mode passed: `{mode}`; Refer to `{self.bot.command_prefix}help commands blacklist`.',
                 color=0xff0000
             ))

@@ -255,8 +255,7 @@ class ModerationCommands(Cog):
                     channel = guild.get_channel(c_id)
                     if channel:
                         message_part.append(
-                            f"-- Name: {channel.mention};"
-                            f" ID: {channel.id}"
+                            f"-- Name: {channel.mention}; ID: {channel.id}"
                         )
                     else:
                         self.bot.user_data["ServerBlacklists"][guild.id][0].remove(i)
@@ -280,7 +279,7 @@ class ModerationCommands(Cog):
 
         message_full = "\n".join(message_part)
         await ctx.send(embed=Embed(
-            title="Server Blacklists",
+            title="Server Blacklist",
             description=message_full,
             color=0xff87a3
         ))

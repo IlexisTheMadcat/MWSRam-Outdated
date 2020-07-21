@@ -444,13 +444,13 @@ class Events(Cog):
             msg = ctx.message
             em = Embed(title="Error", color=0xff0000)
             if isinstance(error, BotMissingPermissions):
-                em.description = f"This bot is missing one or more permissions listed in {self.bot.command_prefix}help`" \
+                em.description = f"This bot is missing one or more permissions listed in `{self.bot.command_prefix}help`" \
                                  f"under `Required Permissions`, " \
                                  f"or you are trying to use the command in a DM channel."
 
             elif isinstance(error, MissingPermissions):
                 em.description = f"You are missing a required permission, or you are trying to use the command in a DM channel.\n" \
-                                 f"Check `{self.bot.command_prefix}help commands` and look by the command you tried to use, " \
+                                 f"Check `{self.bot.command_prefix}help commands` and look by the command you tried to use." \
 
             elif isinstance(error, NotOwner):
                 em.description = "That command is not listed in the help menu and is to be used by the owner only."
