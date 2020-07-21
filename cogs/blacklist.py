@@ -211,7 +211,7 @@ class BlacklistCommands(Cog):
                     await ctx.send(embed=Embed(
                         title="Success",
                         description=f'Removed "{item}" from blacklisted prefixes for you.',
-                        color=0xff0000
+                        color=0xff87a3
                     ))
 
                     print(f'- Removed "{item}" from blacklisted prefixes for user \"{ctx.author}\".')
