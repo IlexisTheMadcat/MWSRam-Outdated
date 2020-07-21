@@ -31,6 +31,8 @@ With a vanity equipped, send a message anywhere in a specific server to transfor
 "Manage Messages"     - Step 1: To delete a message.
 "Manage Webhooks"     - Step 2: To send a transformed version of that message.
 "Send Messages"       - To send notifications/messages for warnings, confirmations, etc.
+"Embed Links"         - To stylize messages using beautiful embeds with my hair color!
+"Attach Files"        - To attach files for iOS viewability in the "vpr:current <user>" command
 ```
 
 A vanity is your avatar specific to a server.\

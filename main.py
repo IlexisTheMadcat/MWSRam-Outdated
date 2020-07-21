@@ -1,4 +1,6 @@
 # Lib
+import os
+from copy import deepcopy
 from random import choice
 
 # Site
@@ -17,7 +19,6 @@ CONFIG_DEFAULTS = {
     "debug_mode": False,  # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
     "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
     "muted_dms": list(),   # List of user IDs to block support DMs from. Y'know, in case of the abusers.
-    "command_prefix": "[:>",  # Default prefix for the testing instances.
     "error_log_channel": None
 }
 
@@ -29,7 +30,8 @@ INIT_EXTENSIONS = [
     "events",
     "help",
     "moderation",
-    "vanity"
+    "vanity",
+    "repl"
 ]
 
 LOADING_CHOICES = [  # because why not
@@ -48,27 +50,24 @@ LOADING_CHOICES = [  # because why not
 ]
 
 
-config_data = PI("Serialized/bot_config.pkl")
+config_data = PI("Serialized/bot_config.pkl", create_file=True)
 
-bot_config = {
-    "debug_mode": config_data.get("debug_mode"),
-    "auto_pull": config_data.get("auto_pull"),
-    "muted_dms": config_data.get("muted_dms"),
-    "command_prefix": config_data.get("prefix"),
-    "error_log_channel": config_data.get("error_log_channel")
-}
-
-defaults_used = False
-for key, val in bot_config.items():
-    if val is None:
+for key in CONFIG_DEFAULTS:
+    if key not in config_data:
         config_data[key] = CONFIG_DEFAULTS[key]
-        bot_config[key] = CONFIG_DEFAULTS[key]
-        defaults_used = True
-        print(f"[USING CONFIG DEFAULT] Config '{key}' missing. "
+        print(f"[MISSING VALUE] Config '{key}' missing. "
               f"Inserted default '{CONFIG_DEFAULTS[key]}'")
-if not defaults_used:
-    print("\n[] Configurations successfully "
-          "loaded from Serialized/bot_config.pkl")
+
+found_data = deepcopy(config_data)  # Duplicate to avoid RuntimeError exception
+for key in found_data:
+    if key not in CONFIG_DEFAULTS:
+        config_data.pop(key)  # Remove redundant data
+        print(f"[REDUNDANCY] Invalid config \'{key}\' found. "
+              f"Removed key from file.")
+
+del found_data  # Remove variable from namespace
+
+print("[] Configurations loaded from Serialized/bot_config.pkl")
 
 
 bot = Bot(
@@ -76,12 +75,11 @@ bot = Bot(
     owner_ids=[331551368789622784, 125435062127820800],  # DocterBotnikM500, SirThane
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
+    command_prefix="vpr:" if os.name == "posix" else "[:>",
 
     # Configurable via [p]bot
-    **bot_config
+    config=config_data
 )
-
-bot.bot_config = config_data
 
 # To be replaced by custom help command
 # TODO: Move to `help.py` when done
@@ -101,9 +99,11 @@ async def on_ready():
     permissions = Permissions()
     permissions.update(
         send_messages=True,
+        embed_links=True,
         manage_messages=True,
         manage_webhooks=True,
-        add_reactions=True
+        add_reactions=True,
+        attach_files=True
     )
 
     print(f"\n"

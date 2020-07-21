@@ -20,7 +20,7 @@ class MiscCommands(Cog):
 
     # ------------------------------------------------------------------------------------------------------------------
     @command()
-    @bot_has_permissions(send_messages=True)
+    @bot_has_permissions(send_messages=True, embed_links=True)
     async def invite(self, ctx: Context):
         """Sends an OAuth bot invite URL"""
 
@@ -30,7 +30,9 @@ class MiscCommands(Cog):
             send_messages=True,
             manage_messages=True,
             manage_webhooks=True,
-            add_reactions=True
+            add_reactions=True,
+            attach_files=True,
+            embed_links=True
         )
 
         em = Embed(
@@ -43,7 +45,7 @@ class MiscCommands(Cog):
         await ctx.send(embed=em)
 
     @command(name="help")
-    @bot_has_permissions(send_messages=True)
+    @bot_has_permissions(send_messages=True, embed_links=True)
     async def bhelp(self, ctx: Context, section: str = "directory", subsection: str = None):
         em = Embed(title="Ram: Help", color=0xff87a3)
         if section == "directory":
@@ -152,7 +154,7 @@ Closets -- Save your avatars in your personal closet:
 
 Moderation -- Enforce some actions:
     list - No limits
-    manage_user - "M/Messages" required
+    manage_user - "M/Nicknames" required
     see_server_blacklists - No limits
     server_blacklist - "M/Channels" required
 

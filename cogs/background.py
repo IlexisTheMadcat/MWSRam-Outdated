@@ -31,7 +31,7 @@ class BackgroundTasks(Cog):
         else:
             status = Status.online
 
-        if self.bot.debug_mode:
+        if self.bot.config['debug_mode']:
             activity = Activity(
                 type=ActivityType.playing,
                 name="in DEBUG MODE"
@@ -52,9 +52,9 @@ class BackgroundTasks(Cog):
         await self.bot.user_data.save()
 
         self.bot.inactive = self.bot.inactive + 1
-        print(f"[VPP: {time}] Saved data.", end="\n" if not self.bot.auto_pull else "\r")
+        print(f"[VPP: {time}] Saved data.", end="\n" if not self.bot.config['auto_pull'] else "\r")
 
-        if self.bot.auto_pull:
+        if self.bot.config['auto_pull']:
             print(f"[VPP: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
             resp = popen("git pull").read()
             resp = f"```diff\n{resp}\n```"
