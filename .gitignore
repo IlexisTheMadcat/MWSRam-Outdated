@@ -3,5 +3,6 @@
 *.idea*
 *.bat
 *.replit*
-*start.json*
+*poetry.lock*
+*pyproject.toml*
 *changelog.txt*
