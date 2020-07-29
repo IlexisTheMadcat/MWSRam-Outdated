@@ -113,7 +113,8 @@ class VanityCommands(Cog):
                 title="URL Error",
                 description=f"An error has occurred;\n"
                             f"Try making sure your url is valid and/or the image is a valid resolution.\n"
-                            f"Your channel may also have to many webhooks. Read the error below. `Error: {e}`",
+                            f"Your channel may also have to many webhooks. Read the error below.\n"
+                            f"`Error: {e}`",
                 color=0xff0000
             ))
 

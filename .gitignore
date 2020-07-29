@@ -5,4 +5,3 @@
 *.replit*
 *poetry.lock*
 *pyproject.toml*
-*changelog.txt*
