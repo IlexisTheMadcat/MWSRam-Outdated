@@ -3,3 +3,5 @@
 *.idea*
 *.bat
 *.replit*
+*poetry.lock*
+*pyproject.toml*
