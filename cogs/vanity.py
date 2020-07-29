@@ -188,7 +188,7 @@ class VanityCommands(Cog):
             ))
 
     @command()
-    @bot_has_permissions(send_messages=True, embed_links=True)
+    @bot_has_permissions(send_messages=True, embed_links=True, attach_files=True)
     async def current(self, ctx: Context, user: User, standard: str = None):
 
         guild = ctx.guild
