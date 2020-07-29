@@ -13,6 +13,7 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 from utils.fileinterface import PickleInterface as PI
+from replit_hosting import start_server
 
 
 CONFIG_DEFAULTS = {
@@ -133,6 +134,6 @@ async def on_ready():
 
 
 if __name__ == "__main__":
-
-    print("[BOT INIT] Logging in with token.")
+    
+    start_server()
     bot.run()

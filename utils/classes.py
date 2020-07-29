@@ -214,6 +214,7 @@ class Bot(DiscordBot):
         print("[] Loaded data.pkl.")
 
     def run(self, *args, **kwargs):
+        print("[BOT INIT] Logging in with token.")
         super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
 
     @property
