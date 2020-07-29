@@ -1,8 +1,6 @@
-Relatively new features:
--- You'll get notifications less frequently now for messages that took some time to send.
----- Note that sending media with a vanity will cause a guarenteed delay than sending text.
+Changes: 
+-- Overhauled the markdown used by the bot to use embeds.
+---- The color of the embed depends on the status. Fails are red, and successes are in pink.
 
-In case you missed it:
-New Features:
--- Moderation commands (see ':>help commands' under Moderation)
----- These commands allow moderators with specific permissions to limit how users can use this bot.
+-- New support method;
+---- Message the bot with a quoted message to send your message directly to the developer.
