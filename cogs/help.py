@@ -105,8 +105,9 @@ This bot was created by:
 {owners}
 
 Support Server invite: https://discord.gg/j2y7jxQ
-Warning: Support server may contain swearing in open channels.
-*Consider DMing the developer instead for questions/information.
+You may also DM this bot with a quoted message;
+> Like this
+ー to send a message to the developer.
 
 Number of servers this bot is in now: {len(self.bot.guilds)}
 :asterisk: Number of users having vanities equipped now: {total}
@@ -385,8 +386,9 @@ Gives you an invite link to invite this bot to any server.
 """
                 
             else:
-                em.description = f"Invalid subsection name. Type and enter `{self.bot.command_prefix}help commands` " \
-                                 f"for subsection names."
+                em.description = f"Invalid command name. Type and enter `{self.bot.command_prefix}help commands` " \
+                                 f"for a list of command names."
+                em.colour = 0xFF0000
 
         elif section.lower() == "actions":
             em.description = f"""
@@ -424,8 +426,7 @@ Last updated: {lastmodified}
         else:
             em.description = f"Not a valid section name. This bot shows all commands with the `commands` section.\n" \
                              f"Type `{self.bot.command_prefix}help` for all sections."
-            em.color = 0x000000
-            return
+            em.colour = 0xFF0000
 
         await ctx.send(embed=em)
         if not subsection:
