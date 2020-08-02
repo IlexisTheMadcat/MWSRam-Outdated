@@ -2,6 +2,9 @@
 
 # Lib
 from inspect import isawaitable
+from asyncio import sleep
+from contextlib import suppress
+from asyncio import TimeoutError
 
 # Site
 from discord.colour import Colour
@@ -9,7 +12,7 @@ from discord.embeds import Embed
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.core import command, group, is_owner
-
+from discord.errors import NotFound, Forbidden
 # Local
 from utils.classes import Bot, Paginator
 
@@ -142,10 +145,25 @@ class REPL(Cog):
 
         embed = Embed().from_dict(emb)
 
-        # await ctx.message.delete()
-        await ctx.channel.send(embed=embed)
+        eval_message = await ctx.channel.send(embed=embed)
+
+        try:
+            await eval_message.add_reaction("❌")
+        except Forbidden:
+            return
+        else:
+            def check(reaction, user):
+                return all((reaction.message.id == eval_message.id, str(reaction.emoji) == "❌", user == ctx.author))
+            
+            try:
+                await self.bot.wait_for("reaction_add", timeout=30, check=check)
+            except TimeoutError:
+                with suppress(NotFound):
+                    await eval_message.remove_reaction("❌", self.bot.user)
+            else:
+                await eval_message.remove_reaction("❌", self.bot.user)
+                await eval_message.edit(embed=Embed(title="Eval closed", description="Caller has hidden eval output."))
 
 
 def setup(bot: Bot):
-    """REPL"""
     bot.add_cog(REPL(bot))

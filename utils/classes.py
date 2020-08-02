@@ -5,6 +5,7 @@ from os import getcwd
 from re import match
 
 # Site
+from discord import Message
 from dbl.client import DBLClient
 from dbl.errors import DBLException
 from discord.channel import TextChannel
@@ -155,7 +156,12 @@ class GlobalTextChannelConverter(IDConverter):
 
         return result
 
-
+USER_SETTINGS_TEMPLATE = {
+    "userID": {
+        "use_quick_delete": "bool",
+        "use_engraved_id": "bool"
+    }
+}
 VANITY_AVATARS_TEMPLATE = {
     "guildID": {
         "userID": [
@@ -190,6 +196,11 @@ class Bot(DiscordBot):
         self.waiting: List[int] = list()  # Users waiting for a response from developer
         self.cwd = getcwd()  # Global bot directory
         self.text_status = f"{kwargs.get('command_prefix')}help"  # Change first half of text status
+        
+        # Per-user organized object to store what messages belong to the user.
+        # By default, users use EngravedID method, disregarding this as it allows garenteed deletion.
+        # Otherwise, because this is namespace only, users will only be able to delete messages sent after the last time the bot reloaded.
+        self.messages = {"userID":["messageID"]}
 
         # Namespace variable to indicate if a support thread is open or not.
         # If true, the developer cannot accept a support message if another is already active.

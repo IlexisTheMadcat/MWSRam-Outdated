@@ -96,6 +96,28 @@ class Events(Cog):
                             await msg.channel.send(":red_circle: The developer currently has "
                                                    "Do Not Disturb on. Please try again later.")
                             return
+                        elif user.status == Status.idle:
+                            conf = await msg.channel.send(":orange_circle: The developer is currently idle, "
+                                                         "are you sure you want to send?\n"
+                                                         "Sending `Yes` will send the message, but you *may* not get a response.\n"
+                                                         "(`Yes`, `No`)")
+
+                            def check(m):
+                                return m.content.lower() in ["yes", "no"]
+                            try:
+                                message = await self.bot.wait_for("message", timeout=20, check=check)
+                            except TimeoutError:
+                                await conf.edit(":orange_circle: The developer is currently idle, "
+                                                "are you sure you want to send?\n"
+                                                "Sending `Yes` will send the message, but you *may* not get a response.\n"
+                                                "(`Yes`, `No`)")
+                            else:
+                                if message.content == "no":
+                                    return await conf.edit(":orange_circle: The developer is currently idle.\n"
+                                                           "Please try again later.")
+
+                                elif message.content == "yes":
+                                    await conf.delete()
 
                         status_msg = await msg.channel.send(":clock9: "
                                                             "I sent your message to the developer.\n"
@@ -262,16 +284,26 @@ class Events(Cog):
                             with suppress(NotFound):
                                 await msg.remove_reaction("❌", msg.guild.me)
 
-            if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id].keys() and \
-                    not msg.author.bot and \
-                    self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
+            if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id] and \
+                not msg.author.bot and \
+                self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
+                
+                if msg.author.id not in self.bot.user_data["UserSettings"]:
+                    self.bot.user_data["UserSettings"][msg.author.id] = {
+                        "use_quick_delete": True,
+                        "use_engraved_id": True
+                    }
+                
+                if self.bot.user_data["UserSettings"][msg.author.id]["use_engraved_id"]:
 
-                engravedid = create_engraved_id_from_user(msg.author.id)
+                    engravedid = create_engraved_id_from_user(msg.author.id)
 
-                if msg.content != "":
-                    new_content = f"{msg.content}  {engravedid}"
+                    if msg.content != "":
+                        new_content = f"{msg.content} {engravedid}"
+                    else:
+                        new_content = EID_FROM_INT[10] + engravedid
                 else:
-                    new_content = EID_FROM_INT[10] + engravedid
+                    new_content = msg.content
 
                 bot_perms = msg.channel.permissions_for(msg.guild.me)
                 if not all((
@@ -304,12 +336,19 @@ class Events(Cog):
                         webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
                         self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
 
-                    await webhook.send(
+                    whmessage = await webhook.send(
                         new_content,
                         files=attachment_files,
                         avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
-                        username=msg.author.display_name
+                        username=msg.author.display_name,
+                        wait=True
                     )
+                    
+                    if msg.author.id not in self.bot.messages:
+                        self.bot.messages[msg.author.id] = []
+
+                    self.bot.messages[msg.author.id].append(whmessage.id)
+
                     self.bot.inactive = 0
                     stop = default_timer()
 
@@ -368,39 +407,63 @@ class Events(Cog):
         if str(reaction.emoji) == "❌" and \
                 reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
-            try:
-                engravedid = get_engraved_id_from_msg(reaction.message.content)
-                identification = self.bot.get_user(engravedid)
-            except Exception as e:
-                print(f"[Error in \"on_raw_reaction_add\"] {e}")
-                return
-
-            member = reaction.guild.get_member(user.id)
-            permissions = member.permissions_in(reaction.channel)
-
-            # Check if the message belongs to the reaction user, or if they have `Manage Messages` permission.
-            if (identification == user or permissions.manage_messages) and user.id != self.bot.user.id:
+            if user.id not in self.bot.user_data["UserSettings"]:
+                self.bot.user_data["UserSettings"] = {
+                    "use_quick_delete": True,
+                    "use_engraved_id": True
+                }
+            
+            if self.bot.user_data["UserSettings"][user.id]["use_engraved_id"]:
                 try:
+                    engravedid = get_engraved_id_from_msg(reaction.message.content)
+                    identification = self.bot.get_user(engravedid)
+                except Exception as e:
+                    print(f"[Error in \"on_raw_reaction_add\"] {e}")
+                    return
+
+                member = reaction.guild.get_member(user.id)
+                permissions = member.permissions_in(reaction.channel)
+
+                # Check if the message belongs to the reaction user, or if they have `Manage Messages` permission.
+                if (identification == user or permissions.manage_messages) and user.id != self.bot.user.id:
+                    try:
+                        await self.bot.http.delete_message(
+                            reaction.channel.id,
+                            reaction.message.id,
+                            reason="Deleted on user request."
+                        )
+                    except Forbidden:
+                        with suppress(HTTPException, Forbidden):
+                            await self.bot.http.remove_reaction(
+                                reaction.channel.id,
+                                reaction.message.id,
+                                reaction.emoji,
+                                user.id
+                            )
+                            await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
+                else:
+                    if user != self.bot.user:
+                        with suppress(Forbidden):
+                            await user.send(f"That's not your message to delete. "
+                                            f"Ask {str(identification)} to delete it.\n"
+                                            f"The reaction was left unchanged.")
+
+            else:
+                member = reaction.guild.get_member(user.id)
+                permissions = member.permissions_in(reaction.channel)
+                if (user.id in self.bot.messages and \
+                    reaction.message.id in self.bot.messages[user.id]) or \
+                    permissions.manage_messages:
                     await self.bot.http.delete_message(
                         reaction.channel.id,
                         reaction.message.id,
                         reason="Deleted on user request."
                     )
-                except Forbidden:
-                    with suppress(HTTPException, Forbidden):
-                        await self.bot.http.remove_reaction(
-                            reaction.channel.id,
-                            reaction.message.id,
-                            reaction.emoji,
-                            user.id
-                        )
-                        await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
-            else:
-                if user != self.bot.user:
-                    with suppress(Forbidden):
-                        await user.send(f"That's not your message to delete. "
-                                        f"Ask {str(identification)} to delete it.\n"
-                                        f"The reaction was left unchanged.")
+                    self.bot.messages.remove(reaction.message.id)
+                else:
+                    if user != self.bot.user:
+                        with suppress(Forbidden):
+                            await user.send(f"That's not your message to delete, or I don't have it in my system.")
 
         elif str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \
@@ -440,6 +503,10 @@ class Events(Cog):
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error: Exception):
+        if not isinstance(error, CommandNotFound):
+            with suppress(Forbidden):
+                await ctx.message.add_reaction("❌")
+            
         if not self.bot.config['debug_mode']:
             msg = ctx.message
             em = Embed(title="Error", color=0xff0000)

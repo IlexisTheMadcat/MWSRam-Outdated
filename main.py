@@ -13,14 +13,14 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 from utils.fileinterface import PickleInterface as PI
-from replit_hosting import start_server
+from utils.replit_hosting import start_server
 
 
 CONFIG_DEFAULTS = {
-    "debug_mode": False,  # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
-    "auto_pull": True,    # Auto pulls github updates every minute and reloads all loaded cogs.
-    "muted_dms": list(),   # List of user IDs to block support DMs from. Y'know, in case of the abusers.
-    "error_log_channel": None
+    "debug_mode": False,       # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
+    "auto_pull": True,         # Auto pulls github updates every minute and reloads all loaded cogs.
+    "muted_dms": list(),       # List of user IDs to block support DMs from. Y'know, in case of the abusers.
+    "error_log_channel": None  # The channel ID to print error exceptions to.
 }
 
 INIT_EXTENSIONS = [
@@ -76,7 +76,7 @@ bot = Bot(
     owner_ids=[331551368789622784, 125435062127820800],  # DocterBotnikM500, SirThane
     activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
     status=Status.idle,
-    command_prefix="vpr:" if os.name == "posix" else "[:>",
+    command_prefix="var:" if os.name == "posix" else "[:>",
 
     # Configurable via [p]bot
     config=config_data

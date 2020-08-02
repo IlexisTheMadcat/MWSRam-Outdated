@@ -217,7 +217,7 @@ Returns a link to `user`'s vanity avatar.
             elif subsection.lower() == "toggle_quick_delete":
                 em.description = f"""
 **TOGGLE_QUICK_DELETE**; Aliases: "toggle_x", "quick_del"
-`vpr:toggle_quick_delete`
+`var:toggle_quick_delete`
 **--------------------------------------------------**
 Toggle the quick delete reaction that appears under message by default.
 -- This "quick_delete" feature allows user who find it difficult to react to delete their message provides them a shortcut for 5 seconds.

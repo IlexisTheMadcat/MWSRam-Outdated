@@ -62,7 +62,7 @@ class ModerationCommands(Cog):
                 ))
 
             else:
-                channel = await self.bot.get_channel(item)
+                channel = self.bot.get_channel(item)
 
                 if channel is None:
                     await ctx.send(embed=Embed(

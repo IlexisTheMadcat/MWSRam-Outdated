@@ -37,7 +37,7 @@ class VanityCommands(Cog):
             ))
 
         user_perms = ctx.channel.permissions_for(ctx.author)
-        mode = None
+        mode = "Used URL"
 
         if (guild.id in self.bot.user_data["VanityAvatars"] and
                 author.id in self.bot.user_data["VanityAvatars"][guild.id] and
@@ -69,7 +69,7 @@ class VanityCommands(Cog):
                     url = self.bot.user_data["Closets"][author.id][url]
                     mode = "Used closet entry"
             else:
-                mode = "Used URL"
+                pass
 
         except KeyError or IndexError:
             pass
@@ -124,20 +124,18 @@ class VanityCommands(Cog):
 
             if author.id not in self.bot.user_data["VanityAvatars"][guild.id]:
                 self.bot.user_data["VanityAvatars"][guild.id].update(
-                    {author.id: [None, None, False, True]}
+                    {author.id: [None, None, False]}
                 )
 
             if self.bot.user_data["VanityAvatars"][guild.id][author.id][0] is None:
-                self.bot.user_data["VanityAvatars"][guild.id][author.id] = [url, url,
-                                                                            self.bot.user_data["VanityAvatars"][guild.id][author.id][2],
-                                                                            self.bot.user_data["VanityAvatars"][guild.id][author.id][3]]
+                self.bot.user_data["VanityAvatars"][guild.id][author.id] = \
+                [url, url, self.bot.user_data["VanityAvatars"][guild.id][author.id][2]]
 
             else:
                 self.bot.user_data["VanityAvatars"][guild.id][author.id] = [
                     url,
                     self.bot.user_data["VanityAvatars"][guild.id][author.id][0],
-                    self.bot.user_data["VanityAvatars"][guild.id][author.id][2],
-                    self.bot.user_data["VanityAvatars"][guild.id][author.id][3]
+                    self.bot.user_data["VanityAvatars"][guild.id][author.id][2]
                 ]
                 
             print(
@@ -166,8 +164,7 @@ class VanityCommands(Cog):
             self.bot.user_data["VanityAvatars"][guild.id][author.id] = [
                 None,
                 self.bot.user_data["VanityAvatars"][guild.id][author.id][0],
-                self.bot.user_data["VanityAvatars"][guild.id][author.id][2],
-                self.bot.user_data["VanityAvatars"][guild.id][author.id][3]
+                self.bot.user_data["VanityAvatars"][guild.id][author.id][2]
             ]
 
             await ctx.send(embed=Embed(
@@ -194,16 +191,8 @@ class VanityCommands(Cog):
         guild = ctx.guild
         author = ctx.author
 
-        if standard not in ["standard", "standard_url"]:
+        if standard != "standard":
             standard = None
-
-        if not guild:
-            return await ctx.send(embed=Embed(
-                title="Error",
-                description="This command cannot be used in a DM channel. Consider "
-                            "using it in a private channel in one of your servers.",
-                color=0xff0000
-            ))
         
         if user.id == self.bot.user.id:
             print(f'[] Sent bot\'s avatar url to user \"{author}\".')
@@ -214,49 +203,31 @@ class VanityCommands(Cog):
         
         else:
             async def show_standard():
-                if (str(user.avatar_url).endswith(".webp") or str(user.avatar_url).endswith(".webp?size=1024")) and standard != "standard_url":
-                    r = get(user.avatar_url, allow_redirects=True)                  # Compatibility for mobile devices unable
-                    with open(f"{self.bot.cwd}/avatar{user.id}.webp", "wb") as f:   # to render .webp files, especially iOS
-                        f.write(r.content)
+                print(
+                    f'[] Sent standard avatar url for \"{user}\"'
+                    f' to user \"{author}\".'
+                )
 
-                    im = Image.open(f"{self.bot.cwd}/avatar{user.id}.webp")
-                    im.save(f"{self.bot.cwd}/avatar{user.id}.png", format="PNG")
-                    file = File(f"{self.bot.cwd}/avatar{user.id}.png")
-                    im.close()
+                await ctx.send(embed=Embed(
+                    title=f"{user}'s Standard Avatar",
+                    description=f"Their current standard avatar is located here:",
+                    color=0xff87a3
+                ).set_image(url=user.avatar_url))
 
-                    print(
-                        f'[] Sent standard avatar url for \"{user}\"'
-                        f' to user \"{author}\".'
-                    )
-
-                    await ctx.send(embed=Embed(
-                        title=f"{user}'s Standard Avatar",
-                        description=f"Their current standard avatar is here:",
-                        color=0xff87a3
-                    ))
-                    await ctx.send(file=file)
-
-                    remove(f"{self.bot.cwd}/avatar{user.id}.webp")
-                    remove(f"{self.bot.cwd}/avatar{user.id}.png")
-
-                    return
-
-                else:
-                    print(
-                        f'[] Sent standard avatar url for \"{user}\"'
-                        f' to user \"{author}\".'
-                    )
-
-                    await ctx.send(embed=Embed(
-                        title=f"{user}'s Standard Avatar",
-                        description=f"Their current standard avatar url is located here:",
-                        color=0xff87a3
-                    ).set_image(url=user.avatar_url))
-
-                    return
+                return
 
             if not standard:
-                if guild.id in self.bot.user_data["VanityAvatars"] and user.id in self.bot.user_data["VanityAvatars"][guild.id] and self.bot.user_data["VanityAvatars"][guild.id][user.id][0]:
+                if not guild:
+                    return await ctx.send(embed=Embed(
+                        title="Error",
+                        description="This command cannot be used in a DM channel (if looking for vanity avatar). "
+                                    "Consider using it in a private channel in one of your servers.",
+                        color=0xff0000
+                    ))
+                
+                if guild.id in self.bot.user_data["VanityAvatars"] and \
+                    user.id in self.bot.user_data["VanityAvatars"][guild.id] and \
+                    self.bot.user_data["VanityAvatars"][guild.id][user.id][0]:
 
                     print(
                         f'[] Sent vanity avatar url for \"{user}\"'
@@ -272,7 +243,7 @@ class VanityCommands(Cog):
                 else:
                     await show_standard()
 
-            elif standard in ["standard", "standard_url"]:
+            elif standard != "standard":
                 await show_standard()
 
     @command(aliases=["pv"])
@@ -281,29 +252,64 @@ class VanityCommands(Cog):
 
     @command(aliases=["toggle_x", "quick_del"])
     @bot_has_permissions(send_messages=True, embed_links=True)
-    async def toggle_quick_delete(self, ctx):
+    async def toggle_quick_delete(self, ctx: Context):
         guild = ctx.guild
         author = ctx.author
-        if guild.id in self.bot.user_data["VanityAvatars"] and author.id in self.bot.user_data["VanityAvatars"][guild.id]:
-            self.bot.user_data["VanityAvatars"][guild.id][author.id][3] = not self.bot.user_data["VanityAvatars"][guild.id][author.id][3]
-            symbol = self.bot.user_data["VanityAvatars"][guild.id][author.id][3]
-            if symbol:
-                symbol = "✅"
-            elif not symbol:
-                symbol = "❎"
+        if author.id in self.bot.user_data["UserSettings"]:
+            self.bot.user_data["UserSettings"][author.id] = {
+                "use_engraved_id": True,
+                "use_quick_delete": True
+            }
+        
+        self.bot.user_data["UserSettings"][author.id]["use_quick_delete"] = not \
+            self.bot.user_data["VanityAvatars"][author.id]["use_quick_delete"]
+        
+        symbol = self.bot.user_data["UserSettings"][guild.id][author.id][3]
+        if symbol:
+            symbol = "✅"
+        elif not symbol:
+            symbol = "❎"
 
-            await ctx.send(embed=Embed(
-                title="Quick delete",
-                description=f"{symbol} Quick delete toggled.\n",
+        await ctx.send(embed=Embed(
+            title="Quick delete",
+            description=f"{symbol} Quick delete toggled.\n",
+            color=0xff87a3
+        ))
+
+    
+    @command(aliases=["toggle_eid", "engraved_id"])
+    @bot_has_permissions(send_messages=True, embed_links=True)
+    async def toggle_engraved_id(self, ctx: Context):
+        """
+        Users have the option of turning off Engraved_ID.
+        A risk to take when calling this command is that
+        messages sent before the bot is reloaded will no longer
+        be able to be deleted due to bot cache limitations.
+        However, users with `Manage Messages` permission 
+        do not have to worry.
+        """
+
+        if not ctx.author.id in self.bot.user_data["UserSettings"]:
+            self.bot.user_data["UserSettings"][ctx.author.id] = \
+                {
+                    "use_quick_delete": True,
+                    "use_engraved_id": True
+                }
+
+        self.bot.user_data["UserSettings"][ctx.author.id]["use_engraved_id"] = \
+            not self.bot.user_data["UserSettings"][ctx.author.id]["use_engraved_id"]
+        
+        symbol = self.bot.user_data["UserSettings"][ctx.author.id]["use_engraved_id"]
+        if symbol:
+            symbol = "✅"
+        elif not symbol:
+            symbol = "❎"
+        
+        await ctx.send(embed=Embed(
+                title="EngravedID",
+                description=f"{symbol} EngravedID toggled.\n",
                 color=0xff87a3
-            ))
-        else:
-            await ctx.send(embed=Embed(
-                title="Error",
-                description="You can't use this feature until you have created your vanity for the first time here.",
-                color=0xff0000
-            ))
-
-
+        ))
+        
 def setup(bot: Bot):
     bot.add_cog(VanityCommands(bot))

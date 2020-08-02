@@ -51,7 +51,7 @@ def get_engraved_id_from_msg(content: str) -> Optional[int]:
         engraved_id = int(engraved_id)
 
     except IndexError:
-        return
+        return 
 
     else:
         return engraved_id

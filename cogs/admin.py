@@ -132,6 +132,7 @@ class Admin(Cog):
                 description=f"Module `{module}` loaded successfully",
                 color=0x00ff00
             )
+            print(f"[] Loaded module \"{module}\".")
 
         await ctx.send(embed=em)
 
@@ -172,6 +173,7 @@ class Admin(Cog):
                 description=f"Module `{module}` unloaded successfully",
                 color=0x00ff00
             )
+            print(f"[] Unloaded module \"{module}\".")
         
         await ctx.send(embed=em)
 
@@ -244,6 +246,7 @@ class Admin(Cog):
                 description=f"Module `{module}` reloaded successfully",
                 color=0x00ff00
             )
+            print(f"[] Reloaded module \"{module}\".")
     
         await ctx.send(embed=em)
 
@@ -379,7 +382,7 @@ class Admin(Cog):
         }
         em.description = "Reset all avatars."
         await ctx.send(embed=em)
-        print("[] Deleted all avatars on owner's request.")
+        print("[] Deleted all avatars on developer's request.")
 
     @is_owner()
     @rs.command(aliases=["blacklists", "bl"])
@@ -393,7 +396,7 @@ class Admin(Cog):
         }
         em.description = "Reset all blacklists."
         await ctx.send(embed=em)
-        print("[] Deleted all blacklists on owner's request.")
+        print("[] Deleted all blacklists on developer's request.")
 
     @is_owner()
     @rs.command(aliases=["serverblacklists", "sbl"])
@@ -406,7 +409,7 @@ class Admin(Cog):
         }
         em.description = "Reset all server blacklists."
         await ctx.send(embed=em)
-        print("[] Deleted all server-blacklists on owner's request.")
+        print("[] Deleted all server-blacklists on developer's request.")
 
     @is_owner()
     @rs.command(aliases=["closets", "cl"])
@@ -418,7 +421,7 @@ class Admin(Cog):
         }
         em.description = "Reset all closets."
         await ctx.send(embed=em)
-        print("[] Deleted all closets on owner's request.")
+        print("[] Deleted all closets on developer's request.")
 
     @is_owner()
     @rs.command(name="all")
@@ -448,6 +451,7 @@ class Admin(Cog):
             "authorID":
                 {"closet_name": "closet_url"}
         }
+        print(f"[] Reset all data on developer's request.")
         await ctx.send(embed=em)
 
     """ ####################
@@ -488,6 +492,7 @@ class Admin(Cog):
                             f"Original prefix: `{orig}`",
                 color=0x00ff00
             )
+            print(f"[] Updated bot prefix to \"{val}\".")
 
         else:
             em = Embed(
@@ -515,6 +520,7 @@ class Admin(Cog):
                                 f"Original value: `{orig}`",
                     color=0x00ff00
                 )
+                print(f"[] Updated debug_mode to \"{val}\".")
 
             else:
                 em = Embed(
@@ -550,6 +556,7 @@ class Admin(Cog):
                                 f"Original value: `{orig}`",
                     color=0x00ff00
                 )
+                print(f"[] Updated auto-pull to \"{val}\".")
 
             else:
                 em = Embed(
@@ -583,6 +590,7 @@ class Admin(Cog):
                             f"Original status: `{orig}`",
                 color=0x00ff00
             )
+            print(f"[] Updated status to \"{val}\".")
 
         else:
             em = Embed(
@@ -614,6 +622,7 @@ class Admin(Cog):
                 await file.save(f"{self.bot.cwd}/changelog.txt")
                 em.description = f"Changelog file set."
                 em.colour = 0x00ff00
+                print(f"[] Updated changelog.txt.")
 
         await ctx.send(embed=em)
 
@@ -676,7 +685,7 @@ class Admin(Cog):
             bot_url = self.bot.dbl_page
             em = Embed(
                 title="Administration: DBL Status",
-                description=f"DiscordBotList Client is currently connected.\n"
+                description=f"DiscordBotList Client is connected.\n"
                             f"Guilds: `{dbl_guilds_count}`\n"
                             f"Bot Page: {bot_url}\n"
                             f"Bot Vote Page: {bot_url}/vote",
@@ -721,6 +730,7 @@ class Admin(Cog):
                 description="DiscordBotList reconnection successful",
                 color=0x00ff00
             )
+            print(f"[] Reconnected to DiscordBotsList.")
 
         else:
             em = Embed(
@@ -730,7 +740,7 @@ class Admin(Cog):
             )
 
         return await ctx.send(embed=em)
-
+'''
     """ ######
          Logs
         ###### """
@@ -816,7 +826,7 @@ class Admin(Cog):
         )
 
         await ctx.send(embed=em)
-
+'''
 
 def setup(bot: Bot):
     """Admin"""
