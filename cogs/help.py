@@ -223,6 +223,19 @@ Toggle the quick delete reaction that appears under message by default.
 -- This "quick_delete" feature allows user who find it difficult to react to delete their message provides them a shortcut for 5 seconds.
 -- Use this command to turn said feature off. It does bother some users.
 """
+            
+            elif subsection.lower() == "toggle_engraved_id":
+                em.description = f"""
+**TOGGLE_ENGRAVED_ID**; Aliases: "toggle_eid", "engraved_id"
+`var:toggle_engraved_id`
+**--------------------------------------------------**
+The bot uses a unique technique to aquire ownership of a message.
+This, however, can make emoji-only messages appear in-line instead of large.
+-- Use this comand to turn said feature off.
+---- You can still react with ❌ to delete messages;
+-- If the bot reloads at any given point, your messages are there permanantly since before then.
+---- This won't be a problem if a user with `Manage Messages` permission is available.
+"""
                 
             elif subsection.lower() == "blacklist":
                 em.description = f"""
