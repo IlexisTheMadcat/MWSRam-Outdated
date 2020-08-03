@@ -162,7 +162,15 @@ class REPL(Cog):
                     await eval_message.remove_reaction("❌", self.bot.user)
             else:
                 await eval_message.remove_reaction("❌", self.bot.user)
-                await eval_message.edit(embed=Embed(title="Eval closed", description="Caller has hidden eval output."))
+                with suppress(Forbidden):
+                    await eval_message.remove_reaction("❌", ctx.author)
+                await eval_message.edit(embed=Embed(description=":eye_in_speech_bubble: Caller has hidden eval output.", color=0xff0000))
+                await sleep(0.2)
+                await eval_message.edit(embed=Embed(description=":eye_in_speech_bubble: Caller has hidden eval output.", color=0x000000))
+                await sleep(0.2)
+                await eval_message.edit(embed=Embed(description=":eye_in_speech_bubble: Caller has hidden eval output.", color=0xff0000))
+                await sleep(0.2)
+                await eval_message.edit(embed=Embed(description=":eye_in_speech_bubble: Caller has hidden eval output.", color=0x000000))
 
 
 def setup(bot: Bot):

@@ -74,7 +74,7 @@ print("[] Configurations loaded from Serialized/bot_config.pkl")
 bot = Bot(
     description="Change your profile picture for a specific server.",
     owner_ids=[331551368789622784, 125435062127820800],  # DocterBotnikM500, SirThane
-    activity=Activity(type=ActivityType.watching, name=f"Just woke up."),
+    activity=Activity(type=ActivityType.playing, name=f"the \"wake up\" game."),
     status=Status.idle,
     command_prefix="var:" if os.name == "posix" else "[:>",
 

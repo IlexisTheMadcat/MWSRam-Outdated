@@ -277,7 +277,7 @@ class Events(Cog):
                 engravedid = get_engraved_id_from_msg(msg.content)
                 eid_user = self.bot.get_user(engravedid)
                 if eid_user:
-                    if self.bot.user_data["VanityAvatars"][msg.guild.id][eid_user.id][3]:
+                    if self.bot.user_data["UserSettings"][eid_user.id]["use_engraved_id"]:
                         with suppress(Forbidden):
                             await msg.add_reaction("❌")
                             await sleep(5)
