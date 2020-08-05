@@ -80,6 +80,7 @@ class Events(Cog):
             self.bot.inactive = 0
             return
 
+        # Support can be run through DMs
         if msg.guild is None:
             if msg.author.id != self.bot.owner_ids[0]:
                 if msg.content.startswith("> "):
@@ -273,16 +274,23 @@ class Events(Cog):
                 continue
 
         try:
-            if msg.author.bot and msg.author.discriminator == "0000":
-                engravedid = get_engraved_id_from_msg(msg.content)
-                eid_user = self.bot.get_user(engravedid)
-                if eid_user:
-                    if self.bot.user_data["UserSettings"][eid_user.id]["use_engraved_id"]:
-                        with suppress(Forbidden):
-                            await msg.add_reaction("❌")
-                            await sleep(5)
-                            with suppress(NotFound):
-                                await msg.remove_reaction("❌", msg.guild.me)
+            if msg.author.discriminator == "0000":
+                await sleep(1)  # This is a set timer to wait for 
+                                # the message id to appear in the bot messages veriable
+                
+                user_id = 0
+                for k, v in self.bot.messages.items():
+                    if msg.id in v:
+                        user_id = k
+                        break
+                
+                if user_id and self.bot.user_data["UserSettings"][user_id]["use_quick_delete"]:
+                    with suppress(Forbidden):
+                        await msg.add_reaction("❌")
+                        await sleep(5)
+                        with suppress(NotFound):
+                            await msg.remove_reaction("❌", msg.guild.me)
+                
 
             if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id] and \
                 not msg.author.bot and \
@@ -322,8 +330,6 @@ class Events(Cog):
                     del start
                     return
                 else:
-                    await msg.delete()
-
                     if "webhooks" not in self.bot.user_data.keys():
                         self.bot.user_data["webhooks"] = {"channelID": "webhookID"}
 
@@ -336,6 +342,7 @@ class Events(Cog):
                         webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
                         self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
 
+                    await msg.delete()
                     whmessage = await webhook.send(
                         new_content,
                         files=attachment_files,
@@ -405,14 +412,13 @@ class Events(Cog):
             return
 
         if str(reaction.emoji) == "❌" and \
-                reaction.message.author.bot and \
                 reaction.message.author.discriminator == "0000":
             if user.id not in self.bot.user_data["UserSettings"]:
                 self.bot.user_data["UserSettings"] = {
                     "use_quick_delete": True,
                     "use_engraved_id": True
                 }
-            
+
             if self.bot.user_data["UserSettings"][user.id]["use_engraved_id"]:
                 try:
                     engravedid = get_engraved_id_from_msg(reaction.message.content)
@@ -462,8 +468,21 @@ class Events(Cog):
                     self.bot.messages.remove(reaction.message.id)
                 else:
                     if user != self.bot.user:
+                        user_id = 0
+                        for k, v in self.bot.messages.items():
+                            if reaction.message.id in v:
+                                user_id = k
+                                break
+                        if user_id:
+                            user_full = await self.bot.get_member(user_id)
+                            if user_full:
+                                user_nick = user_full.display_name
+                            else:
+                                user_nick = "Unknown User"
+                        
                         with suppress(Forbidden):
-                            await user.send(f"That's not your message to delete, or I don't have it in my system.")
+                            await user.send(f"That's not your message to delete, or I don't have it in my system.\n"
+                                            f"Ask {user_nick} to delete it.")
 
         elif str(reaction.emoji) == "❓" and \
                 reaction.message.author.bot and \

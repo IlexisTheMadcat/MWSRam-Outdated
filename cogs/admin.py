@@ -422,6 +422,21 @@ class Admin(Cog):
         em.description = "Reset all closets."
         await ctx.send(embed=em)
         print("[] Deleted all closets on developer's request.")
+    
+    @is_owner()
+    @rs.command(aliases=["settings", "se"])
+    async def r_settings(self, ctx: Context):
+        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00ff00)
+        self.bot.user_data["UserSettings"] = {
+            "userID":{
+                "use_quick_delete": "bool",
+                "use_engraved_id": "bool"
+            }
+        }
+        em.description = "Reset all user settings."
+        await ctx.send(embed=em)
+        print("[] Deleted all user settings on developer's request.")
+    
 
     @is_owner()
     @rs.command(name="all")
@@ -450,6 +465,12 @@ class Admin(Cog):
         self.bot.user_data["Closets"] = {
             "authorID":
                 {"closet_name": "closet_url"}
+        }
+        self.bot.user_data["UserSettings"] = {
+            "userID":{
+                "use_quick_delete": "bool",
+                "use_engraved_id": "bool"
+            }
         }
         print(f"[] Reset all data on developer's request.")
         await ctx.send(embed=em)

@@ -141,6 +141,7 @@ Vanity -- Change your avatar for different servers:
     remove_vanity
     current
     toggle_quick_delete
+    toggle_engraved_id
     
 Blacklisting -- Disable your avatar for different places:
     blacklist
@@ -163,7 +164,6 @@ General -- General commands:
     help
     invite
 ```
-
 """
                 
             elif subsection.lower() == "set_vanity":
@@ -222,6 +222,7 @@ Returns a link to `user`'s vanity avatar.
 Toggle the quick delete reaction that appears under message by default.
 -- This "quick_delete" feature allows user who find it difficult to react to delete their message provides them a shortcut for 5 seconds.
 -- Use this command to turn said feature off. It does bother some users.
+-- **Quick delete cannot be used if Engraved ID is off! (`var:toggle_engraved_id`)**
 """
             
             elif subsection.lower() == "toggle_engraved_id":
@@ -233,10 +234,13 @@ The bot uses a unique technique to aquire ownership of a message.
 This, however, can make emoji-only messages appear in-line instead of large.
 -- Use this comand to turn said feature off.
 ---- You can still react with ❌ to delete messages;
+
 -- If the bot reloads at any given point, your messages are there permanantly since before then.
 ---- This won't be a problem if a user with `Manage Messages` permission is available.
+
+-- **Engraved ID is required for Quick Delete to function as of now.**
 """
-                
+
             elif subsection.lower() == "blacklist":
                 em.description = f"""
 **BLACKLIST**; Aliases: "bl"

@@ -216,7 +216,7 @@ class VanityCommands(Cog):
 
                 return
 
-            if not standard:
+            if not standard or standard != "standard":
                 if not guild:
                     return await ctx.send(embed=Embed(
                         title="Error",
@@ -243,7 +243,7 @@ class VanityCommands(Cog):
                 else:
                     await show_standard()
 
-            elif standard != "standard":
+            elif standard == "standard":
                 await show_standard()
 
     @command(aliases=["pv"])
@@ -255,16 +255,16 @@ class VanityCommands(Cog):
     async def toggle_quick_delete(self, ctx: Context):
         guild = ctx.guild
         author = ctx.author
-        if author.id in self.bot.user_data["UserSettings"]:
+        if author.id not in self.bot.user_data["UserSettings"]:
             self.bot.user_data["UserSettings"][author.id] = {
                 "use_engraved_id": True,
                 "use_quick_delete": True
             }
         
         self.bot.user_data["UserSettings"][author.id]["use_quick_delete"] = not \
-            self.bot.user_data["VanityAvatars"][author.id]["use_quick_delete"]
+            self.bot.user_data["UserSettings"][author.id]["use_quick_delete"]
         
-        symbol = self.bot.user_data["UserSettings"][guild.id][author.id][3]
+        symbol = self.bot.user_data["UserSettings"][author.id]["use_quick_delete"]
         if symbol:
             symbol = "✅"
         elif not symbol:
@@ -289,7 +289,7 @@ class VanityCommands(Cog):
         do not have to worry.
         """
 
-        if not ctx.author.id in self.bot.user_data["UserSettings"]:
+        if ctx.author.id not in self.bot.user_data["UserSettings"]:
             self.bot.user_data["UserSettings"][ctx.author.id] = \
                 {
                     "use_quick_delete": True,
