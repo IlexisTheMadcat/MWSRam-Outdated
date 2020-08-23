@@ -1,14 +1,14 @@
 
 # Lib
+from re import findall
 from asyncio.exceptions import TimeoutError
-from asyncio import sleep
 from contextlib import suppress
-from typing import List
 
 # Site
-from discord import Webhook, Embed, Status
-from discord.errors import Forbidden, NotFound, HTTPException
+from discord import Embed, Status
+from discord.message import Message
 from discord.utils import get
+from discord.errors import Forbidden, HTTPException, NotFound
 from discord.ext.commands.cog import Cog
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import (
@@ -18,31 +18,32 @@ from discord.ext.commands.errors import (
     MissingRequiredArgument,
     NotOwner, BadArgument
 )
-from discord.message import Message
-from timeit import default_timer
+from NHentai import NHentai
+#https://pypi.org/project/NHentai-API/
 
 # Local
-from utils.classes import Bot
 from utils.utils import (
-    EID_FROM_INT,
-    create_engraved_id_from_user,
-    get_engraved_id_from_msg,
+    get_engraved_id_from_msg as get_eid, 
+    create_engraved_id_from_user as create_eid
 )
 
-
 class Events(Cog):
-    def __init__(self, bot: Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     # Transform message
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_message(self, msg: Message):
-        # Pre-event Checks
-        # if msg.guild is None:
-        #     return
-
-        if msg.author.id == self.bot.user.id:
+        if msg.channel.id == self.bot.listening_channel:
+            print(f"[Recieve] ----- Message ----- |\n[] {msg.author.display_name} ({msg.author})\n{msg.content if msg.content != '' else '[No Content]'}")
+            if msg.attachments:
+                for x, e in enumerate(msg.attachments, 1):
+                    print(f"Attachment {x}: {e.url}")
+                    
+            print("\n")
+            
+        if msg.author.bot:
             return
 
         if msg.author.id == 726313554717835284:
@@ -50,23 +51,13 @@ class Events(Cog):
             voter = int(ids[0])
             voted_for = int(ids[1])
 
-            if voted_for == self.bot.user.id:  # append `or 687427956364279873` for testing instance
+            if voted_for == self.bot.user.id:
                 user = await self.bot.fetch_user(voter)
                 try:
                     await user.send(
-                        "Thanks for voting! You will now have access to the following commands shortly for 12 hours:\n"
-                        "```\n"
-                        f"{self.bot.command_prefix}add_to_closet\n"
-                        f"{self.bot.command_prefix}remove_from_closet\n"
-                        f"{self.bot.command_prefix}rename_closet_entry\n"
-                        f"{self.bot.command_prefix}see_closet\n"
-                        f"{self.bot.command_prefix}preview_closet_entry\n"
-                        f"```\n"
-                        f"These commands allow you to store favorite vanity avatars "
-                        f"and use them anywhere. You can only hold up to 10.\n"
-                        f"For help on the usage of each command, "
-                        f"enter `{self.bot.command_prefix}help commands <command name>`.")
-
+                        "Thanks for voting!"
+                    )
+                
                 except HTTPException or Forbidden:
                     print(f"[❌] User \"{user}\" voted for \"{self.bot.user}\". DM Failed.")
                 else:
@@ -81,316 +72,282 @@ class Events(Cog):
             return
 
         # Support can be run through DMs
-        if msg.guild is None:
-            if msg.author.id != self.bot.owner_ids[0]:
-                if msg.content.startswith("> "):
-                    if msg.author.id not in self.bot.config['muted_dms']:
-                        if msg.author.id in self.bot.waiting:
-                            await msg.channel.send(":clock9: Please wait, you already have a question open.\n"
-                                                   "You'll get a response from me soon.")
+        if msg.guild is None and msg.author.id != self.bot.owner_ids[0]:
+            if msg.content.startswith("> "):
+                if msg.author.id not in self.bot.config['muted_dms']:
+                    if msg.author.id in self.bot.waiting:
+                        await msg.channel.send(":clock9: Please wait, you already have a question open.\n"
+                                                "You'll get a response from me soon.")
 
-                            return
+                        return
 
-                        dev_guild = self.bot.get_guild(699399549218717707)  # Developer's Guild
-                        user = dev_guild.get_member(self.bot.owner_ids[0])
-                        if user.status == Status.dnd:
-                            await msg.channel.send(":red_circle: The developer currently has "
-                                                   "Do Not Disturb on. Please try again later.")
-                            return
-                        elif user.status == Status.idle:
-                            conf = await msg.channel.send(":orange_circle: The developer is currently idle, "
-                                                         "are you sure you want to send?\n"
-                                                         "Sending `Yes` will send the message, but you *may* not get a response.\n"
-                                                         "(`Yes`, `No`)")
+                    dev_guild = self.bot.get_guild(699399549218717707)  # Developer's Guild
+                    user = dev_guild.get_member(self.bot.owner_ids[0])
+                    if user.status == Status.dnd:
+                        await msg.channel.send(":red_circle: The developer currently has "
+                                                "Do Not Disturb on. Please try again later.")
+                        return
+                    elif user.status == Status.idle:
+                        conf = await msg.channel.send(":orange_circle: The developer is currently idle, "
+                                                        "are you sure you want to send?\n"
+                                                        "Sending `Yes` will send the message, but you *may* not get a response.\n"
+                                                        "(`Yes`, `No`)")
 
-                            def check(m):
-                                return m.content.lower() in ["yes", "no"]
-                            try:
-                                message = await self.bot.wait_for("message", timeout=20, check=check)
-                            except TimeoutError:
-                                await conf.edit(":orange_circle: The developer is currently idle, "
-                                                "are you sure you want to send?\n"
-                                                "Sending `Yes` will send the message, but you *may* not get a response.\n"
-                                                "(`Yes`, `No`)")
-                            else:
-                                if message.content == "no":
-                                    return await conf.edit(":orange_circle: The developer is currently idle.\n"
-                                                           "Please try again later.")
-
-                                elif message.content == "yes":
-                                    await conf.delete()
-
-                        status_msg = await msg.channel.send(":clock9: "
-                                                            "I sent your message to the developer.\n"
-                                                            "Please stand by for a response or "
-                                                            "until **this message is edited**...\n")
-
-                        self.bot.waiting.append(msg.author.id)
-
-                        embed = Embed(color=0xff87a3)
-                        embed.title = f"Message from user {msg.author} (ID: {msg.author.id}):"
-                        embed.description = f"{msg.content}\n\n" \
-                                            f"Replying to this DM **within 120 seconds** " \
-                                            f"after accepting **within 10 minutes** " \
-                                            f"will relay the message back to the user."
-
-                        dm = await user.send(content="**PENDING**", embed=embed)
-                        await dm.add_reaction("✅")
-                        await dm.add_reaction("❎")
-
-                        def check(sreaction, suser):
-                            if self.bot.thread_active:
-                                self.bot.loop.create_task(
-                                    reaction.channel.send("There is already an active thread running...\n "
-                                                          "Please finish the **`ACTIVE`** one first."))
-                                return False
-                            else:
-                                return sreaction.message.id == dm.id and \
-                                    str(sreaction.emoji) in ["✅", "❎"] and \
-                                    suser == user
+                        def check(m):
+                            return m.content.lower() in ["yes", "no"]
                         try:
-                            reaction, user = await self.bot.wait_for("reaction_add", timeout=600, check=check)
+                            message = await self.bot.wait_for("message", timeout=20, check=check)
                         except TimeoutError:
-                            await dm.edit(content="**TIMED OUT**")
-                            await status_msg.edit(content=":x: "
-                                                          "The developer is unavailable right now. Try again later.")
-                            return
+                            await conf.edit(":orange_circle: The developer is currently idle, "
+                                            "are you sure you want to send?\n"
+                                            "Sending `Yes` will send the message, but you *may* not get a response.\n"
+                                            "(`Yes`, `No`)")
                         else:
-                            if str(reaction.emoji) == "❎":
-                                await dm.edit(content="**DENIED**")
-                                await status_msg.edit(content=":information_source: The developer denied your message. "
-                                                              "Please make sure you are as detailed as possible.")
-                                return
-                            elif str(reaction.emoji) == "✅":
-                                await dm.edit(content="**ACTIVE**")
-                                await status_msg.edit(content=":information_source: "
-                                                              "The developer is typing a message back...")
-                                self.bot.thread_active = True
-                                pass
+                            if message.content == "no":
+                                return await conf.edit(":orange_circle: The developer is currently idle.\n"
+                                                        "Please try again later.")
 
-                        def check(message):
-                            return message.author == user and message.channel == dm.channel
-                        while True:
+                            elif message.content == "yes":
+                                await conf.delete()
+
+                    status_msg = await msg.channel.send(":clock9: "
+                                                        "I sent your message to the developer.\n"
+                                                        "Please stand by for a response or "
+                                                        "until **this message is edited**...\n")
+
+                    self.bot.waiting.append(msg.author.id)
+
+                    embed = Embed(color=0x32d17f)
+                    embed.title = f"Message from user {msg.author} (ID: {msg.author.id}):"
+                    embed.description = f"{msg.content}\n\n" \
+                                        f"Replying to this DM **within 120 seconds** " \
+                                        f"after accepting **within 10 minutes** " \
+                                        f"will relay the message back to the user."
+
+                    dm = await user.send(content="**PENDING**", embed=embed)
+                    await dm.add_reaction("✅")
+                    await dm.add_reaction("❎")
+
+                    def check(sreaction, suser):
+                        if self.bot.thread_active:
+                            self.bot.loop.create_task(
+                                reaction.channel.send("There is already an active thread running...\n "
+                                                        "Please finish the **`ACTIVE`** one first."))
+                            return False
+                        else:
+                            return sreaction.message.id == dm.id and \
+                                str(sreaction.emoji) in ["✅", "❎"] and \
+                                suser == user
+                    try:
+                        reaction, user = await self.bot.wait_for("reaction_add", timeout=600, check=check)
+                    except TimeoutError:
+                        await dm.edit(content="**TIMED OUT**")
+                        await status_msg.edit(content=":x: "
+                                                        "The developer is unavailable right now. Try again later.")
+                        return
+                    else:
+                        if str(reaction.emoji) == "❎":
+                            await dm.edit(content="**DENIED**")
+                            await status_msg.edit(content=":information_source: The developer denied your message. "
+                                                            "Please make sure you are as detailed as possible.")
+                            return
+                        elif str(reaction.emoji) == "✅":
+                            await dm.edit(content="**ACTIVE**")
+                            await status_msg.edit(content=":information_source: "
+                                                            "The developer is typing a message back...")
+                            self.bot.thread_active = True
+                            pass
+
+                    def check(message):
+                        return message.author == user and message.channel == dm.channel
+                    while True:
+
+                        try:
+                            response = await self.bot.wait_for("message", timeout=120, check=check)
+                        except TimeoutError:
+                            conf = await user.send(":warning: Press the button below to continue typing.")
+                            await conf.add_reaction("🔘")
+
+                            def conf_button(b_reaction, b_user):
+                                return str(b_reaction.emoji) == "🔘" and b_user == user \
+                                        and b_reaction.message.channel == dm.channel
 
                             try:
-                                response = await self.bot.wait_for("message", timeout=120, check=check)
+                                await self.bot.wait_for("reaction_add", timeout=10, check=conf_button)
                             except TimeoutError:
-                                conf = await user.send(":warning: Press the button below to continue typing.")
-                                await conf.add_reaction("🔘")
+                                await conf.delete()
+                                await dm.edit(content="**TIMED OUT**")
+                                await dm.channel.send("You timed out. "
+                                                        "The user was notified that you are not available right now.")
 
-                                def conf_button(b_reaction, b_user):
-                                    return str(b_reaction.emoji) == "🔘" and b_user == user \
-                                           and b_reaction.message.channel == dm.channel
-
-                                try:
-                                    await self.bot.wait_for("reaction_add", timeout=10, check=conf_button)
-                                except TimeoutError:
-                                    await conf.delete()
-                                    await dm.edit(content="**TIMED OUT**")
-                                    await dm.channel.send("You timed out. "
-                                                          "The user was notified that you are not available right now.")
-
-                                    self.bot.waiting.remove(msg.author.id)
-                                    self.bot.thread_active = False
-                                    await status_msg.edit(content=":information_source: "
-                                                                  "The developer timed out on typing a response. "
-                                                                  "Please ask at a later time.\n"
-                                                                  "You may also join the support server here: "
-                                                                  "https://discord.gg/j2y7jxQ")
-                                    return
-                                else:
-                                    await conf.delete()
-                                    continue
-                            else:
                                 self.bot.waiting.remove(msg.author.id)
                                 self.bot.thread_active = False
-                                await dm.edit(content="**Answered**")
-                                await dm.channel.send(":white_check_mark: Okay, message sent.")
-                                await status_msg.edit(content=":white_check_mark: The developer has responded.")
-                                await msg.channel.send(f":newspaper: Response from the developer:\n{response.content}")
-                                return
-                    else:
-                        await msg.channel.send("You've been muted by the developer, "
-                                               "so you cannot send anything.\n"
-                                               "If you believe you were muted by mistake, "
-                                               "please join the support server:\n"
-                                               "https://discord.gg/j2y7jxQ\n\n"
-                                               "**Note that spamming will get you banned without hesitation.**")
-                        return
+                                await status_msg.edit(content=":information_source: "
+                                                                "The developer timed out on typing a response. "
+                                                                "Please ask at a later time.\n"
+                                                                "You may also join the support server here: "
+                                                                "https://discord.gg/j2y7jxQ")
+                                
+                            else:
+                                await conf.delete()
+                                continue
+                        else:
+                            self.bot.waiting.remove(msg.author.id)
+                            self.bot.thread_active = False
+                            await dm.edit(content="**Answered**")
+                            await dm.channel.send(":white_check_mark: Okay, message sent.")
+                            await status_msg.edit(content=":white_check_mark: The developer has responded.")
+                            await msg.channel.send(f":newspaper: Response from the developer:\n{response.content}")
+                            
                 else:
-                    await msg.channel.send("Please start your message with "
-                                           "\"`> `\" "
-                                           "to ask a question or send compliments.\n"
-                                           "This is the markdown feature to create quotes.",
-                                           delete_after=5)
-                    return
-            return
-
-        # React with passion
-        if self.bot.user.mentioned_in(msg):
-            try:
-                if msg.author.id in self.bot.owner_ids:
-                    await msg.add_reaction("💕")
-                else:
-                    await msg.add_reaction("👋")
-            except Forbidden:
-                pass
-
-        # Self-Blacklisted
-        try:
-            for i in self.bot.user_data["Blacklists"][msg.author.id][1]:
-                if msg.content.startswith(i):
-                    return
-
-            for i in self.bot.user_data["Blacklists"][msg.author.id][0]:
-                if msg.channel.id == i:
-                    return
-
-        except KeyError:
-            pass
-
-        # Server-Blacklisted
-        try:
-            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][1]:
-                if msg.content.startswith(i):
-                    return
-
-            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][0]:
-                if msg.channel.id == i:
-                    return
-
-        except KeyError:
-            pass
-
-        # Get attachments
-        start = default_timer()
-        attachment_files = []
-        for i in msg.attachments:
-            try:
-                dcfileobj = await i.to_file()
-                attachment_files.append(dcfileobj)
-            except Exception as e:
-                print("[Error while getting attachment]", e)
-                continue
-
-        try:
-            if msg.author.discriminator == "0000":
-                await sleep(1)  # This is a set timer to wait for 
-                                # the message id to appear in the bot messages veriable
-                
-                user_id = 0
-                for k, v in self.bot.messages.items():
-                    if msg.id in v:
-                        user_id = k
-                        break
-                
-                if user_id and self.bot.user_data["UserSettings"][user_id]["use_quick_delete"]:
-                    with suppress(Forbidden):
-                        await msg.add_reaction("❌")
-                        await sleep(5)
-                        with suppress(NotFound):
-                            await msg.remove_reaction("❌", msg.guild.me)
-                
-
-            if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id] and \
-                not msg.author.bot and \
-                self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
-                
-                if msg.author.id not in self.bot.user_data["UserSettings"]:
-                    self.bot.user_data["UserSettings"][msg.author.id] = {
-                        "use_quick_delete": True,
-                        "use_engraved_id": True
-                    }
-                
-                if self.bot.user_data["UserSettings"][msg.author.id]["use_engraved_id"]:
-
-                    engravedid = create_engraved_id_from_user(msg.author.id)
-
-                    if msg.content != "":
-                        new_content = f"{msg.content} {engravedid}"
-                    else:
-                        new_content = EID_FROM_INT[10] + engravedid
-                else:
-                    new_content = msg.content
-
-                bot_perms = msg.channel.permissions_for(msg.guild.me)
-                if not all((
-                    bot_perms.manage_messages,
-                    bot_perms.manage_webhooks
-                )):
-                    await msg.author.send(
-                        f"Your message couldn't be transformed because it is "
-                        f"missing 1 or more permissions listed in "
-                        f"`{self.bot.command_prefix}help` under `Required Permissions`.\n"
-                        f"If you keep getting this error, remove your "
-                        f"vanity avatar or blacklist the channel you are "
-                        f"trying to use it in."
-                    )
-
-                    del start
-                    return
-                else:
-                    if "webhooks" not in self.bot.user_data.keys():
-                        self.bot.user_data["webhooks"] = {"channelID": "webhookID"}
-
-                    if msg.channel.id not in self.bot.user_data["webhooks"]:
-                        self.bot.user_data["webhooks"][msg.channel.id] = 0
-
-                    webhooks: List[Webhook] = await msg.channel.webhooks()
-                    webhook: Webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
-                    if webhook is None:
-                        webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
-                        self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
-
-                    await msg.delete()
-                    whmessage = await webhook.send(
-                        new_content,
-                        files=attachment_files,
-                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
-                        username=msg.author.display_name,
-                        wait=True
-                    )
-                    
-                    if msg.author.id not in self.bot.messages:
-                        self.bot.messages[msg.author.id] = []
-
-                    self.bot.messages[msg.author.id].append(whmessage.id)
-
-                    self.bot.inactive = 0
-                    stop = default_timer()
-
-                comptime = round(stop - start, 3)
-                print(
-                    f"Last message response time: {comptime} seconds from user \"{msg.author}\"."
-                )
-
-                self.bot.LatestRS = comptime
-                self.bot.inactive = 0
-
-                if comptime > 3:
-                    if self.bot.owner.id == msg.author.id:
-                        await msg.author.send(
-                            f"Your message took over 2 seconds to be transformed ({comptime} seconds)."
-                        )
-                    else:
-                        await self.bot.owner.send(
-                            f"Last message response time was over 2 seconds from user \"{msg.author}\" "
-                            f"({comptime} seconds)."
-                        )
-                        await msg.author.send(
-                            f"Your message took over 2 seconds to be transformed ({comptime} seconds). The owner "
-                            f"was just notified about this delay.\nFeel free to mute me if I complain too much. "
-                            f"Please note that it's harder for me to carry out media than pure text."
-                        )
+                    await msg.channel.send("You've been muted by the developer, "
+                                            "so you cannot send anything.\n"
+                                            "If you believe you were muted by mistake, "
+                                            "please join the support server:\n"
+                                            "https://discord.gg/j2y7jxQ\n\n"
+                                            "**Note that spamming will get you banned without hesitation.**")
 
             else:
-                return
-
-        except KeyError:
+                await msg.channel.send("Please start your message with "
+                                        "\"`> `\" "
+                                        "to ask a question or send compliments.\n"
+                                        "This is the markdown feature to create quotes.",
+                                        delete_after=5)
+            
             return
 
-    # Deleting/Inquiring a message
-    # --------------------------------------------------------------------------------------------------------------------------
+                    
+        if msg.content.lower() in ["pspsp", "pspsps", "pspspsp", "pspspsps"]:
+            emoji_ = get(msg.guild.emojis, name="ch_40hara_hide")
+            await msg.channel.send(str(emoji_))
+            
+            return
+
+        if msg.channel.category.id in \
+            [740663474568560671, 740663386500628570]:
+            if 741431440490627234 in [r.id for r in msg.author.roles]:
+                await msg.delete()
+                await msg.channel.send(
+                    content=msg.author.mention,
+                    embed=Embed(
+                        title="Muted!", 
+                        description="You are currently muted. You cannot upload here at this time.\n",
+                        color=0x32d17f),
+                    delete_after=10
+                )
+                return
+            if msg.attachments == []:
+                await msg.delete()
+                await msg.channel.send(
+                    content=msg.author.mention,
+                    embed=Embed(
+                        title="Media", 
+                        description="If you want to send a message, please do so in one of the Discussion channels.\n"
+                                    "The best place to do that is in <#742571100009136148>.",
+                        color=0x32d17f),
+                    delete_after=10
+                )
+            elif msg.attachments != []:
+                await msg.add_reaction("⬆")
+            
+            return
+        
+        # Search for links and reformat
+        new_content = msg.content
+        link_findings1 = findall("https://discordapp.com/channels/740662779106689055/[0-9]{18}/[0-9]{18}", new_content)
+        for i in link_findings1:
+            new_content = new_content.replace(i, "")
+        
+        link_findings2 = findall("https://discord.com/channels/740662779106689055/[0-9]{18}/[0-9]{18}", new_content)
+        for i in link_findings2:
+            new_content = new_content.replace(i, "")
+        
+        nhentai_codes1 = findall("n[0-9]{6}", new_content)
+        for i in nhentai_codes1:
+            new_content = new_content.replace(i, "")
+        
+        nhentai_codes2 = findall("n[0-9]{5}", new_content)
+        for i in nhentai_codes2:
+            new_content = new_content.replace(i, "")
+        
+        
+        link_findings = link_findings1+link_findings2
+        nhentai_codes = nhentai_codes1+nhentai_codes2
+
+        jumps = []
+        mentions = []
+
+        if link_findings:
+
+            for link in link_findings:
+                link_parts = link.split("/")
+                channel = self.bot.get_channel(int(link_parts[5]))
+                if not channel:
+                    continue
+                
+                try:
+                    message = await channel.fetch_message(int(link_parts[6]))
+                except NotFound:
+                    continue
+                
+                new_content = new_content.replace(link, "")
+
+                jumps.append(f"By: {message.author.mention} | {':warning:' if channel.is_nsfw() else ':white_check_mark:'} [\[Jump to message\]]({link})")
+                mentions.append(message.author.mention)
+
+        if nhentai_codes and msg.channel.is_nsfw():
+            jumps.append("\nNhentai codes attached:")
+            for x, i in enumerate(nhentai_codes):
+                code = nhentai_codes[x].strip("n")
+
+                nhentai = NHentai()
+                doujin: dict = nhentai._get_doujin(id=code)
+                if doujin:
+                    jumps.append(f"[{code} | {doujin['title']}](https://nhentai.net/g/{code}/)")
+                    new_content = new_content.replace(f"n{code}", "")
+
+        UID_findings = findall("<@![0-9]{18}>", new_content)
+        for i in UID_findings:
+            mentions.append(i)
+
+        if jumps:
+            jumps = list(set(jumps))
+            mentions = list(set(mentions))
+
+            jumps.reverse()
+            mentions.reverse()
+
+            while msg.author.mention in mentions: 
+                mentions.remove(msg.author.mention)
+            
+            jumps = "\n".join(jumps)
+            mentions = ", ".join(mentions)
+
+            new_content = new_content.strip("\n")
+
+            eid_string = create_eid(msg.author.id)
+            await msg.delete()
+            conf = await msg.channel.send(
+                content=f"{mentions}",
+                embed=Embed(
+                description=f"{jumps}\n"
+                            f"{'ーーーーーー' if new_content != '' else ''}\n"
+                            f"{new_content}",  # \n\n{self.bot.user.mention}: React with :x: to delete this message.",
+                author={
+                    "name":msg.author.display_name,
+                    "icon_url":msg.author.avatar_url
+                },
+                color=0x32d17f
+            ).set_author(
+                name=msg.author.display_name,
+                icon_url=msg.author.avatar_url
+            ))
+            if mentions:
+                await conf.edit(
+                    content=f"{mentions}{eid_string}"
+                )
+            # await conf.add_reaction("❌")
+    
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
         class Reaction:
@@ -410,113 +367,43 @@ class Events(Cog):
 
         if reaction.guild is None:
             return
-
-        if str(reaction.emoji) == "❌" and \
-                reaction.message.author.discriminator == "0000":
-            if user.id not in self.bot.user_data["UserSettings"]:
-                self.bot.user_data["UserSettings"] = {
-                    "use_quick_delete": True,
-                    "use_engraved_id": True
-                }
-
-            if self.bot.user_data["UserSettings"][user.id]["use_engraved_id"]:
-                try:
-                    engravedid = get_engraved_id_from_msg(reaction.message.content)
-                    identification = self.bot.get_user(engravedid)
-                except Exception as e:
-                    print(f"[Error in \"on_raw_reaction_add\"] {e}")
-                    return
-
-                member = reaction.guild.get_member(user.id)
-                permissions = member.permissions_in(reaction.channel)
-
-                # Check if the message belongs to the reaction user, or if they have `Manage Messages` permission.
-                if (identification == user or permissions.manage_messages) and user.id != self.bot.user.id:
-                    try:
-                        await self.bot.http.delete_message(
-                            reaction.channel.id,
-                            reaction.message.id,
-                            reason="Deleted on user request."
-                        )
-                    except Forbidden:
-                        with suppress(HTTPException, Forbidden):
-                            await self.bot.http.remove_reaction(
-                                reaction.channel.id,
-                                reaction.message.id,
-                                reaction.emoji,
-                                user.id
-                            )
-                            await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
-                else:
-                    if user != self.bot.user:
-                        with suppress(Forbidden):
-                            await user.send(f"That's not your message to delete. "
-                                            f"Ask {str(identification)} to delete it.\n"
-                                            f"The reaction was left unchanged.")
-
-            else:
-                member = reaction.guild.get_member(user.id)
-                permissions = member.permissions_in(reaction.channel)
-                if (user.id in self.bot.messages and \
-                    reaction.message.id in self.bot.messages[user.id]) or \
-                    permissions.manage_messages:
-                    await self.bot.http.delete_message(
-                        reaction.channel.id,
-                        reaction.message.id,
-                        reason="Deleted on user request."
-                    )
-                    self.bot.messages.remove(reaction.message.id)
-                else:
-                    if user != self.bot.user:
-                        user_id = 0
-                        for k, v in self.bot.messages.items():
-                            if reaction.message.id in v:
-                                user_id = k
-                                break
-                        if user_id:
-                            user_full = await self.bot.get_member(user_id)
-                            if user_full:
-                                user_nick = user_full.display_name
-                            else:
-                                user_nick = "Unknown User"
-                        
-                        with suppress(Forbidden):
-                            await user.send(f"That's not your message to delete, or I don't have it in my system.\n"
-                                            f"Ask {user_nick} to delete it.")
-
-        elif str(reaction.emoji) == "❓" and \
-                reaction.message.author.bot and \
-                reaction.message.author.discriminator == "0000":
-            try:
-                engravedid = get_engraved_id_from_msg(reaction.message.content)
-                identification = await self.bot.fetch_user(engravedid)
-            except Exception as e:
-                print(f"[Error in event \"on_raw_reaction_add\"] {e}")
-                return
-
-            with suppress(Forbidden):
-                await user.send(
-                    f'Unsure who that was?\nTheir username is \"{str(identification)}\".\n'
-                    f'The reaction was left unchanged.'
-                )
-        else:
+        
+        if user.bot:
             return
+        
+        '''
+        if reaction.message.author.id == self.bot.user.id and \
+            str(reaction.emoji) == "❌":
+
+            if self.bot.get_user(get_eid(reaction.message.content)) == user.id:
+                await reaction.message.delete()
+        '''
+
+        if reaction.message.channel.category.id in \
+            [740663386500628570, 740663474568560671]:
+            if str(reaction.emoji) == "⬆" and \
+                user.id == reaction.message.author.id:
+                member = reaction.message.guild.get_member(user.id)
+                await reaction.message.remove_reaction(reaction.emoji, member)
+                await reaction.message.channel.send(
+                    content=user.mention,
+                    embed=Embed(
+                        title="Upvote", 
+                        description="You can't upvote your own post!",
+                        color=0x32d17f),
+                    delete_after=5
+                )
+
 
     # Guild Count change notifications
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
-    async def on_guild_join(self, guild):
-        await self.bot.owner.send(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        print(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        if guild.id not in self.bot.user_data["VanityAvatars"]:
-            self.bot.user_data["VanityAvatars"][guild.id] = {}
+    async def on_guild_update(self, pre, post):
+        if pre.id == 740662779106689055 and \
+            pre.icon_url != post.icon_url:
+            channel = self.bot.get_channel(742211981720813629)
+            await channel.send(post.icon_url)
 
-    @Cog.listener()
-    async def on_guild_remove(self, guild):
-        await self.bot.owner.send(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        print(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        if guild.id in self.bot.user_data["VanityAvatars"] and self.bot.user_data["VanityAvatars"][guild.id]:
-            self.bot.user_data["VanityAvatars"].pop(guild.id)
 
     # Errors
     # --------------------------------------------------------------------------------------------------------------------------
@@ -586,5 +473,5 @@ class Events(Cog):
             raise error
 
 
-def setup(bot: Bot):
+def setup(bot):
     bot.add_cog(Events(bot))

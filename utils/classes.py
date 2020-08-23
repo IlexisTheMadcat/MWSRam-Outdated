@@ -3,6 +3,7 @@
 from datetime import datetime
 from os import getcwd
 from re import match
+from typing import List
 
 # Site
 from discord import Message
@@ -15,7 +16,6 @@ from discord.ext.commands.converter import IDConverter
 from discord.ext.commands.errors import BadArgument
 from discord.user import User
 from discord.utils import find, get
-from typing import List
 
 # Local
 from utils.fileinterface import PickleInterface as PI
@@ -196,6 +196,8 @@ class Bot(DiscordBot):
         self.waiting: List[int] = list()  # Users waiting for a response from developer
         self.cwd = getcwd()  # Global bot directory
         self.text_status = f"{kwargs.get('command_prefix')}help"  # Change first half of text status
+
+        self.listening_channel = int()  # Channel.id to listen to messages
         
         # Per-user organized object to store what messages belong to the user.
         # By default, users use EngravedID method, disregarding this as it allows garenteed deletion.

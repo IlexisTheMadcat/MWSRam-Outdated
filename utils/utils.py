@@ -43,6 +43,7 @@ def get_engraved_id_from_msg(content: str) -> Optional[int]:
         msg_id_block = list(content[-19:])
         msg_id_block.pop()
 
+
         engraved_id_parts = list()
         for i in msg_id_block:
             engraved_id_parts.append(str(INT_FROM_EID[i]))
@@ -65,4 +66,5 @@ def create_engraved_id_from_user(u_id: int) -> Optional[str]:
 
     engraved_id_parts.append(EID_FROM_INT[10])
     engraved_id = ''.join(engraved_id_parts)
+
     return engraved_id

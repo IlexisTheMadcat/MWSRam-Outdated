@@ -1,0 +1,31 @@
+<!DOCTYPE html5>
+<html>
+    <head>
+        <style>
+            body {text-align: center;}
+        </style>
+    </head>
+
+    <body>
+        <p>
+            Status 200
+        </p>
+        <p>
+            <form action="/send", method="post">
+                <input type="text" name="text" placeholder="Enter text to send here">
+                <input type="submit" value="Send Discord Resonse">
+            </form>
+            <form action="/evaluate", method="post">
+                <input type="text" name="evaluation" placeholder="Enter code to send here">
+                <input type="submit" value="Send Code">
+            </form>
+            <form action="/channel", method="post">
+                <input type="number" name="channel_change" placeholder="Enter channel.id to send here">
+                <input type="submit" value="Send ID">
+            </form>
+            <p>
+                {{ ret }}
+            </p>
+        </p>
+    </body>
+</html>

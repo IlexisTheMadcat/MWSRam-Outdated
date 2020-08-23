@@ -1,6 +1,0 @@
-Changes: 
--- Overhauled the markdown used by the bot to use embeds.
----- The color of the embed depends on the status. Fails are red, and successes are in pink.
-
--- New support method;
----- Message the bot with a quoted message to send your message directly to the developer.

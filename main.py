@@ -1,7 +1,6 @@
 # Lib
 import os
 from copy import deepcopy
-from random import choice
 
 # Site
 from discord import __version__
@@ -13,43 +12,25 @@ from discord.utils import oauth_url
 # Local
 from utils.classes import Bot
 from utils.fileinterface import PickleInterface as PI
-from utils.replit_hosting import start_server
 
 
 CONFIG_DEFAULTS = {
-    "debug_mode": False,       # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
-    "auto_pull": True,         # Auto pulls github updates every minute and reloads all loaded cogs.
+    "debug_mode": False,       # Print exceptions to stdout.
+    "auto_pull": False,         # Auto pulls github updates every minute and reloads all loaded cogs.
     "muted_dms": list(),       # List of user IDs to block support DMs from. Y'know, in case of the abusers.
-    "error_log_channel": None  # The channel ID to print error exceptions to.
+    "error_log_channel": None,  # The channel ID to print error exceptions to.
+    "password": None  # WILL be required to use the control panel
 }
 
 INIT_EXTENSIONS = [
     "admin",
     "background",
-    "blacklist",
-    "closet",
-    "events",
+    "commands",
+    "events", 
     "help",
-    "moderation",
-    "vanity",
-    "repl"
+    "repl",
+    #"web"  # A web-based eval controller for Kyaru.
 ]
-
-LOADING_CHOICES = [  # because why not
-    "Loading Random Access Memory...",
-    '"It appears nothing here will fit except women\'s clothes."',
-    "Booting up the creative but stubborn mind...",
-    "Waking up the older sister...",
-    "Charging RAM...",
-    '"I was only waiting to help Roswaal-sama put on fresh clothes."',
-    '"By the way, do you have plans after this?"',
-    '"I see you really are studying, sir."',
-    '"No, thank you, sir."',
-    '"What can you do by learning anything now?!"',
-    '"I\'m not interested."',
-    "Requesting the one they call Ram..."
-]
-
 
 config_data = PI("Serialized/bot_config.pkl", create_file=True)
 
@@ -72,18 +53,16 @@ print("[] Configurations loaded from Serialized/bot_config.pkl")
 
 
 bot = Bot(
-    description="Change your profile picture for a specific server.",
-    owner_ids=[331551368789622784, 125435062127820800],  # DocterBotnikM500, SirThane
+    description="I help keep my new home organized.",
+    owner_ids=[331551368789622784],  # DocterBotnikM500
     activity=Activity(type=ActivityType.playing, name=f"the \"wake up\" game."),
     status=Status.idle,
-    command_prefix="var:" if os.name == "posix" else "[:>",
+    command_prefix="k!" if os.name == "posix" else "[kyaru]:",
 
     # Configurable via [p]bot
     config=config_data
 )
 
-# To be replaced by custom help command
-# TODO: Move to `help.py` when done
 bot.remove_command("help")
 
 print(f"[BOT INIT] Running in: {bot.cwd}\n"
@@ -99,12 +78,7 @@ async def on_ready():
 
     permissions = Permissions()
     permissions.update(
-        send_messages=True,
-        embed_links=True,
-        manage_messages=True,
-        manage_webhooks=True,
-        add_reactions=True,
-        attach_files=True
+        administrator=True
     )
 
     print(f"\n"
@@ -128,12 +102,11 @@ async def on_ready():
           f"| Guilds:    {len(bot.guilds)}\n"
           f"| Users:     {len(list(bot.get_all_members()))}\n"
           f"| OAuth URL: {oauth_url(app_info.id, permissions)}\n"
-          f"#------------------------------#\n"
-          f"| {choice(LOADING_CHOICES)}\n"
-          f"#-------------------------------#\n")
+          f"#------------------------------#\n")
 
 
 if __name__ == "__main__":
     
-    start_server()
     bot.run()
+
+# https://www.japan-guide.com/e/e2221.html#stay

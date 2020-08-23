@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 
 # Lib
 from asyncio import sleep
 from os import popen
-from os.path import split
 from copy import deepcopy
 
 # Site
@@ -21,13 +19,12 @@ from discord.ext.commands.errors import (
 )
 
 # Local
-from utils.classes import Bot
 
 
 class Admin(Cog):
     """Administrative Commands"""
 
-    def __init__(self, bot: Bot):
+    def __init__(self, bot):
         self.bot = bot
         self.say_dest = None
 
@@ -353,127 +350,6 @@ class Admin(Cog):
 
         await ctx.send(embed=em)
         await self.bot.logout()
-
-    """ ######################
-         User Data Management
-        ###################### """
-
-    @is_owner()
-    @group(name="reset", aliases=["rs"], invoke_without_command=True)
-    async def rs(self, ctx):
-        em = Embed(title="Administration: Reset Data", description="No description set.", color=000000)
-        em.description = f"Chose a reset variable and append it to the end of your command.\n" \
-                         f"`avatars, blacklists, serverblacklists, closets, all`"
-        await ctx.send(embed=em)
-
-    @is_owner()
-    @rs.command(aliases=["avatars", "av"])
-    async def r_avatars(self, ctx: Context):
-        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00ff00)
-        self.bot.user_data["VanityAvatars"] = {
-            "guildID": {
-                "userID": [
-                    "avatar_url",
-                    "previous",
-                    "is_blocked",
-                    "quick_delete_on"
-                ]
-            }
-        }
-        em.description = "Reset all avatars."
-        await ctx.send(embed=em)
-        print("[] Deleted all avatars on developer's request.")
-
-    @is_owner()
-    @rs.command(aliases=["blacklists", "bl"])
-    async def r_blacklists(self, ctx: Context):
-        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00ff00)
-        self.bot.user_data["Blacklists"] = {
-            "authorID": (
-                ["channelID"],
-                ["prefix"]
-            )
-        }
-        em.description = "Reset all blacklists."
-        await ctx.send(embed=em)
-        print("[] Deleted all blacklists on developer's request.")
-
-    @is_owner()
-    @rs.command(aliases=["serverblacklists", "sbl"])
-    async def r_serverblacklists(self, ctx: Context):
-        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00ff00)
-        self.bot.user_data["ServerBlacklists"] = {
-            "guildID": (
-                ["channelID"],
-                ["prefix"])
-        }
-        em.description = "Reset all server blacklists."
-        await ctx.send(embed=em)
-        print("[] Deleted all server-blacklists on developer's request.")
-
-    @is_owner()
-    @rs.command(aliases=["closets", "cl"])
-    async def r_closets(self, ctx: Context):
-        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00ff00)
-        self.bot.user_data["Closets"] = {
-            "authorID":
-                {"closet_name": "closet_url"}
-        }
-        em.description = "Reset all closets."
-        await ctx.send(embed=em)
-        print("[] Deleted all closets on developer's request.")
-    
-    @is_owner()
-    @rs.command(aliases=["settings", "se"])
-    async def r_settings(self, ctx: Context):
-        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00ff00)
-        self.bot.user_data["UserSettings"] = {
-            "userID":{
-                "use_quick_delete": "bool",
-                "use_engraved_id": "bool"
-            }
-        }
-        em.description = "Reset all user settings."
-        await ctx.send(embed=em)
-        print("[] Deleted all user settings on developer's request.")
-    
-
-    @is_owner()
-    @rs.command(name="all")
-    async def r_all(self, ctx: Context):
-        em = Embed(title="Administration: Reset Data", description="No description set.", color=0x00ff00)
-        self.bot.user_data["VanityAvatars"] = {
-            "guildID": {
-                "userID": [
-                    "avatar_url",
-                    "previous",
-                    "is_blocked"
-                ]
-            }
-        }
-        self.bot.user_data["Blacklists"] = {
-            "authorID": (
-                ["channelID"],
-                ["prefix"]
-            )
-        }
-        self.bot.user_data["ServerBlacklists"] = {
-            "guildID": (
-                ["channelID"],
-                ["prefix"])
-        }
-        self.bot.user_data["Closets"] = {
-            "authorID":
-                {"closet_name": "closet_url"}
-        }
-        self.bot.user_data["UserSettings"] = {
-            "userID":{
-                "use_quick_delete": "bool",
-                "use_engraved_id": "bool"
-            }
-        }
-        print(f"[] Reset all data on developer's request.")
-        await ctx.send(embed=em)
 
     """ ####################
          Bot Configurations
@@ -849,6 +725,6 @@ class Admin(Cog):
         await ctx.send(embed=em)
 '''
 
-def setup(bot: Bot):
+def setup(bot):
     """Admin"""
     bot.add_cog(Admin(bot))

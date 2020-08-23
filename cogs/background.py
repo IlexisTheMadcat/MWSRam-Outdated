@@ -11,13 +11,12 @@ from discord.ext.commands.cog import Cog
 from discord.ext.tasks import loop
 
 # Local
-from utils.classes import Bot
 
 
 class BackgroundTasks(Cog):
     """Background loops"""
 
-    def __init__(self, bot: Bot):
+    def __init__(self, bot):
         self.bot = bot
         self.save_data.start()
         self.status_change.start()
@@ -52,23 +51,23 @@ class BackgroundTasks(Cog):
         await self.bot.user_data.save()
 
         self.bot.inactive = self.bot.inactive + 1
-        print(f"[VPP: {time}] Saved data.", end="\n" if not self.bot.config['auto_pull'] else "\r")
+        print(f"[CHK: {time}] Saved data.", end="\n" if not self.bot.config['auto_pull'] else "\r")
 
         if self.bot.config['auto_pull']:
-            print(f"[VPP: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
+            print(f"[CHK: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
             resp = popen("git pull").read()
             resp = f"```diff\n{resp}\n```"
             if str(resp) != f"```diff\nAlready up to date.\n\n```":
                 for i in self.bot.owner_ids:
                     owner = self.bot.get_user(i)
                     await owner.send(f"**__Auto-pulled from github repository and restarted cogs.__**\n{resp}")
-                    print(f"[VPP: {time}] Saved data. Changes sent to owner via Discord.")
+                    print(f"[CHK: {time}] Saved data. Changes sent to owner via Discord.")
 
                 modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
                 for module in modules.keys():
                     self.bot.reload_extension(module)
             else:
-                print(f'[VPP: {time}] Saved data. No new changes.{" "*30}')
+                print(f'[CHK: {time}] Saved data. No new changes.{" "*30}')
 
     @status_change.before_loop
     async def sc_wait(self):
@@ -81,5 +80,5 @@ class BackgroundTasks(Cog):
         await sleep(15)
 
 
-def setup(bot: Bot):
+def setup(bot):
     bot.add_cog(BackgroundTasks(bot))
