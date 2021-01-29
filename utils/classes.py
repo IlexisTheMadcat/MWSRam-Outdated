@@ -3,6 +3,8 @@
 from datetime import datetime
 from os import getcwd
 from re import match
+from replit import db
+from json import dumps, loads
 
 # Site
 from dbl.client import DBLClient
@@ -156,31 +158,6 @@ class GlobalTextChannelConverter(IDConverter):
         return result
 
 
-VANITY_AVATARS_TEMPLATE = {
-    "guildID": {
-        "userID": [
-            "avatar_url",
-            "previous",
-            "is_blocked"
-        ]
-    }
-}
-BLACKLISTS_TEMPLATE = {
-    "authorID": (["channelID"], ["prefix"])
-}
-SERVER_BLACKLISTS_TEMPLATE = {
-    "guildID": (["channelID"], ["prefix"])
-}
-CLOSETS_TEMPLATE = {
-    "authorID": {
-        "closet_name": "closet_url"
-    }
-}
-WEBHOOKS_TEMPLATE = {
-    "channelID": "webhookID"
-}
-
-
 class Bot(DiscordBot):
 
     def __init__(self, *args, **kwargs):
@@ -199,7 +176,7 @@ class Bot(DiscordBot):
         self.config = kwargs.pop("config")
 
         # Attribute for accessing tokens from file
-        self.auth = PI(f"{self.cwd}/Serialized/tokens.pkl")
+        self.auth = dict(db)["Tokens"]
 
         # Attribute will be filled in `on_ready`
         self.owner: User = kwargs.pop("owner", None)
@@ -207,14 +184,17 @@ class Bot(DiscordBot):
         # To be filled by self.connect_dbl() in on_ready
         self.dbl: DBLClient = kwargs.pop("dbl", None)
 
+        # Load bot arguments into __init__
         super().__init__(*args, **kwargs)
 
-        # Load data from pkl after super init to ensure loop is available
-        self.user_data = PI(f"Serialized/data.pkl", create_file=True, loop=self.loop)
-        print("[] Loaded data.pkl.")
+        # Load data from a database
+        jstring = dumps(dict(db))
+        self.user_data = loads(jstring)
+        print("[] Loaded data.")
 
     def run(self, *args, **kwargs):
-        super().run(self.auth["MWS_BOT_TOKEN"], *args, **kwargs)
+        print("[BOT INIT] Logging in with token.")
+        super().run(self.auth["BOT_TOKEN"], *args, **kwargs)
 
     @property
     def dbl_page(self):
@@ -228,7 +208,7 @@ class Bot(DiscordBot):
         try:
             if self.dbl:
                 await self.dbl.close()
-            token = self.auth.get("MWS_DBL_TOKEN")
+            token = self.auth.get("DBL_TOKEN")
 
             self.dbl = DBLClient(self, token, autopost=autopost)
             await self.dbl.post_guild_count()

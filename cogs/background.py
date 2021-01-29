@@ -1,6 +1,6 @@
 
 # Lib
-from os import popen
+from replit import db
 from asyncio import sleep
 from datetime import datetime
 
@@ -49,26 +49,12 @@ class BackgroundTasks(Cog):
     async def save_data(self):
         time = datetime.now().strftime("%H:%M, %m/%d/%Y")
 
-        await self.bot.user_data.save()
+        #await self.bot.user_data.save()
+
+        db.update(self.bot.user_data)
 
         self.bot.inactive = self.bot.inactive + 1
-        print(f"[VPP: {time}] Saved data.", end="\n" if not self.bot.config['auto_pull'] else "\r")
-
-        if self.bot.config['auto_pull']:
-            print(f"[VPP: {time}] Saved data. Checking git repository for changes...{' '*30}", end="\r")
-            resp = popen("git pull").read()
-            resp = f"```diff\n{resp}\n```"
-            if str(resp) != f"```diff\nAlready up to date.\n\n```":
-                for i in self.bot.owner_ids:
-                    owner = self.bot.get_user(i)
-                    await owner.send(f"**__Auto-pulled from github repository and restarted cogs.__**\n{resp}")
-                    print(f"[VPP: {time}] Saved data. Changes sent to owner via Discord.")
-
-                modules = {module.__module__: cog for cog, module in self.bot.cogs.items()}
-                for module in modules.keys():
-                    self.bot.reload_extension(module)
-            else:
-                print(f'[VPP: {time}] Saved data. No new changes.{" "*30}')
+        print(f"[VAR: {time}] Running.")
 
     @status_change.before_loop
     async def sc_wait(self):

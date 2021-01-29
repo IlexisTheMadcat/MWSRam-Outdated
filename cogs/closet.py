@@ -236,7 +236,7 @@ class ClosetCommands(Cog):
                 color=0xff87a3
             ))
 
-    @command(aliases=["cl"])
+    @command(aliases=["cl", "closet"])
     @bot_has_permissions(send_messages=True, embed_links=True)
     async def see_closet(self, ctx: Context, name: User = None):
         if not name:
@@ -289,7 +289,7 @@ class ClosetCommands(Cog):
             if not check:
                 return await ctx.send(embed=Embed(
                     title="Vote-Locked!",
-                    description="Closets are vote-locked. Tell {name.name} to go to "
+                    description=f"Closets are vote-locked. Tell {name.name} to go to "
                                 f"https://discordbots.org/bot/687427956364279873/vote "
                                 f"and click on 'Vote'.\nThen come back and try again.\n"
                                 f"If you just now voted, wait a few moments.",
