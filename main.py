@@ -16,8 +16,6 @@ from discord.utils import oauth_url
 from utils.classes import Bot
 from utils.fileinterface import PickleInterface as PI
 
-db.update({"Tokens":{"BOT_TOKEN":"Njg3NDI3OTU2MzY0Mjc5ODcz.XmlnLA.Z5dF3Xcb-SIYJXnb6xzjDXVQ11M", "DBL_TOKEN":""}})
-
 CONFIG_DEFAULTS = {
     "debug_mode": False, 
     # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
