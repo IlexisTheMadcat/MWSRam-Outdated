@@ -5,3 +5,4 @@
 *.replit*
 *poetry.lock*
 *pyproject.toml*
+*bot_to_file.txt*
