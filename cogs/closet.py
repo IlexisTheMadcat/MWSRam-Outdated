@@ -40,7 +40,7 @@ class ClosetCommands(Cog):
             ))
 
         if not ctx.message.attachments and \
-                not self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0]:
+                not self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0]:
             return await ctx.send(embed=Embed(
                 title="Error",
                 description="You don't have a vanity equipped.\n"
@@ -51,9 +51,9 @@ class ClosetCommands(Cog):
         else:
             try:
                 if ctx.author.id not in self.bot.user_data["Closets"].keys():
-                    self.bot.user_data["Closets"][ctx.author.id] = {}
+                    self.bot.user_data["Closets"][str(ctx.author.id)] = {}
 
-                if name in self.bot.user_data["Closets"][ctx.author.id].keys():
+                if name in self.bot.user_data["Closets"][str(ctx.author.id)].keys():
                     return await ctx.send(embed=Embed(
                         title="Error",
                         description=f"A closet entry with that name already exists.\n"
@@ -62,7 +62,7 @@ class ClosetCommands(Cog):
                         color=0xff0000
                     ))
 
-                if len(self.bot.user_data["Closets"][ctx.author.id].keys()) >= 10:
+                if len(self.bot.user_data["Closets"][str(ctx.author.id)].keys()) >= 10:
                     return await ctx.send(embed=Embed(
                         title="Error",
                         description="You've reached (or somehow exceeded) the max "
@@ -80,16 +80,16 @@ class ClosetCommands(Cog):
 
                 if ctx.message.attachments:
                     url = ctx.message.attachments[0].url
-                    self.bot.user_data["Closets"][ctx.author.id].update({name: url})
+                    self.bot.user_data["Closets"][str(ctx.author.id)].update({name: url})
                     return await ctx.send(embed=Embed(
                         title="Success",
                         description=f"Added attached file to your closet with name `{name}`.",
                         color=0xff87a3
                     ))
 
-                elif self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0] is not None:
-                    url = self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0]
-                    self.bot.user_data["Closets"][ctx.author.id].update({name: url})
+                elif self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0] is not None:
+                    url = self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0]
+                    self.bot.user_data["Closets"][str(ctx.author.id)].update({name: url})
                     return await ctx.send(embed=Embed(
                         title="Success",
                         description=f"Added current vanity avatar to closet with name `{name}`.",
@@ -97,10 +97,10 @@ class ClosetCommands(Cog):
                     ))
 
             except KeyError or IndexError:
-                self.bot.user_data["Closets"][ctx.author.id] = {}
+                self.bot.user_data["Closets"][str(ctx.author.id)] = {}
                 try:
-                    self.bot.user_data["Closets"][ctx.author.id].update(
-                        {name: self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0]}
+                    self.bot.user_data["Closets"][str(ctx.author.id)].update(
+                        {name: self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0]}
                     )
                 except IndexError or KeyError:
                     return await ctx.send(embed=Embed(
@@ -132,11 +132,11 @@ class ClosetCommands(Cog):
                 color=0xff0000
             ))
         
-        if ctx.author.id not in self.bot.user_data["Closets"].keys():
-            self.bot.user_data["Closets"][ctx.author.id] = {}
+        if str(ctx.author.id) not in self.bot.user_data["Closets"].keys():
+            self.bot.user_data["Closets"][str(ctx.author.id)] = {}
 
         try:
-            if name not in self.bot.user_data["Closets"][ctx.author.id].keys():
+            if name not in self.bot.user_data["Closets"][str(ctx.author.id)].keys():
                 return await ctx.send(embed=Embed(
                     title="Name Error",
                     description=f"A closet entry with the name `{name}` doesn't exist.\n"
@@ -146,10 +146,10 @@ class ClosetCommands(Cog):
                 ))
 
             else:
-                self.bot.user_data["Closets"][ctx.author.id].pop(name)
+                self.bot.user_data["Closets"][str(ctx.author.id)].pop(name)
 
         except KeyError:
-            self.bot.user_data["Closets"][ctx.author.id] = dict()
+            self.bot.user_data["Closets"][str(ctx.author.id)] = dict()
             return await ctx.send(embed=Embed(
                 title="Name Error",
                 description=f"A closet entry with the name `{name}` doesn't exist.\n"
@@ -179,8 +179,8 @@ class ClosetCommands(Cog):
                 color=0xff0000
             ))
         
-        if ctx.author.id not in self.bot.user_data["Closets"].keys():
-            self.bot.user_data["Closets"][ctx.author.id] = dict()
+        if str(ctx.author.id) not in self.bot.user_data["Closets"].keys():
+            self.bot.user_data["Closets"][str(ctx.author.id)] = dict()
             
         try:
             if len(rename) > 20:
@@ -197,7 +197,7 @@ class ClosetCommands(Cog):
                     color=0xff0000
                 ))
 
-            elif name not in self.bot.user_data["Closets"][ctx.author.id].keys():
+            elif name not in self.bot.user_data["Closets"][str(ctx.author.id)].keys():
                 return await ctx.send(embed=Embed(
                     title="Name Error",
                     description=f"A closet entry with the name `{name}` doesn't exist.\n"
@@ -206,7 +206,7 @@ class ClosetCommands(Cog):
                     color=0xff0000
                 ))
 
-            elif rename in self.bot.user_data["Closets"][ctx.author.id].keys():
+            elif rename in self.bot.user_data["Closets"][str(ctx.author.id)].keys():
                 return await ctx.send(embed=Embed(
                     title="Name Error",
                     description=f"A closet entry with the name `{rename}` already exists.\n"
@@ -216,11 +216,11 @@ class ClosetCommands(Cog):
                 ))
 
             else:
-                orig_url = self.bot.user_data["Closets"][ctx.author.id].pop(name)
-                self.bot.user_data["Closets"][ctx.author.id].update({rename: orig_url})
+                orig_url = self.bot.user_data["Closets"][str(ctx.author.id)].pop(name)
+                self.bot.user_data["Closets"][str(ctx.author.id)].update({rename: orig_url})
 
         except KeyError:
-            self.bot.user_data["Closets"][ctx.author.id] = dict()
+            self.bot.user_data["Closets"][str(ctx.author.id)] = dict()
             return await ctx.send(embed=Embed(
                 title="Name Error",
                 description=f"A closet entry with with the name `{name}` doesn't exist.\n"
@@ -241,8 +241,8 @@ class ClosetCommands(Cog):
     async def see_closet(self, ctx: Context, name: User = None):
         if not name:
             name = ctx.author
-            if name.id not in self.bot.user_data["Closets"].keys():
-                self.bot.user_data["Closets"][name.id] = {}
+            if str(name.id) not in self.bot.user_data["Closets"].keys():
+                self.bot.user_data["Closets"][str(name.id)] = {}
 
             check = await self.bot.get_user_vote(name.id)
                 
@@ -260,14 +260,14 @@ class ClosetCommands(Cog):
             try:
                 message_part.append(
                     f"Here is your closet. You can use these anywhere. Used "
-                    f"{len(self.bot.user_data['Closets'][name.id].keys())}"
+                    f"{len(self.bot.user_data['Closets'][str(name.id)].keys())}"
                     f"/10 slots.```\n"
                 )
-                if self.bot.user_data["Closets"][name.id] != dict():
-                    for i in self.bot.user_data["Closets"][name.id].keys():
+                if self.bot.user_data["Closets"][str(name.id)] != dict():
+                    for i in self.bot.user_data["Closets"][str(name.id)].keys():
                         message_part.append(
                             f"▛▚ Name: {i}\n"
-                            f"▙▞ URL: ({self.bot.user_data['Closets'][name.id][i]})\n"
+                            f"▙▞ URL: ({self.bot.user_data['Closets'][str(name.id)][i]})\n"
                             f"\n"
                         )
                 else:
@@ -281,8 +281,8 @@ class ClosetCommands(Cog):
                 ))
 
         else:
-            if name.id not in self.bot.user_data["Closets"].keys():
-                self.bot.user_data["Closets"][name.id] = dict()
+            if str(name.id) not in self.bot.user_data["Closets"].keys():
+                self.bot.user_data["Closets"][str(name.id)] = dict()
     
             check = await self.bot.get_user_vote(name.id)
 
@@ -300,14 +300,14 @@ class ClosetCommands(Cog):
             try:
                 message_part.append(
                     f"Here is their closet. Used "
-                    f"{len(self.bot.user_data['Closets'][name.id].keys())}"
+                    f"{len(self.bot.user_data['Closets'][str(name.id)].keys())}"
                     f"/10 slots.```\n"
                 )
-                if self.bot.user_data["Closets"][name.id] != dict():
-                    for i in self.bot.user_data["Closets"][name.id].keys():
+                if self.bot.user_data["Closets"][str(name.id)] != dict():
+                    for i in self.bot.user_data["Closets"][str(name.id)].keys():
                         message_part.append(
                             f"▛▚ Name: {i}\n▙▞ URL: ("
-                            f"{self.bot.user_data['Closets'][name.id][i]})\n\n"
+                            f"{self.bot.user_data['Closets'][str(name.id)][i]})\n\n"
                         )
 
                 else:
@@ -345,18 +345,18 @@ class ClosetCommands(Cog):
                 color=0xff0000
             ))
 
-        if ctx.author.id not in self.bot.user_data["Closets"].keys():
-            self.bot.user_data["Closets"][ctx.author.id] = dict()
+        if str(ctx.author.id) not in self.bot.user_data["Closets"].keys():
+            self.bot.user_data["Closets"][str(ctx.author.id)] = dict()
 
         try:
-            if name in self.bot.user_data["Closets"][ctx.author.id].keys():
+            if name in self.bot.user_data["Closets"][str(ctx.author.id)].keys():
                 dummy = await ctx.channel.create_webhook(name=ctx.author.display_name)
                 await dummy.send(embed=Embed(
                     title="Preview",
                     description=f"{self.bot.user.name}: Preview message.\n",
                     color=0xff87a3
-                ).set_image(url=self.bot.user_data['Closets'][ctx.author.id][name]),
-                    avatar_url=self.bot.user_data["Closets"][ctx.author.id][name])
+                ).set_image(url=self.bot.user_data['Closets'][str(ctx.author.id)][name]),
+                    avatar_url=self.bot.user_data["Closets"][str(ctx.author.id)][name])
                 return await dummy.delete()
 
             else:

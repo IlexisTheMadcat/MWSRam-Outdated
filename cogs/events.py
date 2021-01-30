@@ -215,11 +215,11 @@ class Events(Cog):
 
         # Self-Blacklisted
         try:
-            for i in self.bot.user_data["Blacklists"][msg.author.id][1]:
+            for i in self.bot.user_data["Blacklists"][str(msg.author.id)][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.user_data["Blacklists"][msg.author.id][0]:
+            for i in self.bot.user_data["Blacklists"][str(msg.author.id)][0]:
                 if msg.channel.id == i:
                     return
 
@@ -228,11 +228,11 @@ class Events(Cog):
 
         # Server-Blacklisted
         try:
-            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][1]:
+            for i in self.bot.user_data["ServerBlacklists"][str(msg.guild.id)][1]:
                 if msg.content.startswith(i):
                     return
 
-            for i in self.bot.user_data["ServerBlacklists"][msg.guild.id][0]:
+            for i in self.bot.user_data["ServerBlacklists"][str(msg.guild.id)][0]:
                 if msg.channel.id == i:
                     return
 
@@ -255,16 +255,16 @@ class Events(Cog):
             if engravedid:
                 eid_user = await self.bot.fetch_user(engravedid)
                 if eid_user:
-                    if self.bot.user_data["VanityAvatars"][msg.guild.id][eid_user.id][3]:
+                    if self.bot.user_data["VanityAvatars"][str(msg.guild.id)][str(eid_user.id)][3]:
                         with suppress(Forbidden):
                             await msg.add_reaction("❌")
                             await sleep(5)
                             with suppress(NotFound):
                                 await msg.remove_reaction("❌", msg.guild.me)
 
-            if msg.author.id in self.bot.user_data["VanityAvatars"][msg.guild.id].keys() and \
+            if str(msg.author.id) in self.bot.user_data["VanityAvatars"][str(msg.guild.id)].keys() and \
                     not msg.author.bot and \
-                    self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0]:
+                    self.bot.user_data["VanityAvatars"][str(msg.guild.id)][str(msg.author.id)][0]:
 
                 engravedid = create_engraved_id_from_user(msg.author.id)
 
@@ -292,22 +292,22 @@ class Events(Cog):
                 else:
                     await msg.delete()
 
-                    if "webhooks" not in self.bot.user_data.keys():
-                        self.bot.user_data["webhooks"] = {"channelID": "webhookID"}
+                    if "Webhooks" not in self.bot.user_data.keys():
+                        self.bot.user_data["Webhooks"] = {"channelID": "webhookID"}
 
-                    if msg.channel.id not in self.bot.user_data["webhooks"]:
-                        self.bot.user_data["webhooks"][msg.channel.id] = 0
+                    if msg.channel.id not in self.bot.user_data["Webhooks"]:
+                        self.bot.user_data["Webhooks"][str(msg.channel.id)] = 0
 
                     webhooks: List[Webhook] = await msg.channel.webhooks()
-                    webhook: Webhook = get(webhooks, id=self.bot.user_data["webhooks"].get(msg.channel.id))
+                    webhook: Webhook = get(webhooks, id=self.bot.user_data["Webhooks"].get(msg.channel.id))
                     if webhook is None:
                         webhook: Webhook = await msg.channel.create_webhook(name="Vanity Profile Pics")
-                        self.bot.user_data["webhooks"][msg.channel.id] = webhook.id
+                        self.bot.user_data["Webhooks"][str(msg.channel.id)] = webhook.id
 
                     await webhook.send(
                         new_content,
                         files=attachment_files,
-                        avatar_url=self.bot.user_data["VanityAvatars"][msg.guild.id][msg.author.id][0],
+                        avatar_url=self.bot.user_data["VanityAvatars"][str(msg.guild.id)][str(msg.author.id)][0],
                         username=msg.author.display_name
                     )
                     self.bot.inactive = 0

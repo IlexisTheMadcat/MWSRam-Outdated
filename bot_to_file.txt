@@ -1,0 +1,22 @@
+{'Blacklists': 
+    {
+        'authorID': [
+            [
+                'channelID'
+            ], 
+            [
+                'prefix'
+            ]
+        ], 
+        '331551368789622784': [[], []]
+    }, 
+    'Closets': 
+        {
+            'authorID': {
+                'closet_name': 'closet_url'
+            }, 
+            '331551368789622784': 
+                {
+                    'Jibril': 'https://cdn.discordapp.com/attachments/655456170391109663/804988287705153557/unknown11.png'
+                }, 
+                331551368789622784: {}}, 'ServerBlacklists': {'guildID': [['channelID'], ['prefix']]}, 'Tokens': {'BOT_TOKEN': 'Njg3NDI3OTU2MzY0Mjc5ODcz.XmlnLA.hU3QBPWyn6E0aQWOiW4mguKM5Qg', 'DBL_TOKEN': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzQyNzk1NjM2NDI3OTg3MyIsImJvdCI6dHJ1ZSwiaWF0IjoxNjExODg3NzU3fQ.dOkXX1Ltl6xy8LbGG5GZK7KKcskyjVC9-8MUnG4_HH4'}, 'VanityAvatars': {'guildID': {'userID': ['avatar_url', 'previous', 'is_blocked']}, '504090302928125954': {'331551368789622784': ['https://cdn.discordapp.com/attachments/655456170391109663/804800923455979600/unknown1.png', 'https://cdn.discordapp.com/attachments/655456170391109663/804800923455979600/unknown1.png', False, True]}, '740662779106689055': {'331551368789622784': [None, 'https://cdn.discordapp.com/attachments/655456170391109663/804800923455979600/unknown1.png', False, True]}, '760995450105888788': {'776781682225053737': ['https://cdn.discordapp.com/attachments/804796657719967804/804803390269423696/images.jfif', 'https://cdn.discordapp.com/attachments/804796657719967804/804803390269423696/images.jfif', False, True]}, '426506740440498186': {'345112698025017355': [None, 'https://sun9-4.userapi.com/impg/G-DPC2VEzGO90b4x_9bF-lVPlC0YnzQZUcZ8LA/HqxnqKPRMg4.jpg?size=258x258&quality=96&proxy=1&sign=f49e1efc13129dab708e295ede215f85&type=album', False, True]}, '804872611434856470': {'285465719292821506': ['https://media.discordapp.net/attachments/654285097876586516/804873419707121724/20210130_003353.jpg', 'https://media.discordapp.net/attachments/654285097876586516/804873419707121724/20210130_003353.jpg', False, True], '254600446725849089': ['https://media.discordapp.net/attachments/654285097876586516/804873419707121724/20210130_003353.jpg', 'https://media.discordapp.net/attachments/654285097876586516/804873419707121724/20210130_003353.jpg', False, True]}, '804267778655780905': {'676251988824031277': [None, 'https://a1cdn.gaiaonline.com/dress-up/avatar/ava/e3/01/67789fcf1001e3_flip.png?t=1611906619', False, True]}}, 'webhooks': {'channelID': 'webhookID', '655456170391109663': 804917037368475648, '741381152543211550': 804801283684958228, '740671751293501592': 804801467974156340, '703065742605811764': 804803362376908821, '804796657719967804': 804803450957070367, '793627404957909004': 804803518691016734, '793700519050346496': 804818528934690826, '793629758360911882': 804820397463437322, '795042261623767050': 804822929812226069, '426506740868186141': 804838908324085813, '794040445205872670': 804845881538510889, '804872612396007469': 804874367719964682, '740738378009542687': 804885709978206228, '804267779195928598': 804908211760005151, '804898925383254016': 804956999238418462}, 'Webhooks': {'channelID': 'webhookID'}}

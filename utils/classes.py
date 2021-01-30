@@ -4,7 +4,7 @@ from datetime import datetime
 from os import getcwd
 from re import match
 from replit import db
-from json import dumps, loads
+from copy import deepcopy
 
 # Site
 from dbl.client import DBLClient
@@ -188,8 +188,8 @@ class Bot(DiscordBot):
         super().__init__(*args, **kwargs)
 
         # Load data from a database
-        jstring = dumps(dict(db))
-        self.user_data = loads(jstring)
+        self.user_data = deepcopy(dict(db))
+        print(self.user_data)
         print("[] Loaded data.")
 
     def run(self, *args, **kwargs):

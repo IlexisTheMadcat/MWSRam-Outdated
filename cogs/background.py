@@ -49,8 +49,7 @@ class BackgroundTasks(Cog):
     async def save_data(self):
         time = datetime.now().strftime("%H:%M, %m/%d/%Y")
 
-        #await self.bot.user_data.save()
-
+        db.clear()
         db.update(self.bot.user_data)
 
         self.bot.inactive = self.bot.inactive + 1

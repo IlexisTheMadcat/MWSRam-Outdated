@@ -1,6 +1,5 @@
 # Lib
 import os
-from json import dumps, loads
 from replit import db
 from copy import deepcopy
 from random import choice
@@ -54,6 +53,10 @@ DATA_DEFAULTS = {
     },
     "Webhooks": {
         "channelID": "webhookID"
+    },
+    "Tokens": {
+        "BOT_TOKEN":"XXX",
+        "DBL_TOKEN":"XXX"
     }
 }
 
@@ -88,8 +91,7 @@ LOADING_CHOICES = [  # because why not
 
 config_data = PI("Serialized/bot_config.pkl", create_file=True)
 
-string = dumps(dict(db))
-user_data = dict(loads(string))
+user_data = deepcopy(dict(db))
 
 # Check the bot config file
 for key in CONFIG_DEFAULTS:
