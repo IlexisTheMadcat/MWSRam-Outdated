@@ -20,7 +20,7 @@ class VanityCommands(Cog):
         self.bot = bot
 
     @command(aliases=["set"])
-    @bot_has_permissions(manage_webhooks=True)
+    @bot_has_permissions(manage_webhooks=True, send_messages=True, embed_links=True)
     async def set_vanity(self, ctx: Context, url: str = None):
 
         guild = ctx.guild
@@ -37,7 +37,7 @@ class VanityCommands(Cog):
             ))
 
         user_perms = ctx.channel.permissions_for(ctx.author)
-        mode = None
+        mode = "Used URL"
 
         if (guild.id in self.bot.user_data["VanityAvatars"] and
                 author.id in self.bot.user_data["VanityAvatars"][guild.id] and
@@ -69,7 +69,7 @@ class VanityCommands(Cog):
                     url = self.bot.user_data["Closets"][author.id][url]
                     mode = "Used closet entry"
             else:
-                mode = "Used URL"
+                pass
 
         except KeyError or IndexError:
             pass
@@ -276,8 +276,26 @@ class VanityCommands(Cog):
                 await show_standard()
 
     @command(aliases=["pv"])
+    @bot_has_permissions(manage_webhooks=True, send_messages=True, embed_links=True)
     async def preview(self, ctx, url=None):
-        pass
+        try:
+            dummy = await ctx.channel.create_webhook(name=ctx.author.display_name)
+            await dummy.send(embed=Embed(
+                title="Preview",
+                description=f"{self.bot.user.name}: Preview message.\n",
+                color=0xff87a3
+                ).set_image(url=url),
+                avatar_url=url)
+            return await dummy.delete()
+        except Exception as e:
+            return await ctx.send(embed=Embed(
+                title="URL Error",
+                description=f"An error has occurred;\n"
+                            f"Try making sure your url is valid and/or the image is a valid resolution.\n"
+                            f"Your channel may also have to many webhooks. Read the error below.\n"
+                            f"`Error: {e}`",
+                color=0xff0000
+            ))
 
     @command(aliases=["toggle_x", "quick_del"])
     @bot_has_permissions(send_messages=True, embed_links=True)

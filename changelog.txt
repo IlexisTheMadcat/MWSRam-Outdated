@@ -1,6 +1,8 @@
-Changes: 
--- Overhauled the markdown used by the bot to use embeds.
----- The color of the embed depends on the status. Fails are red, and successes are in pink.
+News:
+-- The bot is now verified, if you could not tell already.
+---- This means the bot can now join as many servers as users want.
 
--- New support method;
----- Message the bot with a quoted message to send your message directly to the developer.
+Bug watch:
+-- Being that the bot has just been woken up from a long dormant time, there are bound to be bugs.
+-- Please identify any bugs you find in this bot and report them in this server:
+---- https://discord.com/invite/DJ4wdsRYy2

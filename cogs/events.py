@@ -251,9 +251,9 @@ class Events(Cog):
                 continue
 
         try:
-            if msg.author.bot and msg.author.discriminator == "0000":
-                engravedid = get_engraved_id_from_msg(msg.content)
-                eid_user = self.bot.get_user(engravedid)
+            engravedid = get_engraved_id_from_msg(msg.content)
+            if engravedid:
+                eid_user = await self.bot.fetch_user(engravedid)
                 if eid_user:
                     if self.bot.user_data["VanityAvatars"][msg.guild.id][eid_user.id][3]:
                         with suppress(Forbidden):
@@ -279,7 +279,7 @@ class Events(Cog):
                     bot_perms.manage_webhooks
                 )):
                     await msg.author.send(
-                        f"Your message couldn't be transformed because it is "
+                        f"Your message couldn't be transformed because I am "
                         f"missing 1 or more permissions listed in "
                         f"`{self.bot.command_prefix}help` under `Required Permissions`.\n"
                         f"If you keep getting this error, remove your "
@@ -347,51 +347,45 @@ class Events(Cog):
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        class Reaction:
-            def __init__(self):
-                pass
-
-        try:
-            reaction = Reaction()
-            reaction.emoji = payload.emoji
-            reaction.channel = self.bot.get_channel(payload.channel_id)
-            reaction.message = await reaction.channel.fetch_message(payload.message_id)
-            reaction.guild = self.bot.get_guild(payload.guild_id)
-            user = self.bot.get_user(payload.user_id)
-        except Exception as e:
-            print(f"[Error in \"on_raw_reaction_add\"] {e}")
+        channel = await self.bot.fetch_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        user = await self.bot.fetch_user(payload.user_id)
+        ctx = await self.bot.get_context(message)
+        
+        if not ctx.guild:
             return
 
-        if reaction.guild is None:
+        if user == self.bot.user:
             return
 
-        if str(reaction.emoji) == "❌" and \
-                reaction.message.author.bot and \
-                reaction.message.author.discriminator == "0000":
+        if str(payload.emoji) == "❌":
             try:
-                engravedid = get_engraved_id_from_msg(reaction.message.content)
-                identification = self.bot.get_user(engravedid)
+                engravedid = get_engraved_id_from_msg(message.content)
+                if engravedid:
+                    identification = await self.bot.fetch_user(engravedid)
+                else:
+                    return
             except Exception as e:
                 print(f"[Error in \"on_raw_reaction_add\"] {e}")
                 return
 
-            member = reaction.guild.get_member(user.id)
-            permissions = member.permissions_in(reaction.channel)
+            member = await ctx.guild.fetch_member(user.id)
+            permissions = member.permissions_in(channel)
 
             # Check if the message belongs to the reaction user, or if they have `Manage Messages` permission.
             if (identification == user or permissions.manage_messages) and user.id != self.bot.user.id:
                 try:
                     await self.bot.http.delete_message(
-                        reaction.channel.id,
-                        reaction.message.id,
+                        channel.id,
+                        message.id,
                         reason="Deleted on user request."
                     )
                 except Forbidden:
                     with suppress(HTTPException, Forbidden):
                         await self.bot.http.remove_reaction(
-                            reaction.channel.id,
-                            reaction.message.id,
-                            reaction.emoji,
+                            channel.id,
+                            message.id,
+                            payload.emoji,
                             user.id
                         )
                         await user.send('`If you want to do that, this bot needs the "Manage Messages" permission.`')
@@ -402,11 +396,11 @@ class Events(Cog):
                                         f"Ask {str(identification)} to delete it.\n"
                                         f"The reaction was left unchanged.")
 
-        elif str(reaction.emoji) == "❓" and \
-                reaction.message.author.bot and \
-                reaction.message.author.discriminator == "0000":
+        elif str(payload.emoji) == "❓" and \
+                message.author.bot and \
+                message.author.discriminator == "0000":
             try:
-                engravedid = get_engraved_id_from_msg(reaction.message.content)
+                engravedid = get_engraved_id_from_msg(message.content)
                 identification = await self.bot.fetch_user(engravedid)
             except Exception as e:
                 print(f"[Error in event \"on_raw_reaction_add\"] {e}")
@@ -419,22 +413,6 @@ class Events(Cog):
                 )
         else:
             return
-
-    # Guild Count change notifications
-    # --------------------------------------------------------------------------------------------------------------------------
-    @Cog.listener()
-    async def on_guild_join(self, guild):
-        await self.bot.owner.send(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        print(f"Joined server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        if guild.id not in self.bot.user_data["VanityAvatars"]:
-            self.bot.user_data["VanityAvatars"][guild.id] = {}
-
-    @Cog.listener()
-    async def on_guild_remove(self, guild):
-        await self.bot.owner.send(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        print(f"Left server \"{guild.name}\". Now in {len(self.bot.guilds)} servers.")
-        if guild.id in self.bot.user_data["VanityAvatars"] and self.bot.user_data["VanityAvatars"][guild.id]:
-            self.bot.user_data["VanityAvatars"].pop(guild.id)
 
     # Errors
     # --------------------------------------------------------------------------------------------------------------------------

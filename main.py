@@ -66,7 +66,8 @@ INIT_EXTENSIONS = [
     "help",
     "moderation",
     "vanity",
-    "repl"
+    "repl",
+    "web"
 ]
 
 LOADING_CHOICES = [  # because why not

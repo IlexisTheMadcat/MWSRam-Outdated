@@ -39,7 +39,7 @@ class ClosetCommands(Cog):
                 color=0xff0000
             ))
 
-        if ctx.message.attachments == list() and \
+        if not ctx.message.attachments and \
                 not self.bot.user_data["VanityAvatars"][ctx.guild.id][ctx.author.id][0]:
             return await ctx.send(embed=Embed(
                 title="Error",
@@ -330,7 +330,7 @@ class ClosetCommands(Cog):
             color=0xff87a3,
         ))
 
-    @command(aliases=["cl_preview"])
+    @command(aliases=["cl_preview", "cl_pv"])
     @bot_has_permissions(send_messages=True, embed_links=True, manage_webhooks=True)
     async def preview_closet_entry(self, ctx, name):
         check = await self.bot.get_user_vote(ctx.author.id)
