@@ -8,6 +8,7 @@ from aiohttp_jinja2 import (
 )
 
 # Site
+from multidict import MultiDict
 from discord.ext import tasks
 from discord.ext.commands import Cog
 
@@ -36,6 +37,23 @@ class Webserver(Cog):
         async def ping(request):
             return html("200.html", request, context={})
         
+        @routes.get('/download')
+        async def download(request):
+            try:
+                filename = request.query["id"]
+            except KeyError:
+                return web.Response(body="Pass 'id' in the query string of the url.")
+            
+            if os.path.exists(f"Storage/{filename}"):
+                with open(f"Storage/{filename}", "rb") as f:
+                    data = f.read()
+                    return web.Response(
+                        headers=MultiDict({'Content-Desposition': f'attachment; filename="{filename}.zip"'}),
+                        body=data
+                    )
+            else:
+                return web.Response(body="File not found.")
+            
         self.webserver_port = os.environ.get('PORT', 8080)
         app.add_routes(routes)
 
@@ -52,5 +70,3 @@ class Webserver(Cog):
 
 def setup(bot):
     bot.add_cog(Webserver(bot))
-
-# 🐾chat-1 - 741381152543211550

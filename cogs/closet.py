@@ -18,7 +18,7 @@ class ClosetCommands(Cog):
 
     @command(aliases=["cl_add"])
     @bot_has_permissions(send_messages=True, embed_links=True)
-    async def add_to_closet(self, ctx: Context, name: str):
+    async def add_to_closet(self, ctx: Context, *, name: str):
         check = await self.bot.get_user_vote(ctx.author.id)
     
         if not check:
@@ -50,7 +50,7 @@ class ClosetCommands(Cog):
 
         else:
             try:
-                if ctx.author.id not in self.bot.user_data["Closets"].keys():
+                if str(ctx.author.id) not in self.bot.user_data["Closets"].keys():
                     self.bot.user_data["Closets"][str(ctx.author.id)] = {}
 
                 if name in self.bot.user_data["Closets"][str(ctx.author.id)].keys():
@@ -89,7 +89,11 @@ class ClosetCommands(Cog):
 
                 elif self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0] is not None:
                     url = self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0]
+                    
+                    print(self.bot.user_data["Closets"][str(ctx.author.id)])
                     self.bot.user_data["Closets"][str(ctx.author.id)].update({name: url})
+                    print(self.bot.user_data["Closets"][str(ctx.author.id)])
+                    
                     return await ctx.send(embed=Embed(
                         title="Success",
                         description=f"Added current vanity avatar to closet with name `{name}`.",
@@ -263,11 +267,11 @@ class ClosetCommands(Cog):
                     f"{len(self.bot.user_data['Closets'][str(name.id)].keys())}"
                     f"/10 slots.```\n"
                 )
-                if self.bot.user_data["Closets"][str(name.id)] != dict():
-                    for i in self.bot.user_data["Closets"][str(name.id)].keys():
+                if self.bot.user_data["Closets"][str(name.id)]:
+                    for i, url in self.bot.user_data["Closets"][str(name.id)].items():
                         message_part.append(
                             f"▛▚ Name: {i}\n"
-                            f"▙▞ URL: ({self.bot.user_data['Closets'][str(name.id)][i]})\n"
+                            f"▙▞ URL: ({url})\n"
                             f"\n"
                         )
                 else:

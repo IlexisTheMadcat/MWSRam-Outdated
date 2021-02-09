@@ -38,6 +38,13 @@ class Events(Cog):
     # --------------------------------------------------------------------------------------------------------------------------
     @Cog.listener()
     async def on_message(self, msg: Message):
+        # MechHub Bot Status response
+        if msg.author.id == 805162807942709268 and \
+            msg.content.startswith(f"[{self.bot.user.id}] [MechHub Message Ping]"):
+            await sleep(1)
+            await msg.channel.send("Pong!")
+            return
+
         # Pre-event Checks
         # if msg.guild is None:
         #     return

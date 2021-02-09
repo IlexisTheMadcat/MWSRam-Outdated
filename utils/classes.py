@@ -19,7 +19,6 @@ from discord.utils import find, get
 from typing import List
 
 # Local
-from utils.fileinterface import PickleInterface as PI
 
 
 class Paginator:
@@ -108,56 +107,6 @@ class Paginator:
         return self.pages
 
 
-class GlobalTextChannelConverter(IDConverter):
-    """Converts to a :class:`~discord.TextChannel`.
-
-    Copy of discord.ext.commands.converters.TextChannelConverter,
-    Modified to always search global cache.
-
-    The lookup strategy is as follows (in order):
-
-    1. Lookup by ID.
-    2. Lookup by mention.
-    3. Lookup by name
-    """
-
-    @staticmethod
-    def _get_from_guilds(bot, getter, argument):
-        """Copied from discord.ext.commands.converter to prevent
-        access to protected attributes inspection error"""
-        result = None
-        for guild in bot.guilds:
-            result = getattr(guild, getter)(argument)
-            if result:
-                return result
-        return result
-
-    async def convert(self, ctx: Context, argument: str) -> TextChannel:
-        bot = ctx.bot
-
-        search = self._get_id_match(argument) or match(r'<#([0-9]+)>$', argument)
-
-        if match is None:
-            # not a mention
-            if ctx.guild:
-                result = get(ctx.guild.text_channels, name=argument)
-            else:
-                def check(c):
-                    return isinstance(c, TextChannel) and c.name == argument
-                result = find(check, bot.get_all_channels())
-        else:
-            channel_id = int(search.group(1))
-            if ctx.guild:
-                result = ctx.guild.get_channel(channel_id)
-            else:
-                result = self._get_from_guilds(bot, 'get_channel', channel_id)
-
-        if not isinstance(result, TextChannel):
-            raise BadArgument('Channel "{}" not found.'.format(argument))
-
-        return result
-
-
 class Bot(DiscordBot):
 
     def __init__(self, *args, **kwargs):
@@ -189,7 +138,6 @@ class Bot(DiscordBot):
 
         # Load data from a database
         self.user_data = deepcopy(dict(db))
-        print(self.user_data)
         print("[] Loaded data.")
 
     def run(self, *args, **kwargs):
@@ -230,16 +178,3 @@ class Bot(DiscordBot):
             return None
 
         return await self.dbl.get_user_vote(user_id)
-
-    async def logout(self):
-        """Overload built-in `logout` to save data first and close DBL"""
-
-        await self.user_data.save()
-
-        time = datetime.now().strftime("%H:%M, %m/%d/%Y")
-        print(f"[VPP: {time}] Saved data.")
-
-        if self.dbl:
-            await self.dbl.close()
-
-        await super().logout()

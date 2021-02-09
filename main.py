@@ -1,5 +1,4 @@
 # Lib
-import os
 from replit import db
 from copy import deepcopy
 from random import choice
@@ -13,15 +12,11 @@ from discord.utils import oauth_url
 
 # Local
 from utils.classes import Bot
-from utils.fileinterface import PickleInterface as PI
 
 CONFIG_DEFAULTS = {
     "debug_mode": False, 
     # Print exceptions to stdout.  # TODO: Examine `on_error` to print all
-    
-    "auto_pull": True,    
-    # Auto pulls github updates every minute and reloads all loaded cogs.
-    
+
     "muted_dms": list(),   
     # List of user IDs to block support DMs from. Y'know, in case of the abusers.
     
@@ -57,7 +52,8 @@ DATA_DEFAULTS = {
     "Tokens": {
         "BOT_TOKEN":"XXX",
         "DBL_TOKEN":"XXX"
-    }
+    },
+    "config": {}
 }
 
 INIT_EXTENSIONS = [
@@ -89,10 +85,22 @@ LOADING_CHOICES = [  # because why not
 ]
 
 
-config_data = PI("Serialized/bot_config.pkl", create_file=True)
-
 user_data = deepcopy(dict(db))
+# Check the database
+for key in DATA_DEFAULTS:
+    if key not in user_data:
+        user_data[key] = DATA_DEFAULTS[key]
+        print(f"[MISSING VALUE] Data key '{key}' missing. "
+              f"Inserted default '{DATA_DEFAULTS[key]}'")
+found_data = deepcopy(user_data)  # Duplicate to avoid RuntimeError exception
+for key in found_data:
+    if key not in user_data:
+        user_data.pop(key)  # Remove redundant data
+        print(f"[REDUNDANCY] Invalid data \'{key}\' found. "
+              f"Removed key from file.")
+del found_data  # Remove variable from namespace
 
+config_data = user_data["config"]
 # Check the bot config file
 for key in CONFIG_DEFAULTS:
     if key not in config_data:
@@ -107,20 +115,6 @@ for key in found_data:
               f"Removed key from file.")
 del found_data  # Remove variable from namespace
 
-# Check the database
-for key in DATA_DEFAULTS:
-    if key not in user_data:
-        user_data[key] = DATA_DEFAULTS[key]
-        print(f"[MISSING VALUE] Data key '{key}' missing. "
-              f"Inserted default '{DATA_DEFAULTS[key]}'")
-found_data = deepcopy(config_data)  # Duplicate to avoid RuntimeError exception
-for key in found_data:
-    if key not in CONFIG_DEFAULTS:
-        config_data.pop(key)  # Remove redundant data
-        print(f"[REDUNDANCY] Invalid data \'{key}\' found. "
-              f"Removed key from file.")
-del found_data  # Remove variable from namespace
-
 db.update(user_data)
 
 print("[] Configurations loaded from Serialized/bot_config.pkl")
@@ -131,7 +125,7 @@ bot = Bot(
     owner_ids=[331551368789622784, 125435062127820800],  # DocterBotnikM500, SirThane
     activity=Activity(type=ActivityType.playing, name=f"the \"wake up\" game."),
     status=Status.idle,
-    command_prefix="var:" if os.name == "posix" else "[ram]:",
+    command_prefix="var:",
 
     # Configurable via [p]bot
     config=config_data
@@ -181,7 +175,6 @@ async def on_ready():
           f"| User ID:   {bot.user.id}\n"
           f"| Owner:     {bot.owner}\n"
           f"| Guilds:    {len(bot.guilds)}\n"
-          f"| Users:     {len(list(bot.get_all_members()))}\n"
           f"| OAuth URL: {oauth_url(app_info.id, permissions)}\n"
           f"#------------------------------#\n"
           f"| {choice(LOADING_CHOICES)}\n"

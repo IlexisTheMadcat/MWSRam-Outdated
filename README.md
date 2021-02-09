@@ -49,7 +49,6 @@ Vanity -- Change your avatar for different servers:
     remove_vanity
     current
     toggle_quick_delete
-    toggle_engraved_id
     
 Blasklisting -- Disable your avatar for different places:
     blacklist
