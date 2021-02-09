@@ -60,11 +60,13 @@ Closets -- Save your avatars in your personal cloest:
     rename_closet_entry
     see_closet
     preview_closet_entry
+
 Moderation -- Enforce some actions:
     list                  - No limits
     manage_user           - You require "Manage Messages" permission
     see_server_blacklists - No limits
     server_blacklist      - You require "Manage Channels" permission
+
 Genral -- General commands:
     help
     invite
