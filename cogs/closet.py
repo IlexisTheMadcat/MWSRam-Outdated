@@ -89,10 +89,7 @@ class ClosetCommands(Cog):
 
                 elif self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0] is not None:
                     url = self.bot.user_data["VanityAvatars"][str(ctx.guild.id)][str(ctx.author.id)][0]
-                    
-                    print(self.bot.user_data["Closets"][str(ctx.author.id)])
                     self.bot.user_data["Closets"][str(ctx.author.id)].update({name: url})
-                    print(self.bot.user_data["Closets"][str(ctx.author.id)])
                     
                     return await ctx.send(embed=Embed(
                         title="Success",
